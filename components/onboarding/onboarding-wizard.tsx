@@ -23,10 +23,12 @@ const STEPS: Step[] = ["genres", "authors", "moods", "goals", "clubs", "type"];
 export function OnboardingWizard() {
   const [stepIndex, setStepIndex] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [favoriteGenres, setFavoriteGenres] = useState<string[]>([]);
   const [favoriteAuthors, setFavoriteAuthors] = useState<string[]>([]);
   const [preferredMoods, setPreferredMoods] = useState<string[]>([]);
+  const [preferredThemes] = useState<string[]>([]);
   const [readingGoal, setReadingGoal] = useState(12);
   const [clubPreference, setClubPreference] = useState("online");
   const [interestedInClubs, setInterestedInClubs] = useState(true);
@@ -42,17 +44,23 @@ export function OnboardingWizard() {
 
   async function handleFinish() {
     setLoading(true);
-    await saveOnboardingAction({
-      favoriteGenres,
-      favoriteAuthors,
-      preferredMoods,
-      preferredThemes: [],
-      readingGoalBooksPerYear: readingGoal,
-      clubPreference,
-      interestedInClubs,
-      interestedInChallenges,
-      userType,
-    });
+    setError(null);
+    try {
+      await saveOnboardingAction({
+        favoriteGenres,
+        favoriteAuthors,
+        preferredMoods,
+        preferredThemes,
+        readingGoalBooksPerYear: readingGoal,
+        clubPreference,
+        interestedInClubs,
+        interestedInChallenges,
+        userType,
+      });
+    } catch {
+      setLoading(false);
+      setError("Something went wrong. Please try again.");
+    }
   }
 
   const canProceed =
@@ -244,6 +252,10 @@ export function OnboardingWizard() {
                 ))}
               </div>
             </>
+          )}
+
+          {error && (
+            <p className="mt-4 text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">{error}</p>
           )}
 
           {/* Navigation */}

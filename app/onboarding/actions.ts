@@ -21,47 +21,47 @@ export async function saveOnboardingAction(payload: OnboardingPayload) {
   if (!session) redirect("/sign-in");
 
   const userId = session.user.id;
+  const year = new Date().getFullYear();
 
-  await db.onboardingData.upsert({
-    where: { userId },
-    update: { ...payload, completedAt: new Date() },
-    create: { userId, ...payload, completedAt: new Date() },
+  const tasteFields = {
+    topGenres: payload.favoriteGenres,
+    topAuthors: payload.favoriteAuthors,
+    topThemes: payload.preferredThemes,
+    topMoods: payload.preferredMoods,
+    dislikedGenres: [] as string[],
+    dislikedThemes: [] as string[],
+    dislikedAuthors: [] as string[],
+    confidence: "LOW" as const,
+    lastCalculated: new Date(),
+  };
+
+  await db.$transaction(async (tx) => {
+    await tx.onboardingData.upsert({
+      where: { userId },
+      update: { ...payload, completedAt: new Date() },
+      create: { userId, ...payload, completedAt: new Date() },
+    });
+
+    await tx.tasteProfile.upsert({
+      where: { userId },
+      update: tasteFields,
+      create: { userId, ...tasteFields },
+    });
+
+    await tx.readingGoal.upsert({
+      where: { userId_type_year: { userId, type: "BOOKS_PER_YEAR", year } },
+      update: { target: payload.readingGoalBooksPerYear },
+      create: { userId, type: "BOOKS_PER_YEAR", target: payload.readingGoalBooksPerYear, year },
+    });
+
+    await tx.userScore.upsert({
+      where: { userId },
+      update: {},
+      create: { userId },
+    });
+
+    await tx.user.update({ where: { id: userId }, data: { onboarded: true, userType: payload.userType } });
   });
-
-  // Create initial taste profile from onboarding data
-  await db.tasteProfile.upsert({
-    where: { userId },
-    update: {},
-    create: {
-      userId,
-      topGenres: payload.favoriteGenres,
-      topAuthors: payload.favoriteAuthors,
-      topThemes: payload.preferredThemes,
-      topMoods: payload.preferredMoods,
-      dislikedGenres: [],
-      dislikedThemes: [],
-      dislikedAuthors: [],
-      confidence: "LOW",
-      lastCalculated: new Date(),
-    },
-  });
-
-  // Create default reading goal
-  await db.readingGoal.upsert({
-    where: { userId_type_year: { userId, type: "BOOKS_PER_YEAR", year: new Date().getFullYear() } },
-    update: {},
-    create: { userId, type: "BOOKS_PER_YEAR", target: payload.readingGoalBooksPerYear, year: new Date().getFullYear() },
-  });
-
-  // Create user score record if it doesn't exist
-  await db.userScore.upsert({
-    where: { userId },
-    update: {},
-    create: { userId },
-  });
-
-  // Mark user as onboarded
-  await db.user.update({ where: { id: userId }, data: { onboarded: true, userType: payload.userType } });
 
   redirect("/home");
 }
