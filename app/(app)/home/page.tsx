@@ -38,7 +38,7 @@ export default async function HomePage() {
   return (
     <div className="p-6 max-w-4xl">
       <h1 className="text-2xl font-bold text-white mb-1">
-        Good reading, {firstName} 👋
+        Good reading, {firstName}
       </h1>
       <p className="text-muted-foreground mb-8 text-sm">Here&apos;s where you left off.</p>
 

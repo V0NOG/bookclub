@@ -9,49 +9,49 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log("🌱 Seeding Folio database...");
+  console.log("Seeding Folio database...");
 
   // ── Achievements ────────────────────────────────────────────────────────────
   const achievements = await Promise.all([
     prisma.achievement.upsert({
       where: { key: "first_book" },
       update: {},
-      create: { key: "first_book", title: "First Page Turner", description: "Finished your first book on Folio", icon: "📖", points: 50 },
+      create: { key: "first_book", title: "First Page Turner", description: "Finished your first book on Folio", icon: "BookOpen", points: 50 },
     }),
     prisma.achievement.upsert({
       where: { key: "week_streak" },
       update: {},
-      create: { key: "week_streak", title: "7-Day Streak", description: "Read every day for 7 days", icon: "🔥", points: 75 },
+      create: { key: "week_streak", title: "7-Day Streak", description: "Read every day for 7 days", icon: "Flame", points: 75 },
     }),
     prisma.achievement.upsert({
       where: { key: "club_finisher" },
       update: {},
-      create: { key: "club_finisher", title: "Club Finisher", description: "Completed a club reading challenge", icon: "🏆", points: 100 },
+      create: { key: "club_finisher", title: "Club Finisher", description: "Completed a club reading challenge", icon: "Trophy", points: 100 },
     }),
     prisma.achievement.upsert({
       where: { key: "speed_reader" },
       update: {},
-      create: { key: "speed_reader", title: "Speed Reader", description: "Finished a book in under 3 days", icon: "⚡", points: 80 },
+      create: { key: "speed_reader", title: "Speed Reader", description: "Finished a book in under 3 days", icon: "Zap", points: 80 },
     }),
     prisma.achievement.upsert({
       where: { key: "thoughtful_reviewer" },
       update: {},
-      create: { key: "thoughtful_reviewer", title: "Thoughtful Reviewer", description: "Written 5 detailed reviews", icon: "✍️", points: 60 },
+      create: { key: "thoughtful_reviewer", title: "Thoughtful Reviewer", description: "Written 5 detailed reviews", icon: "PenLine", points: 60 },
     }),
     prisma.achievement.upsert({
       where: { key: "genre_explorer" },
       update: {},
-      create: { key: "genre_explorer", title: "Genre Explorer", description: "Read books across 5 different genres", icon: "🗺️", points: 70 },
+      create: { key: "genre_explorer", title: "Genre Explorer", description: "Read books across 5 different genres", icon: "Compass", points: 70 },
     }),
     prisma.achievement.upsert({
       where: { key: "poll_participant" },
       update: {},
-      create: { key: "poll_participant", title: "Poll Participant", description: "Voted in your first club poll", icon: "🗳️", points: 20 },
+      create: { key: "poll_participant", title: "Poll Participant", description: "Voted in your first club poll", icon: "Vote", points: 20 },
     }),
     prisma.achievement.upsert({
       where: { key: "challenge_winner" },
       update: {},
-      create: { key: "challenge_winner", title: "Challenge Winner", description: "Won a reading challenge", icon: "🥇", points: 150 },
+      create: { key: "challenge_winner", title: "Challenge Winner", description: "Won a reading challenge", icon: "Medal", points: 150 },
     }),
   ]);
 
@@ -1028,7 +1028,7 @@ async function main() {
     name: "Sarah Chen",
     username: "sarahreads",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=sarah",
-    bio: "Fantasy and dark academia obsessed. Book club organiser. 📚",
+    bio: "Fantasy and dark academia obsessed. Book club organiser.",
     location: "London, UK",
     userType: "ORGANISER" as const,
     passwordHash: hashedPassword,
@@ -1064,7 +1064,7 @@ async function main() {
     name: "James Okafor",
     username: "jamesokafor",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=james",
-    bio: "Sci-fi and thriller enthusiast. Reading at the speed of light ⚡",
+    bio: "Sci-fi and thriller enthusiast. Reading at the speed of light.",
     location: "Lagos, Nigeria",
     userType: "READER" as const,
     passwordHash: hashedPassword,
@@ -1076,7 +1076,7 @@ async function main() {
     name: "Priya Sharma",
     username: "priyareads",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=priya",
-    bio: "Romance and contemporary fiction lover. TBR pile height: alarming 💕",
+    bio: "Romance and contemporary fiction lover. TBR pile height: alarming.",
     location: "Mumbai, India",
     userType: "READER" as const,
     passwordHash: hashedPassword,
@@ -1112,7 +1112,7 @@ async function main() {
     name: "Connor",
     username: "connor_reads",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=connor",
-    bio: "Currently building Folio 🚀 Loves fantasy and literary fiction.",
+    bio: "Currently building Folio. Loves fantasy and literary fiction.",
     location: "Online",
     userType: "READER" as const,
     passwordHash: hashedPassword,
@@ -1124,7 +1124,7 @@ async function main() {
     name: "Maya Osei",
     username: "mayareads",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=maya",
-    bio: "Psychological thrillers, dark crime fiction, and unreliable narrators. Speed reader. 🔪",
+    bio: "Psychological thrillers, dark crime fiction, and unreliable narrators. Speed reader.",
     location: "Accra, Ghana",
     userType: "READER" as const,
     passwordHash: hashedPassword,
@@ -1136,7 +1136,7 @@ async function main() {
     name: "Oliver Braun",
     username: "oliverreads",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=oliver",
-    bio: "Hard sci-fi or bust. If the science doesn't check out I'm leaving a review. 🚀",
+    bio: "Hard sci-fi or bust. If the science doesn't check out, I'm leaving a review.",
     location: "Berlin, Germany",
     userType: "READER" as const,
     passwordHash: hashedPassword,
@@ -1160,7 +1160,7 @@ async function main() {
     name: "Zoe Hartley",
     username: "zoereads",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=zoe",
-    bio: "Romantasy is my whole personality. Fae courts, dragon riders, morally grey love interests 💕🐉",
+    bio: "Romantasy is my whole personality. Fae courts, dragon riders, morally grey love interests.",
     location: "Melbourne, Australia",
     userType: "READER" as const,
     passwordHash: hashedPassword,
@@ -1184,7 +1184,7 @@ async function main() {
     name: "Nina Castillo",
     username: "ninareads",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=nina",
-    bio: "Magical realism, mythology, and books that blur the line between real and imagined ✨",
+    bio: "Magical realism, mythology, and books that blur the line between real and imagined.",
     location: "Mexico City, Mexico",
     userType: "READER" as const,
     passwordHash: hashedPassword,
@@ -1208,7 +1208,7 @@ async function main() {
     name: "Chloe Mensah",
     username: "chloereads",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=chloe",
-    bio: "I'll try anything once. My reading list has no genre loyalty whatsoever 📚",
+    bio: "I'll try anything once. My reading list has no genre loyalty whatsoever.",
     location: "Toronto, Canada",
     userType: "READER" as const,
     passwordHash: hashedPassword,
@@ -1232,7 +1232,7 @@ async function main() {
     name: "Sophie Laurent",
     username: "sophiereads",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=sophie",
-    bio: "Gothic fiction, dark atmosphere, haunted houses. The eerier the better. 🕯️",
+    bio: "Gothic fiction, dark atmosphere, haunted houses. The eerier the better.",
     location: "Lyon, France",
     userType: "READER" as const,
     passwordHash: hashedPassword,
@@ -2109,9 +2109,9 @@ async function main() {
   await prisma.clubPost.createMany({
     skipDuplicates: true,
     data: [
-      { clubId: darkAcademySociety.id, authorId: sarah.id, title: "📚 This Month: The Atlas Six", content: "Welcome to our February read! The Atlas Six is peak dark academia — six morally grey magicians competing for a place in a secret society. Discussion questions posted below. Reminder: spoilers allowed after the 15th!", isPinned: true },
+      { clubId: darkAcademySociety.id, authorId: sarah.id, title: "This Month: The Atlas Six", content: "Welcome to our February read! The Atlas Six is peak dark academia — six morally grey magicians competing for a place in a secret society. Discussion questions posted below. Reminder: spoilers allowed after the 15th!", isPinned: true },
       { clubId: darkAcademySociety.id, authorId: luna.id, title: "Callum vs. Parisa: Who is the real villain?", content: "I cannot stop thinking about this. Callum manipulates emotions, Parisa manipulates thoughts — but which power is more corrosive? I think Callum is more dangerous because he doesn't need to try.", isPinned: false },
-      { clubId: dragonClub.id, authorId: alex.id, title: "🐉 February Read: The Priory of the Orange Tree", content: "This month we're tackling Samantha Shannon's epic standalone. At 848 pages it's a commitment — but the world-building and the female-led cast are extraordinary. See you at the discussion on the 28th!", isPinned: true },
+      { clubId: dragonClub.id, authorId: alex.id, title: "February Read: The Priory of the Orange Tree", content: "This month we're tackling Samantha Shannon's epic standalone. At 848 pages it's a commitment — but the world-building and the female-led cast are extraordinary. See you at the discussion on the 28th!", isPinned: true },
       { clubId: literaryMinds.id, authorId: marcus.id, title: "Pachinko Discussion — February", content: "Min Jin Lee said she wanted to write about 'the burden of belonging' — did she succeed? I would argue Pachinko is the most important novel about the immigrant experience in decades.", isPinned: true },
     ],
   });
@@ -2119,11 +2119,11 @@ async function main() {
   await prisma.clubPost.createMany({
     skipDuplicates: true,
     data: [
-      { clubId: mysteryCircle.id, authorId: maya.id, title: "📖 March Read: Gone Girl", content: "Welcome to The Mystery Circle! We're starting with Gone Girl — the book that redefined the psychological thriller. Fair warning: spoilers are fine from day one, because figuring out the twist IS the discussion.", isPinned: true },
+      { clubId: mysteryCircle.id, authorId: maya.id, title: "March Read: Gone Girl", content: "Welcome to The Mystery Circle! We're starting with Gone Girl — the book that redefined the psychological thriller. Fair warning: spoilers are fine from day one, because figuring out the twist IS the discussion.", isPinned: true },
       { clubId: mysteryCircle.id, authorId: sophie.id, title: "Amy vs Nick: Who's the real villain?", content: "I've been thinking about this for days. Amy is clearly the architect of chaos but Nick's passive dishonesty enabled everything. Are we letting him off too easy because he's the narrator we start with?", isPinned: false },
-      { clubId: pagesAndPerspectives.id, authorId: grace.id, title: "🌿 April Read: Lessons in Chemistry", content: "Pages & Perspectives is thrilled to welcome everyone to our April read. Bonnie Garmus has written something genuinely funny AND genuinely furious. Come ready to talk about 1960s feminism and brilliant women who refused to be diminished.", isPinned: true },
-      { clubId: sciFiFutures.id, authorId: oliver.id, title: "🚀 Reading Dune — ground rules", content: "Welcome to Sci-Fi Futures. Dune is our inaugural read. House rules: citations welcome, hand-waving is not. If you want to argue about the spice metabolism, bring your sources. Discussion thread posted after everyone hits page 200.", isPinned: true },
-      { clubId: romanceReadersGuild.id, authorId: zoe.id, title: "💕 We're reading ACOTAR!", content: "Romance is not a guilty pleasure — it's a genre with craft, intention, and more emotional intelligence per page than most literary fiction. Welcome to the Romance Readers Guild. We start with ACOTAR: fae, court intrigue, and the enemies-to-lovers pipeline at full throttle.", isPinned: true },
+      { clubId: pagesAndPerspectives.id, authorId: grace.id, title: "April Read: Lessons in Chemistry", content: "Pages & Perspectives is thrilled to welcome everyone to our April read. Bonnie Garmus has written something genuinely funny AND genuinely furious. Come ready to talk about 1960s feminism and brilliant women who refused to be diminished.", isPinned: true },
+      { clubId: sciFiFutures.id, authorId: oliver.id, title: "Reading Dune — ground rules", content: "Welcome to Sci-Fi Futures. Dune is our inaugural read. House rules: citations welcome, hand-waving is not. If you want to argue about the spice metabolism, bring your sources. Discussion thread posted after everyone hits page 200.", isPinned: true },
+      { clubId: romanceReadersGuild.id, authorId: zoe.id, title: "We're reading ACOTAR", content: "Romance is not a guilty pleasure — it's a genre with craft, intention, and more emotional intelligence per page than most literary fiction. Welcome to the Romance Readers Guild. We start with ACOTAR: fae, court intrigue, and the enemies-to-lovers pipeline at full throttle.", isPinned: true },
     ],
   });
 
@@ -2255,12 +2255,12 @@ async function main() {
     },
   });
 
-  console.log("✅ Folio database seeded successfully!");
-  console.log(`  📚 ${books.length} books`);
-  console.log(`  👤 ${allUsers.length} users`);
-  console.log(`  🏛️  9 clubs`);
-  console.log(`  🏆 ${achievements.length} achievements`);
-  console.log(`  🌱 5 taste clusters`);
+  console.log("Folio database seeded successfully.");
+  console.log(`  ${books.length} books`);
+  console.log(`  ${allUsers.length} users`);
+  console.log(`  9 clubs`);
+  console.log(`  ${achievements.length} achievements`);
+  console.log(`  5 taste clusters`);
 }
 
 // ── Helper functions ─────────────────────────────────────────────────────────
