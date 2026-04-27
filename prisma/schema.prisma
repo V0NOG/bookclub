@@ -1,0 +1,690 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum UserType {
+  READER
+  ORGANISER
+  MEMBER
+  INFLUENCER
+}
+
+enum ReadingStatus {
+  WANT_TO_READ
+  CURRENTLY_READING
+  READ
+  ABANDONED
+}
+
+enum MatchType {
+  USER_TO_USER
+  USER_TO_BOOK
+  USER_TO_CLUB
+  CLUB_TO_BOOK
+}
+
+enum MatchConfidence {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum MembershipType {
+  OPEN
+  APPLICATION
+  PRIVATE
+}
+
+enum ClubVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum ClubRole {
+  OWNER
+  ORGANISER
+  MEMBER
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PollStatus {
+  ACTIVE
+  CLOSED
+  DRAFT
+}
+
+enum VoteMode {
+  SINGLE
+  MULTI
+}
+
+enum GoalType {
+  BOOKS_PER_YEAR
+  PAGES_PER_MONTH
+  MINUTES_PER_DAY
+}
+
+enum ChallengeType {
+  FASTEST_FINISH
+  MOST_PAGES_WEEK
+  MOST_MINUTES_MONTH
+  CLUB_MONTHLY
+  FRIEND_GROUP
+  PERSONAL_GOAL
+}
+
+enum FeedItemType {
+  REVIEW_CREATED
+  BOOK_FINISHED
+  BOOK_STARTED
+  CLUB_JOINED
+  CHALLENGE_JOINED
+  CHALLENGE_COMPLETED
+  ACHIEVEMENT_EARNED
+  CLUB_POST
+  CLUB_POLL
+  READING_MILESTONE
+  TASTE_EVOLUTION
+}
+
+// ─── Auth ────────────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String?
+  username      String?   @unique
+  avatar        String?
+  bio           String?
+  location      String?
+  userType      UserType  @default(READER)
+  onboarded     Boolean   @default(false)
+  passwordHash  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts              Account[]
+  sessions              Session[]
+  userBooks             UserBook[]
+  shelves               Shelf[]
+  reviews               Review[]
+  tasteProfile          TasteProfile?
+  onboardingData        OnboardingData?
+  clubMemberships       ClubMember[]
+  clubApplications      ClubApplication[]
+  followers             Follow[]           @relation("Following")
+  following             Follow[]           @relation("Followers")
+  readingSessions       ReadingSession[]
+  readingGoals          ReadingGoal[]
+  challengeParticipants ChallengeParticipant[]
+  userScore             UserScore?
+  userAchievements      UserAchievement[]
+  feedItems             FeedItem[]
+
+  @@index([email])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Books ───────────────────────────────────────────────────────────────────
+
+model Book {
+  id          String    @id @default(cuid())
+  title       String
+  author      String
+  authors     String[]
+  isbn        String?   @unique
+  cover       String?
+  description String?   @db.Text
+  publishedAt DateTime?
+  publisher   String?
+  pageCount   Int?
+  language    String    @default("en")
+  genres      String[]
+  tags        String[]
+  avgRating   Float?
+  ratingsCount Int      @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  userBooks         UserBook[]
+  reviews           Review[]
+  shelfBooks        ShelfBook[]
+  tasteDimensions   BookTasteDimension?
+  clubCurrentBooks  Club[]             @relation("CurrentBook")
+  clubUpcomingBooks Club[]             @relation("UpcomingBook")
+  clubPollOptions   ClubPollOption[]
+  challengeBooks    ReadingChallenge[]
+  readingHistories  ClubReadingHistory[]
+
+  @@index([author])
+}
+
+model BookTasteDimension {
+  id                  String  @id @default(cuid())
+  bookId              String  @unique
+  pace                Float?
+  tone                Float?
+  focus               Float?
+  emotionalIntensity  Float?
+  romanceLevel        Float?
+  complexity          Float?
+  worldbuildingDepth  Float?
+  discussionPotential Float?
+
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+}
+
+model UserBook {
+  id         String        @id @default(cuid())
+  userId     String
+  bookId     String
+  status     ReadingStatus @default(WANT_TO_READ)
+  rating     Int?
+  startedAt  DateTime?
+  finishedAt DateTime?
+  progress   Int           @default(0)
+  notes      String?       @db.Text
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id])
+
+  @@unique([userId, bookId])
+  @@index([userId, status])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  bookId    String
+  content   String   @db.Text
+  rating    Int
+  isPublic  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  likes     ReviewLike[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id])
+
+  @@unique([userId, bookId])
+}
+
+model ReviewLike {
+  id       String @id @default(cuid())
+  reviewId String
+  userId   String
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, userId])
+}
+
+// ─── Shelves ─────────────────────────────────────────────────────────────────
+
+model Shelf {
+  id          String      @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  isPublic    Boolean     @default(true)
+  isDefault   Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shelfBooks ShelfBook[]
+
+  @@index([userId])
+}
+
+model ShelfBook {
+  id      String   @id @default(cuid())
+  shelfId String
+  bookId  String
+  addedAt DateTime @default(now())
+
+  shelf Shelf @relation(fields: [shelfId], references: [id], onDelete: Cascade)
+  book  Book  @relation(fields: [bookId], references: [id])
+
+  @@unique([shelfId, bookId])
+}
+
+// ─── Taste ───────────────────────────────────────────────────────────────────
+
+model TasteProfile {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  topGenres           String[]
+  topAuthors          String[]
+  topThemes           String[]
+  topMoods            String[]
+  pace                Float?
+  tone                Float?
+  focus               Float?
+  emotionalIntensity  Float?
+  romanceLevel        Float?
+  complexity          Float?
+  worldbuildingDepth  Float?
+  discussionPotential Float?
+  cluster             String?
+  dislikedGenres      String[]
+  dislikedThemes      String[]
+  dislikedAuthors     String[]
+  confidence          MatchConfidence @default(LOW)
+  lastCalculated      DateTime?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dimensionScores TasteDimensionScore[]
+}
+
+model TasteDimensionScore {
+  id             String  @id @default(cuid())
+  tasteProfileId String
+  dimension      String
+  score          Float
+  confidence     Float
+
+  tasteProfile TasteProfile @relation(fields: [tasteProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([tasteProfileId, dimension])
+}
+
+model TasteMatch {
+  id                    String          @id @default(cuid())
+  userAId               String?
+  userBId               String?
+  bookId                String?
+  clubId                String?
+  matchType             MatchType
+  score                 Int
+  confidence            MatchConfidence
+  matchReasons          String[]
+  positiveSignals       Json
+  negativeSignals       Json
+  sharedBooks           String[]
+  sharedGenres          String[]
+  sharedAuthors         String[]
+  sharedThemes          String[]
+  sharedTasteDimensions String[]
+  calculatedAt          DateTime        @default(now())
+  expiresAt             DateTime?
+
+  @@index([userAId, matchType])
+  @@index([clubId, matchType])
+}
+
+model TasteCluster {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  label       String
+  description String?
+  genres      String[]
+  themes      String[]
+  dimensions  Json
+  createdAt   DateTime @default(now())
+}
+
+model OnboardingData {
+  id                      String    @id @default(cuid())
+  userId                  String    @unique
+  favoriteGenres          String[]
+  favoriteBookIds         String[]
+  dislikedBookIds         String[]
+  favoriteAuthors         String[]
+  preferredMoods          String[]
+  preferredThemes         String[]
+  readingGoalBooksPerYear Int?
+  clubPreference          String?
+  interestedInClubs       Boolean   @default(false)
+  interestedInChallenges  Boolean   @default(false)
+  userType                UserType  @default(READER)
+  completedAt             DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── Clubs ───────────────────────────────────────────────────────────────────
+
+model Club {
+  id             String         @id @default(cuid())
+  name           String
+  description    String?        @db.Text
+  banner         String?
+  avatar         String?
+  ownerId        String
+  genres         String[]
+  themes         String[]
+  location       String?
+  isOnline       Boolean        @default(true)
+  meetingCadence String?
+  membershipType MembershipType @default(OPEN)
+  visibility     ClubVisibility @default(PUBLIC)
+  maxMembers     Int?
+  currentBookId  String?
+  upcomingBookId String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  currentBook      Book?                @relation("CurrentBook", fields: [currentBookId], references: [id])
+  upcomingBook     Book?                @relation("UpcomingBook", fields: [upcomingBookId], references: [id])
+  members          ClubMember[]
+  applications     ClubApplication[]
+  posts            ClubPost[]
+  discussions      ClubDiscussion[]
+  polls            ClubPoll[]
+  readingHistory   ClubReadingHistory[]
+  challenges       ReadingChallenge[]
+
+  @@index([genres])
+  @@index([isOnline])
+}
+
+model ClubMember {
+  id       String   @id @default(cuid())
+  clubId   String
+  userId   String
+  role     ClubRole @default(MEMBER)
+  joinedAt DateTime @default(now())
+  votes    ClubVote[]
+
+  club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([clubId, userId])
+}
+
+model ClubApplication {
+  id        String            @id @default(cuid())
+  clubId    String
+  userId    String
+  message   String?
+  status    ApplicationStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+
+  club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([clubId, userId])
+}
+
+model ClubReadingHistory {
+  id         String    @id @default(cuid())
+  clubId     String
+  bookId     String
+  startedAt  DateTime?
+  finishedAt DateTime?
+  avgRating  Float?
+  notes      String?
+
+  club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id])
+
+  @@index([clubId])
+}
+
+model ClubPost {
+  id        String   @id @default(cuid())
+  clubId    String
+  authorId  String
+  title     String?
+  content   String   @db.Text
+  isPinned  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  comments  ClubComment[]
+
+  club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+}
+
+model ClubDiscussion {
+  id        String   @id @default(cuid())
+  clubId    String
+  authorId  String
+  title     String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  comments  ClubComment[]
+
+  club Club @relation(fields: [clubId], references: [id], onDelete: Cascade)
+}
+
+model ClubComment {
+  id           String   @id @default(cuid())
+  postId       String?
+  discussionId String?
+  authorId     String
+  content      String   @db.Text
+  createdAt    DateTime @default(now())
+
+  post       ClubPost?       @relation(fields: [postId], references: [id], onDelete: Cascade)
+  discussion ClubDiscussion? @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+}
+
+model ClubPoll {
+  id             String     @id @default(cuid())
+  clubId         String
+  title          String
+  description    String?
+  status         PollStatus @default(ACTIVE)
+  voteMode       VoteMode   @default(SINGLE)
+  resultsVisible Boolean    @default(false)
+  endsAt         DateTime?
+  createdAt      DateTime   @default(now())
+
+  club    Club             @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  options ClubPollOption[]
+  votes   ClubVote[]
+
+  @@index([clubId, status])
+}
+
+model ClubPollOption {
+  id           String   @id @default(cuid())
+  pollId       String
+  bookId       String?
+  label        String
+  matchScore   Int?
+  matchReasons String[]
+  votes        ClubVote[]
+
+  poll ClubPoll @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  book Book?    @relation(fields: [bookId], references: [id])
+}
+
+model ClubVote {
+  id        String   @id @default(cuid())
+  pollId    String
+  optionId  String
+  memberId  String
+  createdAt DateTime @default(now())
+
+  poll   ClubPoll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  option ClubPollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  member ClubMember     @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([pollId, memberId, optionId])
+}
+
+// ─── Reading ─────────────────────────────────────────────────────────────────
+
+model ReadingSession {
+  id           String   @id @default(cuid())
+  userId       String
+  bookId       String
+  date         DateTime @default(now())
+  pagesRead    Int?
+  minutesRead  Int?
+  chaptersRead Int?
+  notes        String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+}
+
+model ReadingGoal {
+  id      String   @id @default(cuid())
+  userId  String
+  type    GoalType
+  target  Int
+  current Int      @default(0)
+  year    Int
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type, year])
+}
+
+// ─── Challenges ──────────────────────────────────────────────────────────────
+
+model ReadingChallenge {
+  id          String        @id @default(cuid())
+  title       String
+  description String?
+  type        ChallengeType
+  creatorId   String
+  clubId      String?
+  bookId      String?
+  startDate   DateTime
+  endDate     DateTime
+  target      Int?
+  isPublic    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+
+  club         Club?                  @relation(fields: [clubId], references: [id])
+  book         Book?                  @relation(fields: [bookId], references: [id])
+  participants ChallengeParticipant[]
+
+  @@index([clubId])
+}
+
+model ChallengeParticipant {
+  id          String   @id @default(cuid())
+  challengeId String
+  userId      String
+  progress    Int      @default(0)
+  joinedAt    DateTime @default(now())
+  isPrivate   Boolean  @default(false)
+
+  challenge ReadingChallenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([challengeId, userId])
+}
+
+// ─── Gamification ────────────────────────────────────────────────────────────
+
+model Achievement {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  title       String
+  description String
+  icon        String?
+  points      Int      @default(10)
+
+  userAchievements UserAchievement[]
+}
+
+model UserAchievement {
+  id            String   @id @default(cuid())
+  userId        String
+  achievementId String
+  earnedAt      DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id])
+
+  @@unique([userId, achievementId])
+}
+
+model UserScore {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  totalPoints Int       @default(0)
+  streakDays  Int       @default(0)
+  lastReadAt  DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── Social ──────────────────────────────────────────────────────────────────
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("Followers", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+}
+
+model FeedItem {
+  id             String       @id @default(cuid())
+  userId         String
+  actorId        String
+  type           FeedItemType
+  entityId       String
+  entityType     String
+  content        Json?
+  isRead         Boolean      @default(false)
+  relevanceScore Float?
+  createdAt      DateTime     @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
