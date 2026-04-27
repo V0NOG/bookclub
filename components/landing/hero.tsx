@@ -28,7 +28,7 @@ export function Hero() {
         </h1>
 
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-          Folio matches you with books, readers, and clubs based on your taste — not just genre. Discover more, read together, and never miss a book you'll love.
+          Folio matches you with books, readers, and clubs based on your taste — not just genre. Discover more, read together, and never miss a book you&apos;ll love.
         </p>
 
         {/* CTAs */}

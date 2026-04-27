@@ -7,7 +7,6 @@ import { saveOnboardingAction } from "@/app/onboarding/actions";
 
 const GENRES = ["Fantasy", "Science Fiction", "Literary Fiction", "Historical Fiction", "Mystery", "Romance", "Thriller", "Horror", "Contemporary Fiction", "Non-fiction", "Biography", "Dark Academia", "Cozy Fantasy", "Romantasy"];
 const MOODS = ["Immersive", "Fast-paced", "Character-driven", "Atmospheric", "Feel-good", "Thought-provoking", "Emotional", "Adventurous", "Dark", "Witty"];
-const THEMES = ["Magic & Fantasy", "Romance & Love", "Family & Identity", "War & Conflict", "Mystery & Secrets", "Science & Technology", "Coming of Age", "Mythology", "Academia", "Social Justice"];
 const AUTHORS = ["Patrick Rothfuss", "Leigh Bardugo", "Hanya Yanagihara", "Taylor Jenkins Reid", "Andy Weir", "Min Jin Lee", "Susanna Clarke", "Olivie Blake", "Sally Rooney", "Rebecca Yarros", "Emily Henry", "Matt Haig", "Richard Osman", "Silvia Moreno-Garcia", "RF Kuang"];
 const GOALS = [6, 12, 24, 36, 52];
 const USER_TYPES = [
