@@ -40,7 +40,7 @@ export function Sidebar() {
       {/* Main Nav */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
-          const active = pathname.startsWith(item.href);
+          const active = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link
               key={item.href}
@@ -62,7 +62,7 @@ export function Sidebar() {
       {/* Bottom Nav */}
       <div className="px-3 pb-4 border-t border-border pt-4 space-y-1">
         {bottomNavItems.map((item) => {
-          const active = pathname.startsWith(item.href);
+          const active = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link
               key={item.href}
