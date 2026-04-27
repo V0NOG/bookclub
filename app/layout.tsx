@@ -1,40 +1,24 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { Inter } from "next/font/google";
 import "./globals.css";
-import { cn } from "@/lib/utils";
+import { AppSessionProvider } from "@/components/layout/session-provider";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-sans",
-  weight: "100 900",
-});
-
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Folio",
-  description: "Find your next favourite book — and the people to read it with.",
+  title: "Folio — Find your next favourite book",
+  description: "Find your next favourite book — and the people to read it with. Taste-matched recommendations, book clubs, reading challenges.",
+  openGraph: {
+    title: "Folio",
+    description: "Spotify-style social reading platform",
+  },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark">
-      <body
-        className={cn(
-          geistSans.variable,
-          geistMono.variable,
-          "font-sans antialiased"
-        )}
-      >
-        {children}
+      <body className={`${inter.variable} font-sans antialiased`}>
+        <AppSessionProvider>{children}</AppSessionProvider>
       </body>
     </html>
   );
