@@ -55,7 +55,7 @@ function SignInPageInner() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" placeholder="you@example.com" required defaultValue="stormbreaker128@gmail.com" className="bg-background" />
+            <Input id="email" name="email" type="email" placeholder="you@example.com" required defaultValue="sarah@folio.dev" className="bg-background" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
