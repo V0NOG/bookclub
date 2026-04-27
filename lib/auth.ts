@@ -50,6 +50,16 @@ export const authOptions: NextAuthOptions = {
         token.username = u.username;
         token.onboarded = u.onboarded;
       }
+      // After onboarding completes the DB is updated but the JWT still holds the
+      // old onboarded=false value. Re-read from DB on every token refresh until
+      // the flag flips — after that it never needs re-checking.
+      if (token.id && !token.onboarded) {
+        const fresh = await db.user.findUnique({
+          where: { id: token.id as string },
+          select: { onboarded: true },
+        });
+        if (fresh?.onboarded) token.onboarded = true;
+      }
       return token;
     },
     async session({ session, token }) {
