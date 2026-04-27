@@ -33,10 +33,10 @@ export function Hero() {
 
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link href="/sign-up" className={cn(buttonVariants({ size: "lg" }), "bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-8 h-12 text-base")}>
+          <Link href="/sign-up" className={cn(buttonVariants({ variant: "default" }), "bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-8 h-12 text-base")}>
             Start matching →
           </Link>
-          <Link href="/clubs" className={cn(buttonVariants({ size: "lg", variant: "outline" }), "border-border h-12 text-base")}>
+          <Link href="/clubs" className={cn(buttonVariants({ variant: "outline" }), "border-border h-12 text-base")}>
             Explore clubs
           </Link>
         </div>

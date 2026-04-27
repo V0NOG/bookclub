@@ -39,11 +39,6 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Folio brand colours
-        emerald: {
-          500: "#10b981",
-          600: "#059669",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",
