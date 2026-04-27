@@ -1,11 +1,12 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import { Adapter } from "next-auth/adapters";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(db) as any,
+  adapter: PrismaAdapter(db) as Adapter,
   session: { strategy: "jwt" },
   pages: {
     signIn: "/sign-in",
@@ -44,9 +45,10 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
-        token.username = (user as any).username;
-        token.onboarded = (user as any).onboarded;
+        const u = user as typeof user & { username: string; onboarded: boolean };
+        token.id = u.id;
+        token.username = u.username;
+        token.onboarded = u.onboarded;
       }
       return token;
     },
