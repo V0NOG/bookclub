@@ -67,6 +67,7 @@ export function calculateUserToClubMatch(
     clubDimensions: club.dimensions,
     sharedDimensions: alignedDims,
     memberCount,
+    score,
   });
 
   const allSharedBooks = Array.from(new Set(memberMatches.flatMap((m) => m.sharedBooks)));
@@ -77,7 +78,7 @@ export function calculateUserToClubMatch(
     confidence,
     matchReasons: reasons,
     positiveSignals: [
-      `${strongMatchCount} strong member matches`,
+      ...(strongMatchCount > 0 ? [`${strongMatchCount} strong member matches`] : []),
       ...sharedGenres.map((g) => `Club reads: ${g}`),
     ],
     negativeSignals: [],

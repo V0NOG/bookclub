@@ -96,6 +96,7 @@ export function calculateUserToUserMatch(
     negativeGenreOverlap: sharedDislikedGenres,
     dimensionsA: userA.dimensions,
     dimensionsB: userB.dimensions,
+    score,
   });
 
   return {

@@ -67,6 +67,7 @@ export function calculateUserToBookMatch(
     bookDimensions: book.dimensions,
     userDimensions: user.dimensions,
     triggerBooks,
+    score,
   });
 
   return {
