@@ -8,7 +8,7 @@ export type MatchOutput = {
   sharedGenres: string[];
   sharedAuthors: string[];
   sharedThemes: string[];
-  sharedTasteDimensions: string[];
+  sharedTasteDimensions: Array<keyof TasteDimensions>;
 };
 
 export type TasteDimensions = {

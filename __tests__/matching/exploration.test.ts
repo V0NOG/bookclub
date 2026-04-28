@@ -77,6 +77,28 @@ test("eligible: adjacent by shared theme", () => {
   expect(isExploratoryEligible(themeAdjacent, ctx)).toBe(true);
 });
 
+test("eligible: empty genres (user-to-user) relies on adjacency only, not genre gate", () => {
+  const userCandidate: ExplorationCandidate = {
+    score: 55,
+    genres: [],
+    sharedGenres: [],
+    sharedDimensions: ["tone"],
+    sharedThemes: [],
+  };
+  expect(isExploratoryEligible(userCandidate, ctx)).toBe(true);
+});
+
+test("ineligible: empty genres but no adjacency signal", () => {
+  const userNoAdjacency: ExplorationCandidate = {
+    score: 55,
+    genres: [],
+    sharedGenres: [],
+    sharedDimensions: [],
+    sharedThemes: [],
+  };
+  expect(isExploratoryEligible(userNoAdjacency, ctx)).toBe(false);
+});
+
 test("selectExploratory returns at most `limit` items", () => {
   type Item = { score: number; genres: string[]; dims: string[] };
   const items: Item[] = [
