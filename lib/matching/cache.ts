@@ -6,6 +6,7 @@ import { calculateUserToBookMatch, BookSnapshot } from "./user-to-book";
 import { calculateUserToClubMatch, ClubSnapshot } from "./user-to-club";
 import { UserTasteSnapshot, TasteDimensions, MatchOutput } from "./types";
 import { selectExploratory, ExplorationContext } from "./exploration";
+import { generateExploratoryReason } from "./reasons";
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
 
@@ -38,16 +39,19 @@ function toConfidence(c: "LOW" | "MEDIUM" | "HIGH"): "low" | "medium" | "high" {
 export type ScoredUser = {
   user: { id: string; name: string | null; username: string | null; avatar: string | null };
   match: MatchOutput;
+  isExploratory?: true;
 };
 
 export type ScoredBook = {
   book: { id: string; title: string; author: string; cover: string | null; genres: string[] };
   match: MatchOutput;
+  isExploratory?: true;
 };
 
 export type ScoredClub = {
   club: { id: string; name: string; avatar: string | null; genres: string[]; _count: { members: number } };
   match: MatchOutput;
+  isExploratory?: true;
 };
 
 export type MatchCacheResult = {
@@ -221,7 +225,11 @@ async function computeMatchesForUser(userId: string): Promise<MatchCacheResult> 
         }),
         explorationCtx,
         1
-      )
+      ).map((r) => ({
+        ...r,
+        isExploratory: true as const,
+        match: { ...r.match, matchReasons: [generateExploratoryReason(r.match.sharedTasteDimensions, r.match.sharedThemes)] },
+      }))
     : [];
 
   const exploratoryBooks = topGenreSet.size > 0
@@ -236,7 +244,11 @@ async function computeMatchesForUser(userId: string): Promise<MatchCacheResult> 
         }),
         explorationCtx,
         1
-      )
+      ).map((r) => ({
+        ...r,
+        isExploratory: true as const,
+        match: { ...r.match, matchReasons: [generateExploratoryReason(r.match.sharedTasteDimensions, r.match.sharedThemes)] },
+      }))
     : [];
 
   const exploratoryClubs = topGenreSet.size > 0
@@ -251,7 +263,11 @@ async function computeMatchesForUser(userId: string): Promise<MatchCacheResult> 
         }),
         explorationCtx,
         1
-      )
+      ).map((r) => ({
+        ...r,
+        isExploratory: true as const,
+        match: { ...r.match, matchReasons: [generateExploratoryReason(r.match.sharedTasteDimensions, r.match.sharedThemes)] },
+      }))
     : [];
 
   return {
