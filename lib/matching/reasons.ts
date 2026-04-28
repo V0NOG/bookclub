@@ -104,7 +104,8 @@ export function generateClubMatchReasons(params: {
   }
 
   if (params.memberCompatibilityAvg > 0.65) {
-    reasons.push(`Your taste aligns closely with the club's reading history.`);
+    const pct = Math.round(params.memberCompatibilityAvg * 100);
+    reasons.push(`Your taste overlaps ~${pct}% with the club's typical reader.`);
   }
 
   const dimParts: string[] = [];

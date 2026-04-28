@@ -58,6 +58,15 @@
   }
 }
 
+/* Hide scrollbars on horizontal recommendation rows */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Folio custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
