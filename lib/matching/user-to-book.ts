@@ -30,6 +30,12 @@ export function calculateUserToBookMatch(
   }
 
   const sharedGenres = book.genres.filter((g) => user.topGenres.includes(g));
+  const triggerBooks = user.ratedBooks
+    .filter((rb) => rb.rating >= 4 && rb.genres.some((g) => sharedGenres.includes(g)))
+    .sort((a, b) => b.rating - a.rating)
+    .slice(0, 1)
+    .map((rb) => rb.title);
+
   const genreScore = sharedGenres.length / Math.max(1, user.topGenres.length);
 
   const authorLiked = user.topAuthors.includes(book.author);
@@ -60,6 +66,7 @@ export function calculateUserToBookMatch(
     sharedDimensions: alignedDims,
     bookDimensions: book.dimensions,
     userDimensions: user.dimensions,
+    triggerBooks,
   });
 
   return {

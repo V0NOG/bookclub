@@ -47,3 +47,35 @@ test("match has reasons", () => {
   const result = calculateUserToBookMatch(fantasyUser, fantasyBook);
   expect(result.matchReasons.length).toBeGreaterThan(0);
 });
+
+test("trigger book appears as first reason when user rated a book in the same genre highly", () => {
+  const userWithHistory: UserTasteSnapshot = {
+    ...fantasyUser,
+    ratedBooks: [
+      { bookId: "b1", title: "Six of Crows", rating: 5, genres: ["Fantasy"], authors: ["Leigh Bardugo"] },
+    ],
+  };
+  const result = calculateUserToBookMatch(userWithHistory, fantasyBook);
+  expect(result.matchReasons[0]).toMatch(/Because you loved Six of Crows/);
+});
+
+test("no trigger book reason when user has no high-rated books in shared genre", () => {
+  const userNoHistory: UserTasteSnapshot = {
+    ...fantasyUser,
+    ratedBooks: [],
+  };
+  const result = calculateUserToBookMatch(userNoHistory, fantasyBook);
+  expect(result.matchReasons[0]).not.toMatch(/Because you loved/);
+});
+
+test("trigger book uses highest-rated shared-genre book, not just first", () => {
+  const userWithHistory: UserTasteSnapshot = {
+    ...fantasyUser,
+    ratedBooks: [
+      { bookId: "b10", title: "A Lesser Book", rating: 4, genres: ["Fantasy"], authors: ["Someone"] },
+      { bookId: "b11", title: "The Kingkiller Chronicle", rating: 5, genres: ["Fantasy"], authors: ["Rothfuss"] },
+    ],
+  };
+  const result = calculateUserToBookMatch(userWithHistory, fantasyBook);
+  expect(result.matchReasons[0]).toMatch(/The Kingkiller Chronicle/);
+});

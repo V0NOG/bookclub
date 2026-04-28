@@ -61,8 +61,13 @@ export function generateBookMatchReasons(params: {
   sharedDimensions: Array<keyof TasteDimensions>;
   bookDimensions: Partial<TasteDimensions>;
   userDimensions: Partial<TasteDimensions>;
+  triggerBooks?: string[];
 }): string[] {
   const reasons: string[] = [];
+
+  if (params.triggerBooks && params.triggerBooks.length > 0) {
+    reasons.push(`Because you loved ${params.triggerBooks[0]}.`);
+  }
 
   if (params.authorLiked) {
     reasons.push(`You've rated other books by ${params.authorName} highly.`);
