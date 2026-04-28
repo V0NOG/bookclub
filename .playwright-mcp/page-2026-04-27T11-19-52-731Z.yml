@@ -1,0 +1,81 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "Folio" [ref=e5] [cursor=pointer]:
+          - /url: /
+          - img [ref=e6]
+          - text: Folio
+        - navigation [ref=e8]:
+          - link "Sign in" [ref=e9] [cursor=pointer]:
+            - /url: /sign-in
+          - link "Get started" [ref=e10] [cursor=pointer]:
+            - /url: /sign-up
+    - main [ref=e11]:
+      - generic [ref=e15]:
+        - generic [ref=e16]:
+          - img [ref=e17]
+          - text: Taste-matched reading — now in beta
+        - heading "Find your next favourite book and the people to read it with." [level=1] [ref=e20]:
+          - text: Find your next favourite book
+          - text: and the people to read it with.
+        - paragraph [ref=e21]: Folio matches you with books, readers, and clubs based on your taste — not just genre. Discover more, read together, and never miss a book you'll love.
+        - generic [ref=e22]:
+          - link "Start matching →" [ref=e23] [cursor=pointer]:
+            - /url: /sign-up
+          - link "Explore clubs" [ref=e24] [cursor=pointer]:
+            - /url: /clubs
+        - generic [ref=e25]:
+          - generic [ref=e26]:
+            - img [ref=e27]
+            - generic [ref=e29]: 20,000+ books
+          - generic [ref=e31]:
+            - img [ref=e32]
+            - generic [ref=e37]: 5,000+ readers
+          - generic [ref=e39]:
+            - img [ref=e40]
+            - generic [ref=e43]: Taste matching engine
+      - generic [ref=e45]:
+        - generic [ref=e46]:
+          - heading "Everything a reader needs" [level=2] [ref=e47]
+          - paragraph [ref=e48]: Taste matching powers every feature — from recommendations to club discovery to book voting.
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - img [ref=e52]
+            - heading "Taste-based recommendations" [level=3] [ref=e54]
+            - paragraph [ref=e55]: We analyse your ratings, abandoned books, preferred themes, and reading patterns to surface books you'll actually love — not just popular titles.
+          - generic [ref=e56]:
+            - img [ref=e58]
+            - heading "Taste-matched readers" [level=3] [ref=e63]
+            - paragraph [ref=e64]: "Find readers whose taste mirrors yours. See exactly why you're compatible: shared loves, matching styles, overlapping dislikes."
+          - generic [ref=e65]:
+            - img [ref=e67]
+            - heading "Discover book clubs" [level=3] [ref=e71]
+            - paragraph [ref=e72]: Get matched to clubs based on your taste profile — not just genre. Know your compatibility score and top reasons before you even apply.
+          - generic [ref=e73]:
+            - img [ref=e75]
+            - heading "Reading tracker" [level=3] [ref=e77]
+            - paragraph [ref=e78]: Log sessions, track progress, see your reading streaks, and get estimated finish dates. Your reading history at a glance.
+          - generic [ref=e79]:
+            - img [ref=e81]
+            - heading "Reading challenges" [level=3] [ref=e87]
+            - paragraph [ref=e88]: Compete with friends and club members. Who read the most pages this month? Fastest to finish the club book? Leaderboards make it fun.
+          - generic [ref=e89]:
+            - img [ref=e91]
+            - heading "Democratic book voting" [level=3] [ref=e94]
+            - paragraph [ref=e95]: Clubs vote on what to read next. Every option shows its taste match score so members can make informed choices — not just popularity contests.
+      - generic [ref=e97]:
+        - heading "Ready to find your next favourite book?" [level=2] [ref=e98]
+        - paragraph [ref=e99]: Join thousands of readers discovering books, clubs, and communities that match their taste.
+        - generic [ref=e100]:
+          - link "Get started free →" [ref=e101] [cursor=pointer]:
+            - /url: /sign-up
+          - link "Sign in" [ref=e102] [cursor=pointer]:
+            - /url: /sign-in
+    - contentinfo [ref=e103]:
+      - generic [ref=e104]:
+        - generic [ref=e105]:
+          - img [ref=e106]
+          - generic [ref=e108]: Folio
+        - paragraph [ref=e109]: Find your next favourite book — and the people to read it with.
+  - alert [ref=e110]

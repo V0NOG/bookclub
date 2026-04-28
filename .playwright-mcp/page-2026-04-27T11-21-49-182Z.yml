@@ -1,0 +1,25 @@
+- generic [active] [ref=e1]:
+  - alert [ref=e25]
+  - generic [ref=e49]:
+    - generic [ref=e51]:
+      - generic [ref=e52]: Building your taste profile
+      - generic [ref=e53]: 3 / 6
+    - generic [ref=e56]:
+      - heading "What moods do you read for?" [level=2] [ref=e97]
+      - paragraph [ref=e98]: Pick at least 2 reading vibes.
+      - generic [ref=e99]:
+        - button "Immersive" [ref=e100] [cursor=pointer]
+        - button "Fast-paced" [ref=e101] [cursor=pointer]
+        - button "Character-driven" [ref=e102] [cursor=pointer]
+        - button "Atmospheric" [ref=e103] [cursor=pointer]
+        - button "Feel-good" [ref=e104] [cursor=pointer]
+        - button "Thought-provoking" [ref=e105] [cursor=pointer]
+        - button "Emotional" [ref=e106] [cursor=pointer]
+        - button "Adventurous" [ref=e107] [cursor=pointer]
+        - button "Dark" [ref=e108] [cursor=pointer]
+        - button "Witty" [ref=e109] [cursor=pointer]
+      - generic [ref=e74]:
+        - button "Back" [ref=e75] [cursor=pointer]
+        - button "Continue" [disabled] [ref=e76]:
+          - text: Continue
+          - img [ref=e77]

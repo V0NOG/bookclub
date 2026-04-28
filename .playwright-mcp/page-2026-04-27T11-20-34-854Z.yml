@@ -1,0 +1,33 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - link "Folio" [ref=e3] [cursor=pointer]:
+      - /url: /
+      - img [ref=e4]
+      - text: Folio
+    - generic [ref=e26]:
+      - generic [ref=e27]:
+        - generic [ref=e28]: Welcome back
+        - generic [ref=e29]: Account created! Sign in to continue.
+      - generic [ref=e30]:
+        - generic [ref=e31]: Account created successfully! Sign in below.
+        - generic [ref=e32]:
+          - generic [ref=e33]:
+            - generic [ref=e34]: Email
+            - textbox "Email" [ref=e35]:
+              - /placeholder: you@example.com
+              - text: sarah@folio.dev
+          - generic [ref=e36]:
+            - generic [ref=e37]: Password
+            - textbox "Password" [ref=e38]: password123
+          - button "Sign in →" [ref=e39] [cursor=pointer]
+        - generic [ref=e40]:
+          - paragraph [ref=e41]: "Demo accounts:"
+          - paragraph [ref=e42]: sarah@folio.dev — fantasy/dark academia organiser
+          - paragraph [ref=e43]: marcus@folio.dev — literary fiction reader
+          - paragraph [ref=e44]: priya@folio.dev — romance enthusiast
+          - paragraph [ref=e45]: "All passwords: password123"
+        - paragraph [ref=e46]:
+          - text: Don't have an account?
+          - link "Sign up free" [ref=e47] [cursor=pointer]:
+            - /url: /sign-up
+  - alert [ref=e25]

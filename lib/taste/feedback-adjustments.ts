@@ -28,14 +28,14 @@ function toDimensions(src: {
 } | null | undefined): Partial<TasteDimensions> {
   if (!src) return {};
   const d: Partial<TasteDimensions> = {};
-  if (src.pace !== null) d.pace = src.pace!;
-  if (src.tone !== null) d.tone = src.tone!;
-  if (src.focus !== null) d.focus = src.focus!;
-  if (src.emotionalIntensity !== null) d.emotionalIntensity = src.emotionalIntensity!;
-  if (src.romanceLevel !== null) d.romanceLevel = src.romanceLevel!;
-  if (src.complexity !== null) d.complexity = src.complexity!;
-  if (src.worldbuildingDepth !== null) d.worldbuildingDepth = src.worldbuildingDepth!;
-  if (src.discussionPotential !== null) d.discussionPotential = src.discussionPotential!;
+  if (src.pace !== null) d.pace = src.pace;
+  if (src.tone !== null) d.tone = src.tone;
+  if (src.focus !== null) d.focus = src.focus;
+  if (src.emotionalIntensity !== null) d.emotionalIntensity = src.emotionalIntensity;
+  if (src.romanceLevel !== null) d.romanceLevel = src.romanceLevel;
+  if (src.complexity !== null) d.complexity = src.complexity;
+  if (src.worldbuildingDepth !== null) d.worldbuildingDepth = src.worldbuildingDepth;
+  if (src.discussionPotential !== null) d.discussionPotential = src.discussionPotential;
   return d;
 }
 
@@ -141,11 +141,37 @@ export async function computeFeedbackAdjustments(userId: string): Promise<Feedba
     select: { targetType: true, targetId: true, action: true },
   });
 
-  if (feedbackRecords.length === 0) return EMPTY_FEEDBACK_ADJUSTMENTS;
+  if (feedbackRecords.length === 0) return { genreWeights: new Map(), dimensionNudge: {} };
 
   const bookIds = feedbackRecords.filter((f) => f.targetType === "BOOK").map((f) => f.targetId);
   const userIds = feedbackRecords.filter((f) => f.targetType === "USER").map((f) => f.targetId);
   const clubIds = feedbackRecords.filter((f) => f.targetType === "CLUB").map((f) => f.targetId);
+
+  type BookRow = {
+    id: string;
+    genres: string[];
+    tasteDimensions: {
+      pace: number | null; tone: number | null; focus: number | null;
+      emotionalIntensity: number | null; romanceLevel: number | null;
+      complexity: number | null; worldbuildingDepth: number | null;
+      discussionPotential: number | null;
+    } | null;
+  };
+  type UserRow = {
+    id: string;
+    tasteProfile: {
+      topGenres: string[];
+      pace: number | null; tone: number | null; focus: number | null;
+      emotionalIntensity: number | null; romanceLevel: number | null;
+      complexity: number | null; worldbuildingDepth: number | null;
+      discussionPotential: number | null;
+    } | null;
+  };
+  type ClubRow = { id: string; genres: string[] };
+
+  const emptyBooks: BookRow[] = [];
+  const emptyUsers: UserRow[] = [];
+  const emptyClubs: ClubRow[] = [];
 
   const [books, users, clubs] = await Promise.all([
     bookIds.length > 0
@@ -153,16 +179,7 @@ export async function computeFeedbackAdjustments(userId: string): Promise<Feedba
           where: { id: { in: bookIds } },
           select: { id: true, genres: true, tasteDimensions: true },
         })
-      : Promise.resolve([] as Array<{
-          id: string;
-          genres: string[];
-          tasteDimensions: {
-            pace: number | null; tone: number | null; focus: number | null;
-            emotionalIntensity: number | null; romanceLevel: number | null;
-            complexity: number | null; worldbuildingDepth: number | null;
-            discussionPotential: number | null;
-          } | null;
-        }>),
+      : Promise.resolve(emptyBooks),
     userIds.length > 0
       ? db.user.findMany({
           where: { id: { in: userIds } },
@@ -178,22 +195,13 @@ export async function computeFeedbackAdjustments(userId: string): Promise<Feedba
             },
           },
         })
-      : Promise.resolve([] as Array<{
-          id: string;
-          tasteProfile: {
-            topGenres: string[];
-            pace: number | null; tone: number | null; focus: number | null;
-            emotionalIntensity: number | null; romanceLevel: number | null;
-            complexity: number | null; worldbuildingDepth: number | null;
-            discussionPotential: number | null;
-          } | null;
-        }>),
+      : Promise.resolve(emptyUsers),
     clubIds.length > 0
       ? db.club.findMany({
           where: { id: { in: clubIds } },
           select: { id: true, genres: true },
         })
-      : Promise.resolve([] as Array<{ id: string; genres: string[] }>),
+      : Promise.resolve(emptyClubs),
   ]);
 
   const bookMap = new Map(books.map((b) => [b.id, b]));
@@ -208,6 +216,7 @@ export async function computeFeedbackAdjustments(userId: string): Promise<Feedba
 
     if (record.targetType === "BOOK") {
       const book = bookMap.get(record.targetId);
+      // books without tasteDimensions still contribute genre signals
       if (book) signals = { genres: book.genres, dimensions: toDimensions(book.tasteDimensions) };
     } else if (record.targetType === "USER") {
       const user = userMap.get(record.targetId);

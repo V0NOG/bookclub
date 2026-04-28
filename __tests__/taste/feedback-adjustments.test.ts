@@ -107,7 +107,7 @@ test("blended dimensions are clamped to [0.05, 0.95]", () => {
 test("at most 2 genre additions from feedback", () => {
   const genreWeights = new Map([["A", 0.2], ["B", 0.2], ["C", 0.2]]);
   const { topGenres } = applyGenreAdjustments(["Fantasy"], [], genreWeights);
-  expect(topGenres.length).toBeLessThanOrEqual(3);
+  expect(topGenres.length).toBe(3); // 1 base + exactly 2 additions, not 3
 });
 
 test("no feedback returns empty adjustments", () => {

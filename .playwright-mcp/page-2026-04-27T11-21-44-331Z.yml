@@ -1,0 +1,30 @@
+- generic [ref=e1]:
+  - alert [ref=e25]
+  - generic [ref=e49]:
+    - generic [ref=e51]:
+      - generic [ref=e52]: Building your taste profile
+      - generic [ref=e53]: 2 / 6
+    - generic [ref=e56]:
+      - heading "Any favourite authors?" [level=2] [ref=e79]
+      - paragraph [ref=e80]: Select any you love. Helps us find readers who read like you.
+      - generic [ref=e81]:
+        - button "Patrick Rothfuss" [ref=e82] [cursor=pointer]
+        - button "Leigh Bardugo" [active] [ref=e83] [cursor=pointer]
+        - button "Hanya Yanagihara" [ref=e84] [cursor=pointer]
+        - button "Taylor Jenkins Reid" [ref=e85] [cursor=pointer]
+        - button "Andy Weir" [ref=e86] [cursor=pointer]
+        - button "Min Jin Lee" [ref=e87] [cursor=pointer]
+        - button "Susanna Clarke" [ref=e88] [cursor=pointer]
+        - button "Olivie Blake" [ref=e89] [cursor=pointer]
+        - button "Sally Rooney" [ref=e90] [cursor=pointer]
+        - button "Rebecca Yarros" [ref=e91] [cursor=pointer]
+        - button "Emily Henry" [ref=e92] [cursor=pointer]
+        - button "Matt Haig" [ref=e93] [cursor=pointer]
+        - button "Richard Osman" [ref=e94] [cursor=pointer]
+        - button "Silvia Moreno-Garcia" [ref=e95] [cursor=pointer]
+        - button "RF Kuang" [ref=e96] [cursor=pointer]
+      - generic [ref=e74]:
+        - button "Back" [ref=e75] [cursor=pointer]
+        - button "Continue" [ref=e76] [cursor=pointer]:
+          - text: Continue
+          - img [ref=e77]

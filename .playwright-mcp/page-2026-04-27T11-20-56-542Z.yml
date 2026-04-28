@@ -1,0 +1,29 @@
+- generic [active] [ref=e1]:
+  - alert [ref=e25]
+  - generic [ref=e49]:
+    - generic [ref=e51]:
+      - generic [ref=e52]: Building your taste profile
+      - generic [ref=e53]: 1 / 6
+    - generic [ref=e56]:
+      - heading "What genres do you love?" [level=2] [ref=e57]
+      - paragraph [ref=e58]: Pick at least 2. This shapes your taste profile.
+      - generic [ref=e59]:
+        - button "Fantasy" [ref=e60] [cursor=pointer]
+        - button "Science Fiction" [ref=e61] [cursor=pointer]
+        - button "Literary Fiction" [ref=e62] [cursor=pointer]
+        - button "Historical Fiction" [ref=e63] [cursor=pointer]
+        - button "Mystery" [ref=e64] [cursor=pointer]
+        - button "Romance" [ref=e65] [cursor=pointer]
+        - button "Thriller" [ref=e66] [cursor=pointer]
+        - button "Horror" [ref=e67] [cursor=pointer]
+        - button "Contemporary Fiction" [ref=e68] [cursor=pointer]
+        - button "Non-fiction" [ref=e69] [cursor=pointer]
+        - button "Biography" [ref=e70] [cursor=pointer]
+        - button "Dark Academia" [ref=e71] [cursor=pointer]
+        - button "Cozy Fantasy" [ref=e72] [cursor=pointer]
+        - button "Romantasy" [ref=e73] [cursor=pointer]
+      - generic [ref=e74]:
+        - button "Back" [disabled] [ref=e75]
+        - button "Continue" [disabled] [ref=e76]:
+          - text: Continue
+          - img [ref=e77]
