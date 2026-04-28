@@ -5,6 +5,7 @@ import { calculateUserToUserMatch } from "./user-to-user";
 import { calculateUserToBookMatch, BookSnapshot } from "./user-to-book";
 import { calculateUserToClubMatch, ClubSnapshot } from "./user-to-club";
 import { UserTasteSnapshot, TasteDimensions, MatchOutput } from "./types";
+import { selectExploratory, ExplorationContext } from "./exploration";
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
 
@@ -201,31 +202,56 @@ async function computeMatchesForUser(userId: string): Promise<MatchCacheResult> 
     (r) => `CLUB:${r.club.id}`
   );
 
-  // ── Exploration: good score, genres outside user's top ───────────────────
+  // ── Exploration: adjacent-genre, adjacency-gated, score ≥ 45, limit 1 ──
+  const explorationCtx: ExplorationContext = {
+    topGenreSet,
+    dislikedGenreSet: new Set(mySnapshot.dislikedGenres),
+    minScore: 45,
+  };
+
   const exploratoryUsers = topGenreSet.size > 0
-    ? adjustedUserScores
-        .filter((r) => r.match.score >= 20 && r.match.sharedGenres.length === 0)
-        .slice(0, 2)
+    ? selectExploratory(
+        adjustedUserScores,
+        (r) => ({
+          score: r.match.score,
+          genres: [],
+          sharedGenres: r.match.sharedGenres,
+          sharedDimensions: r.match.sharedTasteDimensions as Array<keyof TasteDimensions>,
+          sharedThemes: r.match.sharedThemes,
+        }),
+        explorationCtx,
+        1
+      )
     : [];
 
   const exploratoryBooks = topGenreSet.size > 0
-    ? adjustedBookScores
-        .filter((r) =>
-          r.match.score >= 20 &&
-          r.book.genres.length > 0 &&
-          r.book.genres.every((g) => !topGenreSet.has(g))
-        )
-        .slice(0, 2)
+    ? selectExploratory(
+        adjustedBookScores,
+        (r) => ({
+          score: r.match.score,
+          genres: r.book.genres,
+          sharedGenres: r.match.sharedGenres,
+          sharedDimensions: r.match.sharedTasteDimensions as Array<keyof TasteDimensions>,
+          sharedThemes: r.match.sharedThemes,
+        }),
+        explorationCtx,
+        1
+      )
     : [];
 
   const exploratoryClubs = topGenreSet.size > 0
-    ? adjustedClubScores
-        .filter((r) =>
-          r.match.score >= 20 &&
-          r.club.genres.length > 0 &&
-          r.club.genres.every((g) => !topGenreSet.has(g))
-        )
-        .slice(0, 2)
+    ? selectExploratory(
+        adjustedClubScores,
+        (r) => ({
+          score: r.match.score,
+          genres: r.club.genres,
+          sharedGenres: r.match.sharedGenres,
+          sharedDimensions: r.match.sharedTasteDimensions as Array<keyof TasteDimensions>,
+          sharedThemes: r.match.sharedThemes,
+        }),
+        explorationCtx,
+        1
+      )
     : [];
 
   return {
