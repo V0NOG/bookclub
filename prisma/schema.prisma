@@ -99,6 +99,17 @@ enum FeedItemType {
   TASTE_EVOLUTION
 }
 
+enum FeedbackTargetType {
+  USER
+  BOOK
+  CLUB
+}
+
+enum FeedbackAction {
+  LIKE
+  DISLIKE
+}
+
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
 model User {
@@ -133,6 +144,7 @@ model User {
   userScore             UserScore?
   userAchievements      UserAchievement[]
   feedItems             FeedItem[]
+  recommendationFeedback RecommendationFeedback[]
 
   @@index([email])
 }
@@ -687,4 +699,22 @@ model FeedItem {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+}
+
+// ─── Recommendation Feedback ─────────────────────────────────────────────────
+
+model RecommendationFeedback {
+  id         String             @id @default(cuid())
+  userId     String
+  targetType FeedbackTargetType
+  targetId   String
+  action     FeedbackAction
+  context    String?            @db.Text
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, targetType, targetId])
+  @@index([userId, targetType])
 }

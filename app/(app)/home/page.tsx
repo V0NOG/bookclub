@@ -209,6 +209,7 @@ export default async function HomePage() {
                   featured={i === 0 && !exploratory}
                   topMatch={i === 0 && userTopMatch && !exploratory}
                   exploratory={exploratory}
+                  targetId={user.id}
                 />
               ))}
             </div>
@@ -224,6 +225,7 @@ export default async function HomePage() {
                   title={u.name ?? u.username ?? "Reader"}
                   coverImage={u.avatar}
                   badge="Trending"
+                  targetId={u.id}
                 />
               ))}
             </div>
@@ -255,6 +257,7 @@ export default async function HomePage() {
                   featured={i === 0 && !exploratory}
                   topMatch={i === 0 && bookTopMatch && !exploratory}
                   exploratory={exploratory}
+                  targetId={book.id}
                 />
               ))}
             </div>
@@ -271,6 +274,7 @@ export default async function HomePage() {
                   subtitle={b.author}
                   coverImage={b.cover ?? null}
                   badge="Popular"
+                  targetId={b.id}
                 />
               ))}
             </div>
@@ -302,6 +306,7 @@ export default async function HomePage() {
                   featured={i === 0 && !exploratory}
                   topMatch={i === 0 && clubTopMatch && !exploratory}
                   exploratory={exploratory}
+                  targetId={club.id}
                 />
               ))}
             </div>
@@ -319,6 +324,7 @@ export default async function HomePage() {
                   coverImage={c.avatar ?? null}
                   meta={`${c._count.members} members`}
                   badge="Active"
+                  targetId={c.id}
                 />
               ))}
             </div>

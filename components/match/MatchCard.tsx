@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { colors, typography, spacing, radius, shadow } from "@/styles/design-tokens";
 import { BookOpen, Users } from "lucide-react";
+import { upsertFeedback } from "@/app/actions/feedback";
+import { FeedbackTargetType, FeedbackAction } from "@/lib/generated/prisma/enums";
 
 type Props = {
   variant: "person" | "book" | "club";
@@ -17,6 +19,7 @@ type Props = {
   topMatch?: boolean;
   exploratory?: boolean;
   badge?: string;
+  targetId?: string;
 };
 
 function Chip({
@@ -102,9 +105,79 @@ function CoverPlaceholder({ variant }: { variant: Props["variant"] }) {
   );
 }
 
+function FeedbackButtons({ variant, targetId }: { variant: Props["variant"]; targetId: string }) {
+  const [dismissPending, setDismissPending] = useState(false);
+  const [likePending, setLikePending] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const [liked, setLiked] = useState(false);
+
+  const targetType: FeedbackTargetType =
+    variant === "person" ? FeedbackTargetType.USER :
+    variant === "book"   ? FeedbackTargetType.BOOK : FeedbackTargetType.CLUB;
+
+  async function handleDismiss() {
+    if (dismissPending || likePending) return;
+    setDismissPending(true);
+    try {
+      const result = await upsertFeedback({ targetType, targetId, action: FeedbackAction.DISLIKE });
+      if (result.success) setDismissed(true);
+    } catch {
+      // transport error — silently ignore, button returns to normal
+    } finally {
+      setDismissPending(false);
+    }
+  }
+
+  async function handleLike() {
+    if (dismissPending || likePending) return;
+    setLikePending(true);
+    try {
+      const result = await upsertFeedback({ targetType, targetId, action: FeedbackAction.LIKE });
+      if (result.success) setLiked(true);
+    } catch {
+      // transport error — silently ignore, button returns to normal
+    } finally {
+      setLikePending(false);
+    }
+  }
+
+  return (
+    <div style={{ display: "flex", gap: spacing.sm }}>
+      <button
+        onClick={handleDismiss}
+        disabled={dismissPending || likePending || dismissed || liked}
+        style={{
+          background: "none", border: "none", cursor: dismissed ? "default" : "pointer",
+          padding: 0,
+          color: dismissed ? colors.primary : colors.accentMuted,
+          fontSize: "11px", fontFamily: typography.fontFamily.serif,
+          opacity: dismissPending ? 0.5 : 1,
+          transition: "color 200ms ease, opacity 200ms ease",
+        }}
+      >
+        {dismissed ? "Noted" : "Not for me"}
+      </button>
+      <button
+        onClick={handleLike}
+        disabled={dismissPending || likePending || dismissed || liked}
+        style={{
+          background: "none", border: "none", cursor: liked ? "default" : "pointer",
+          padding: 0,
+          color: liked ? colors.primary : colors.secondary,
+          fontSize: "11px", fontFamily: typography.fontFamily.serif,
+          opacity: likePending ? 0.5 : 1,
+          transition: "color 200ms ease, opacity 200ms ease",
+        }}
+      >
+        {liked ? "Got it" : "More like this"}
+      </button>
+    </div>
+  );
+}
+
 export function MatchCard({
   variant, title, subtitle, coverImage, score, confidence, reasons = [], meta,
-  featured, topMatch, exploratory, badge,
+  featured, topMatch, exploratory, badge, targetId,
 }: Props) {
   const [hovered, setHovered] = useState(false);
 
@@ -234,21 +307,12 @@ export function MatchCard({
             {meta}
           </p>
         )}
-        {/* Step 4: feedback hooks — logs interaction, no backend yet */}
-        <div style={{ display: "flex", gap: spacing.sm }}>
-          <button
-            onClick={() => console.log("[folio] dismiss", { variant, title })}
-            style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: colors.accentMuted, fontSize: "11px", fontFamily: typography.fontFamily.serif }}
-          >
-            Not for me
-          </button>
-          <button
-            onClick={() => console.log("[folio] like", { variant, title })}
-            style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: colors.secondary, fontSize: "11px", fontFamily: typography.fontFamily.serif }}
-          >
-            More like this
-          </button>
-        </div>
+        {targetId && (
+          <FeedbackButtons
+            variant={variant}
+            targetId={targetId}
+          />
+        )}
       </div>
     </article>
   );

@@ -159,15 +159,57 @@ async function computeMatchesForUser(userId: string): Promise<MatchCacheResult> 
     })
     .sort((a, b) => b.match.score - a.match.score);
 
+  // ── Feedback adjustment ───────────────────────────────────────────────────
+  const feedbackRecords = await db.recommendationFeedback.findMany({
+    where: { userId },
+    select: { targetId: true, targetType: true, action: true },
+  });
+
+  const feedbackMap = new Map(
+    feedbackRecords.map((f: { targetId: string; targetType: string; action: string }) => [
+      `${f.targetType}:${f.targetId}`,
+      f.action,
+    ])
+  );
+
+  function applyFeedback<T extends { match: MatchOutput }>(
+    items: T[],
+    getTargetKey: (item: T) => string
+  ): T[] {
+    return items
+      .map((item) => {
+        const action = feedbackMap.get(getTargetKey(item));
+        if (!action) return item;
+        const adjustment = action === "DISLIKE" ? -40 : 8;
+        const newScore = Math.min(100, Math.max(0, item.match.score + adjustment));
+        return { ...item, match: { ...item.match, score: newScore } } as T;
+      })
+      .filter((item) => item.match.score > 0)
+      .sort((a, b) => b.match.score - a.match.score);
+  }
+
+  const adjustedUserScores: ScoredUser[] = applyFeedback(
+    allUserScores,
+    (r) => `USER:${r.user.id}`
+  );
+  const adjustedBookScores: ScoredBook[] = applyFeedback(
+    allBookScores,
+    (r) => `BOOK:${r.book.id}`
+  );
+  const adjustedClubScores: ScoredClub[] = applyFeedback(
+    allClubScores,
+    (r) => `CLUB:${r.club.id}`
+  );
+
   // ── Exploration: good score, genres outside user's top ───────────────────
   const exploratoryUsers = topGenreSet.size > 0
-    ? allUserScores
+    ? adjustedUserScores
         .filter((r) => r.match.score >= 20 && r.match.sharedGenres.length === 0)
         .slice(0, 2)
     : [];
 
   const exploratoryBooks = topGenreSet.size > 0
-    ? allBookScores
+    ? adjustedBookScores
         .filter((r) =>
           r.match.score >= 20 &&
           r.book.genres.length > 0 &&
@@ -177,7 +219,7 @@ async function computeMatchesForUser(userId: string): Promise<MatchCacheResult> 
     : [];
 
   const exploratoryClubs = topGenreSet.size > 0
-    ? allClubScores
+    ? adjustedClubScores
         .filter((r) =>
           r.match.score >= 20 &&
           r.club.genres.length > 0 &&
@@ -187,9 +229,9 @@ async function computeMatchesForUser(userId: string): Promise<MatchCacheResult> 
     : [];
 
   return {
-    userMatches: allUserScores,
-    bookMatches: allBookScores,
-    clubMatches: allClubScores,
+    userMatches: adjustedUserScores,
+    bookMatches: adjustedBookScores,
+    clubMatches: adjustedClubScores,
     exploratoryUsers,
     exploratoryBooks,
     exploratoryClubs,
