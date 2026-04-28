@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { UserTasteSnapshot, TasteDimensions } from "@/lib/matching/types";
+import { computeFeedbackAdjustments, blendDimensions, applyGenreAdjustments } from "@/lib/taste/feedback-adjustments";
 
 export async function buildUserTasteSnapshot(userId: string): Promise<UserTasteSnapshot> {
   const [userBooks, tasteProfile, onboardingData] = await Promise.all([
@@ -120,13 +121,22 @@ export async function buildUserTasteSnapshot(userId: string): Promise<UserTasteS
   const confidence: "low" | "medium" | "high" =
     ratedBooks.length >= 5 ? "high" : ratedBooks.length >= 2 ? "medium" : "low";
 
+  // Blend feedback adjustments at 15% weight — base TasteProfile is not mutated.
+  const feedbackAdj = await computeFeedbackAdjustments(userId);
+  const blendedDimensions = blendDimensions(mergedDimensions, feedbackAdj.dimensionNudge);
+  const { topGenres: blendedGenres, dislikedGenres: blendedDisliked } = applyGenreAdjustments(
+    finalGenres,
+    finalDisliked,
+    feedbackAdj.genreWeights
+  );
+
   return {
     userId,
-    topGenres: finalGenres,
+    topGenres: blendedGenres,
     topAuthors: finalAuthors,
     topThemes: tasteProfile?.topThemes ?? onboardingData?.preferredThemes ?? [],
-    dimensions: mergedDimensions,
-    dislikedGenres: finalDisliked,
+    dimensions: blendedDimensions,
+    dislikedGenres: blendedDisliked,
     dislikedAuthors: tasteProfile?.dislikedAuthors ?? [],
     ratedBooks,
     confidence,
