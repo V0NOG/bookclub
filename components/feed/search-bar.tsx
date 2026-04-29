@@ -24,7 +24,7 @@ export function SearchBar() {
         <input
           type="text"
           placeholder="Find clubs & events..."
-          className="w-full bg-card border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-muted-foreground focus:outline-none focus:border-emerald-500/50 transition-colors"
+          className="w-full bg-card border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
         />
       </div>
       <div className="flex gap-2 flex-wrap">
@@ -34,8 +34,8 @@ export function SearchBar() {
             onClick={() => toggle(f)}
             className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
               active.has(f)
-                ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-400"
-                : "bg-card border-border text-muted-foreground hover:text-white hover:border-white/20"
+                ? "bg-primary/10 border-primary/40 text-primary"
+                : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-foreground/20"
             }`}
           >
             {f}

@@ -28,8 +28,8 @@ function StarRow({ rating }: { rating: number }) {
         <Star
           key={i}
           className="h-2.5 w-2.5"
-          fill={i < rating ? "#34d399" : "none"}
-          stroke={i < rating ? "#34d399" : "#6b7280"}
+          fill={i < rating ? "#8B3A2F" : "none"}
+          stroke={i < rating ? "#8B3A2F" : "#C2B8A3"}
         />
       ))}
     </span>
@@ -93,26 +93,26 @@ export function ActivityCard({
   }
 
   return (
-    <div className="flex items-start gap-3 px-4 py-3.5 bg-card border border-border rounded-xl hover:border-white/10 transition-colors group">
+    <div className="flex items-start gap-3 px-4 py-3.5 bg-card border border-border rounded-xl hover:border-foreground/15 transition-colors group shadow-sm">
       <div className="w-8 h-8 rounded-full bg-accent flex-shrink-0 flex items-center justify-center overflow-hidden mt-0.5">
         {actorAvatar ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={actorAvatar} alt="" className="w-full h-full object-cover" />
         ) : (
-          <span className="text-xs font-bold text-white">{actorName[0]?.toUpperCase()}</span>
+          <span className="text-xs font-bold text-foreground">{actorName[0]?.toUpperCase()}</span>
         )}
       </div>
 
       <div className="flex-1 min-w-0">
         <p className="text-sm leading-snug">
-          <span className="font-semibold text-white">{actorName}</span>
+          <span className="font-semibold text-foreground">{actorName}</span>
           {" "}
           <ActionLabel action={action} />
           {bookTitle && (
-            <> <span className="font-medium text-white italic">{bookTitle}</span></>
+            <> <span className="font-medium text-foreground italic">{bookTitle}</span></>
           )}
           {clubName && (
-            <> <span className="font-medium text-white">{clubName}</span></>
+            <> <span className="font-medium text-foreground">{clubName}</span></>
           )}
           {rating !== undefined && <StarRow rating={rating} />}
         </p>
@@ -127,8 +127,8 @@ export function ActivityCard({
                 disabled={wantToRead || wtrPending}
                 className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-md border transition-colors ${
                   wantToRead
-                    ? "border-emerald-700 text-emerald-400 cursor-default"
-                    : "border-border text-muted-foreground hover:border-white/20 hover:text-white"
+                    ? "border-primary/50 text-primary cursor-default"
+                    : "border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground"
                 }`}
               >
                 <BookmarkPlus className="h-3 w-3" />
@@ -139,11 +139,11 @@ export function ActivityCard({
             <button
               onClick={handleLike}
               disabled={likePending}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-rose-400 transition-colors"
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
             >
               <Heart
                 className={`h-3.5 w-3.5 transition-colors ${
-                  liked ? "fill-rose-500 text-rose-500" : ""
+                  liked ? "fill-primary text-primary" : ""
                 }`}
               />
               {likeCount > 0 && <span>{likeCount}</span>}

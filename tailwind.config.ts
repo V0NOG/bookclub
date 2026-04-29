@@ -47,6 +47,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "Iowan Old Style", "Georgia", "serif"],
       },
       keyframes: {
         "accordion-down": {

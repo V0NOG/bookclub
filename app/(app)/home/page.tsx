@@ -277,7 +277,7 @@ export default async function HomePage() {
 
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white mb-1">Good reading, {firstName}</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-1">Good reading, {firstName}</h1>
         <div className="flex items-center justify-between">
           <p className="text-muted-foreground text-sm">
             {ratedCount > 0
@@ -286,7 +286,7 @@ export default async function HomePage() {
           </p>
           <Link
             href="/how-it-works"
-            className="text-xs text-emerald-400 hover:underline shrink-0 ml-4"
+            className="text-xs text-primary hover:underline shrink-0 ml-4"
           >
             How it works
           </Link>
@@ -373,7 +373,7 @@ export default async function HomePage() {
             <p className="text-sm text-muted-foreground mb-1">
               Rate a few books and we&apos;ll find titles you&apos;ll love.
             </p>
-            <Link href="/library" className="text-xs text-emerald-400 hover:underline">
+            <Link href="/library" className="text-xs text-primary hover:underline">
               Browse your library →
             </Link>
           </div>
@@ -386,7 +386,7 @@ export default async function HomePage() {
           <div className="mb-3">
             <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Because You Liked{" "}
-              <span className="text-emerald-400 normal-case">{triggerTitle}</span>
+              <span className="text-primary normal-case italic">{triggerTitle}</span>
             </h2>
           </div>
           <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
@@ -445,7 +445,7 @@ export default async function HomePage() {
             <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               People to Follow
             </h2>
-            <Link href="/discover" className="text-xs text-emerald-400 hover:underline">
+            <Link href="/discover" className="text-xs text-primary hover:underline">
               See all →
             </Link>
           </div>
@@ -473,7 +473,7 @@ export default async function HomePage() {
             <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Clubs You&apos;d Love
             </h2>
-            <Link href="/clubs" className="text-xs text-emerald-400 hover:underline">
+            <Link href="/clubs" className="text-xs text-primary hover:underline">
               Browse all →
             </Link>
           </div>
@@ -516,11 +516,11 @@ export default async function HomePage() {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-white truncate">{currentBook.book.title}</p>
+              <p className="font-semibold text-foreground italic truncate">{currentBook.book.title}</p>
               <p className="text-sm text-muted-foreground mb-3">{currentBook.book.author}</p>
               <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1">
                 <div
-                  className="h-full bg-emerald-500 rounded-full"
+                  className="h-full bg-primary rounded-full"
                   style={{ width: `${currentPercent}%` }}
                 />
               </div>
@@ -543,16 +543,16 @@ export default async function HomePage() {
           </h2>
           <div className="bg-card border border-border rounded-xl p-4 max-w-lg">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-white font-medium">
+              <span className="text-sm text-foreground font-medium">
                 {booksReadThisYear} of {goal.target} books
               </span>
-              <span className="text-xs text-emerald-400">
+              <span className="text-xs text-primary font-semibold">
                 {Math.round((booksReadThisYear / goal.target) * 100)}%
               </span>
             </div>
             <div className="h-2 bg-muted rounded-full overflow-hidden">
               <div
-                className="h-full bg-emerald-500 rounded-full transition-all"
+                className="h-full bg-primary rounded-full transition-all"
                 style={{
                   width: `${Math.min(100, Math.round((booksReadThisYear / goal.target) * 100))}%`,
                 }}
@@ -585,12 +585,12 @@ export default async function HomePage() {
                     </div>
                   )}
                 </div>
-                <p className="text-sm font-medium text-white truncate">{ub.book.title}</p>
+                <p className="text-sm font-medium text-foreground italic truncate">{ub.book.title}</p>
                 <p className="text-xs text-muted-foreground truncate">{ub.book.author}</p>
                 {ub.rating && (
                   <div className="flex items-center gap-0.5 mt-1">
                     {Array.from({ length: ub.rating }).map((_, i) => (
-                      <Star key={i} className="h-3 w-3 fill-emerald-400 text-emerald-400" />
+                      <Star key={i} className="h-3 w-3 fill-primary text-primary" />
                     ))}
                   </div>
                 )}
@@ -604,7 +604,7 @@ export default async function HomePage() {
       {!currentBook && recentBooks.length === 0 && topPicksDisplay.length === 0 && (
         <div className="text-center py-16 text-muted-foreground">
           <BookOpen className="h-10 w-10 mx-auto mb-3 opacity-30" />
-          <p className="text-sm font-medium mb-2 text-white">Your reading journey starts here</p>
+          <p className="text-sm font-medium mb-2 text-foreground">Your reading journey starts here</p>
           <p className="text-xs mb-1">Start by rating a few books you&apos;ve already read.</p>
           <p className="text-xs mb-5 opacity-70">
             Even 3–5 ratings unlock personalised recommendations.
@@ -612,11 +612,11 @@ export default async function HomePage() {
           <div className="flex gap-3 justify-center">
             <Link
               href="/library"
-              className="text-sm bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg transition-colors"
+              className="text-sm bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg transition-colors"
             >
               Rate books
             </Link>
-            <Link href="/how-it-works" className="text-sm text-emerald-400 hover:underline py-2">
+            <Link href="/how-it-works" className="text-sm text-primary hover:underline py-2">
               How it works
             </Link>
           </div>

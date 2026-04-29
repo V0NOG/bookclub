@@ -32,8 +32,8 @@ export function Sidebar() {
     <aside className="fixed left-0 top-0 z-40 h-screen w-60 border-r border-border bg-card flex flex-col">
       {/* Logo */}
       <div className="h-16 flex items-center px-6 border-b border-border">
-        <Link href="/home" className="flex items-center gap-2 font-bold text-lg text-white">
-          <BookOpen className="h-5 w-5 text-emerald-500" />
+        <Link href="/home" className="flex items-center gap-2 font-bold text-lg text-foreground">
+          <BookOpen className="h-5 w-5 text-primary" />
           Folio
         </Link>
       </div>
@@ -49,8 +49,8 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                 active
-                  ? "bg-emerald-500/15 text-emerald-400"
-                  : "text-muted-foreground hover:text-white hover:bg-accent"
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
               )}
             >
               <item.icon className="h-4 w-4 flex-shrink-0" />
@@ -71,8 +71,8 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                 active
-                  ? "bg-emerald-500/15 text-emerald-400"
-                  : "text-muted-foreground hover:text-white hover:bg-accent"
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
               )}
             >
               <item.icon className="h-4 w-4 flex-shrink-0" />
@@ -82,7 +82,7 @@ export function Sidebar() {
         })}
         <button
           onClick={() => signOut({ callbackUrl: "/" })}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-white hover:bg-accent transition-colors"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
         >
           <LogOut className="h-4 w-4 flex-shrink-0" />
           Sign out
