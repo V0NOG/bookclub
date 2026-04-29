@@ -28,7 +28,24 @@ function SignInPageInner() {
     });
 
     if (result?.error) {
-      setError("Invalid email or password. Try sarah@folio.dev / password123 for the demo.");
+      setError("Invalid email or password.");
+      setLoading(false);
+    } else {
+      router.push("/home");
+      router.refresh();
+    }
+  }
+
+  async function handleDemo() {
+    setLoading(true);
+    setError(null);
+    const result = await signIn("credentials", {
+      email: "sarah@folio.dev",
+      password: "password123",
+      redirect: false,
+    });
+    if (result?.error) {
+      setError("Demo sign-in failed. Please try again.");
       setLoading(false);
     } else {
       router.push("/home");
@@ -47,6 +64,22 @@ function SignInPageInner() {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <button
+          type="button"
+          onClick={handleDemo}
+          disabled={loading}
+          className="w-full mb-4 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? "Loading..." : "Try Demo — sign in as Sarah"}
+        </button>
+        <div className="relative mb-4">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-muted-foreground">or sign in with email</span>
+          </div>
+        </div>
         {registered && (
           <div className="mb-4 text-sm text-emerald-400 bg-emerald-400/10 rounded-md px-3 py-2">
             Account created successfully! Sign in below.

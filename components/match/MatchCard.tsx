@@ -203,10 +203,13 @@ export function MatchCard({
 }: Props) {
   const [hovered, setHovered] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const [dismissClicked, setDismissClicked] = useState(false);
   const [liked, setLiked] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [likedAnimating, setLikedAnimating] = useState(false);
+  const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
+  const [feedbackMsgFading, setFeedbackMsgFading] = useState(false);
 
   useEffect(() => {
     const t = requestAnimationFrame(() => setMounted(true));
@@ -387,15 +390,40 @@ export function MatchCard({
           <FeedbackButtons
             variant={variant}
             targetId={targetId}
-            dismissed={dismissed}
+            dismissed={dismissed || dismissClicked}
             liked={liked}
-            onDismiss={() => setDismissed(true)}
+            onDismiss={() => {
+              setDismissClicked(true);
+              setFeedbackMsg("We'll show you less like this");
+              setFeedbackMsgFading(false);
+              setTimeout(() => setDismissed(true), 700);
+            }}
             onLike={() => {
               setLiked(true);
               setLikedAnimating(true);
+              setFeedbackMsg("We'll prioritise similar titles");
+              setFeedbackMsgFading(false);
               setTimeout(() => setLikedAnimating(false), 220);
+              setTimeout(() => setFeedbackMsgFading(true), 2000);
+              setTimeout(() => setFeedbackMsg(null), 2500);
             }}
           />
+        )}
+        {feedbackMsg && (
+          <p
+            style={{
+              color: colors.secondary,
+              fontSize: "11px",
+              fontFamily: typography.fontFamily.serif,
+              margin: `${spacing.xs} 0 0`,
+              fontStyle: "italic",
+              opacity: feedbackMsgFading ? 0 : 1,
+              transition: "opacity 500ms ease",
+              lineHeight: "1.3",
+            }}
+          >
+            {feedbackMsg}
+          </p>
         )}
       </div>
     </article>
