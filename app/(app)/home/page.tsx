@@ -61,16 +61,39 @@ type RawEvent = {
   club: { id: string; name: string } | null;
 };
 
+type FeedScore = {
+  score: number;
+  debug: { recencyScore: number; tasteMatchScore: number; userMatchScore: number; finalScore: number };
+};
+
 function scoreFeedItem(
   event: RawEvent,
   bookScoreMap: Map<string, number>,
   userScoreMap: Map<string, number>
-): number {
+): FeedScore {
   const hoursElapsed = (Date.now() - event.createdAt.getTime()) / 3_600_000;
   const recencyScore = 1 / (hoursElapsed + 1);
   const tasteMatchScore = event.bookId ? (bookScoreMap.get(event.bookId) ?? 0) / 100 : 0;
   const userMatchScore = (userScoreMap.get(event.userId) ?? 0) / 100;
-  return 0.5 * recencyScore + 0.3 * tasteMatchScore + 0.2 * userMatchScore;
+  const finalScore =
+    0.5 * recencyScore + 0.3 * tasteMatchScore + 0.2 * userMatchScore + Math.random() * 0.03;
+  return { score: finalScore, debug: { recencyScore, tasteMatchScore, userMatchScore, finalScore } };
+}
+
+function applyFeedDiversity(
+  scored: Array<{ event: RawEvent; score: number }>
+): Array<{ event: RawEvent; score: number }> {
+  const perUser = new Map<string, number>();
+  const perBook = new Map<string, number>();
+  return scored.filter(({ event }) => {
+    const userCount = perUser.get(event.userId) ?? 0;
+    if (userCount >= 2) return false;
+    const bookCount = event.bookId ? (perBook.get(event.bookId) ?? 0) : 0;
+    if (event.bookId && bookCount >= 2) return false;
+    perUser.set(event.userId, userCount + 1);
+    if (event.bookId) perBook.set(event.bookId, bookCount + 1);
+    return true;
+  });
 }
 
 function mapToActivityItem(event: RawEvent): ActivityItem | null {
@@ -219,9 +242,17 @@ export default async function HomePage() {
   const bookScoreMap = new Map(rawMatches.bookMatches.map((r) => [r.book.id, r.match.score]));
   const userScoreMap = new Map(rawMatches.userMatches.map((r) => [r.user.id, r.match.score]));
 
-  const activityItems: ActivityItem[] = rawActivityEvents
-    .map((event) => ({ event, score: scoreFeedItem(event, bookScoreMap, userScoreMap) }))
-    .sort((a, b) => b.score - a.score)
+  const activityItems: ActivityItem[] = applyFeedDiversity(
+    rawActivityEvents
+      .map((event) => {
+        const { score, debug } = scoreFeedItem(event, bookScoreMap, userScoreMap);
+        if (process.env.NODE_ENV === "development") {
+          console.log(`[feed] ${event.type}@${event.userId}`, debug);
+        }
+        return { event, score };
+      })
+      .sort((a, b) => b.score - a.score)
+  )
     .map(({ event }) => mapToActivityItem(event))
     .filter((item): item is ActivityItem => item !== null);
 
