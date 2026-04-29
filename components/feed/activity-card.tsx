@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Star, BookOpen, Users, Heart, BookmarkPlus } from "lucide-react";
+import { Star, Heart, BookmarkPlus } from "lucide-react";
 import { toggleActivityLike } from "@/app/actions/activity-like";
 import { setBookStatus } from "@/app/actions/user-book";
 
@@ -93,7 +93,7 @@ export function ActivityCard({
   }
 
   return (
-    <div className="flex items-start gap-3 px-4 py-3.5 bg-card border border-border rounded-xl hover:border-foreground/15 transition-colors group shadow-sm">
+    <div className="flex items-start gap-3 py-5 border-b border-border/50">
       <div className="w-8 h-8 rounded-full bg-accent flex-shrink-0 flex items-center justify-center overflow-hidden mt-0.5">
         {actorAvatar ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -117,45 +117,37 @@ export function ActivityCard({
           {rating !== undefined && <StarRow rating={rating} />}
         </p>
 
-        <div className="flex items-center justify-between mt-2">
+        <div className="flex items-center gap-3 mt-2">
           <p className="text-xs text-muted-foreground">{timestamp}</p>
 
-          <div className="flex items-center gap-2">
-            {bookId && isBookAction && (
-              <button
-                onClick={handleWantToRead}
-                disabled={wantToRead || wtrPending}
-                className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-md border transition-colors ${
-                  wantToRead
-                    ? "border-primary/50 text-primary cursor-default"
-                    : "border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground"
-                }`}
-              >
-                <BookmarkPlus className="h-3 w-3" />
-                {wantToRead ? "Added" : "Want to read"}
-              </button>
-            )}
-
+          {bookId && isBookAction && (
             <button
-              onClick={handleLike}
-              disabled={likePending}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+              onClick={handleWantToRead}
+              disabled={wantToRead || wtrPending}
+              className={`flex items-center gap-1 text-xs transition-colors ${
+                wantToRead
+                  ? "text-primary cursor-default"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
             >
-              <Heart
-                className={`h-3.5 w-3.5 transition-colors ${
-                  liked ? "fill-primary text-primary" : ""
-                }`}
-              />
-              {likeCount > 0 && <span>{likeCount}</span>}
+              <BookmarkPlus className="h-3 w-3" />
+              {wantToRead ? "Added" : "Want to read"}
             </button>
-          </div>
-        </div>
-      </div>
+          )}
 
-      <div className="flex-shrink-0 opacity-20 group-hover:opacity-40 transition-opacity mt-0.5">
-        {isBookAction
-          ? <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
-          : <Users className="h-3.5 w-3.5 text-muted-foreground" />}
+          <button
+            onClick={handleLike}
+            disabled={likePending}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors ml-auto"
+          >
+            <Heart
+              className={`h-3.5 w-3.5 transition-colors ${
+                liked ? "fill-primary text-primary" : ""
+              }`}
+            />
+            {likeCount > 0 && <span>{likeCount}</span>}
+          </button>
+        </div>
       </div>
     </div>
   );

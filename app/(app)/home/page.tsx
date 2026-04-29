@@ -359,11 +359,11 @@ export default async function HomePage() {
         </div>
       ) : (
         <>
-          <div className="mb-6">
-            <h2 className="text-xl font-bold text-foreground">Today</h2>
+          <div className="mb-0 pb-5 border-b border-border/60">
+            <h2 className="text-2xl font-bold text-foreground">Today</h2>
           </div>
 
-          <div className="space-y-5">
+          <div className="space-y-0">
             {feedSlots.map((slot, i) => {
               switch (slot.kind) {
 
@@ -372,16 +372,15 @@ export default async function HomePage() {
 
                 case "people":
                   return (
-                    <div key={`people-${i}`} className="pt-2">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                          Readers like you
-                        </span>
+                    <div key={`people-${i}`} className="pt-8 pb-2">
+                      <div className="flex items-baseline justify-between mb-1">
+                        <h3 className="text-base font-semibold text-foreground">Readers similar to you</h3>
                         {peopleToFollow.length > 2 && (
-                          <Link href="/discover" className="text-xs text-primary hover:underline">See all →</Link>
+                          <Link href="/discover" className="text-xs text-primary hover:underline">See all</Link>
                         )}
                       </div>
-                      <div className="space-y-2.5">
+                      <p className="text-xs text-muted-foreground mb-4">People who read what you read</p>
+                      <div>
                         {slot.items.map(({ user, match }) => (
                           <PeopleSuggestion
                             key={user.id}
@@ -400,16 +399,15 @@ export default async function HomePage() {
 
                 case "clubs":
                   return (
-                    <div key={`clubs-${i}`} className="pt-2">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                          Clubs you&apos;d love
-                        </span>
+                    <div key={`clubs-${i}`} className="pt-8 pb-2">
+                      <div className="flex items-baseline justify-between mb-1">
+                        <h3 className="text-base font-semibold text-foreground">Clubs you&apos;d love</h3>
                         {clubsForDisplay.length > 2 && (
-                          <Link href="/clubs" className="text-xs text-primary hover:underline">Browse all →</Link>
+                          <Link href="/clubs" className="text-xs text-primary hover:underline">Browse all</Link>
                         )}
                       </div>
-                      <div className="space-y-2.5">
+                      <p className="text-xs text-muted-foreground mb-4">Matched to your reading taste</p>
+                      <div>
                         {slot.items.map(({ club, match }) => (
                           <ClubSuggestionCard
                             key={club.id}
@@ -428,15 +426,15 @@ export default async function HomePage() {
 
                 case "books":
                   return (
-                    <div key={`books-${i}`} className="pt-2">
-                      <div className="mb-3">
-                        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                    <div key={`books-${i}`} className="pt-8 pb-2">
+                      <div className="mb-4">
+                        <h3 className="text-base font-semibold text-foreground">
                           {slot.isTrigger && slot.triggerName
-                            ? <>Because you liked{" "}<span className="text-primary italic normal-case">{slot.triggerName}</span></>
+                            ? <>Because you liked <span className="text-primary italic">{slot.triggerName}</span></>
                             : slot.label}
-                        </span>
+                        </h3>
                         {slot.sublabel && (
-                          <p className="text-xs text-muted-foreground/60 mt-0.5">{slot.sublabel}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{slot.sublabel}</p>
                         )}
                       </div>
                       <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
@@ -463,10 +461,8 @@ export default async function HomePage() {
 
                 case "popular":
                   return (
-                    <div key={`popular-${i}`} className="pt-2">
-                      <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3 block">
-                        Popular right now
-                      </span>
+                    <div key={`popular-${i}`} className="pt-8 pb-2">
+                      <h3 className="text-base font-semibold text-foreground mb-4">Popular right now</h3>
                       <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
                         {slot.items.map((b) => (
                           <MatchCard
@@ -486,11 +482,9 @@ export default async function HomePage() {
                 case "currently_reading":
                   if (!currentBook) return null;
                   return (
-                    <div key="currently-reading" className="pt-2">
-                      <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3 block">
-                        On your nightstand
-                      </span>
-                      <div className="bg-card border border-border rounded-xl p-5 flex gap-4 items-start max-w-lg">
+                    <div key="currently-reading" className="pt-8 pb-2">
+                      <h3 className="text-sm font-medium text-muted-foreground mb-4">On your nightstand</h3>
+                      <div className="flex gap-4 items-start max-w-md">
                         <div className="flex-shrink-0">
                           {currentBook.book.cover ? (
                             // eslint-disable-next-line @next/next/no-img-element
@@ -504,7 +498,7 @@ export default async function HomePage() {
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-foreground italic truncate">{currentBook.book.title}</p>
                           <p className="text-sm text-muted-foreground mb-4">{currentBook.book.author}</p>
-                          <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1.5">
+                          <div className="h-1 bg-muted rounded-full overflow-hidden mb-1.5">
                             <div className="h-full bg-primary rounded-full" style={{ width: `${currentPercent}%` }} />
                           </div>
                           <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -519,12 +513,10 @@ export default async function HomePage() {
                 case "reading_goal":
                   if (!goal) return null;
                   return (
-                    <div key="reading-goal" className="pt-2">
-                      <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3 block">
-                        {new Date().getFullYear()} reading goal
-                      </span>
-                      <div className="bg-card border border-border rounded-xl p-5 max-w-lg">
-                        <div className="flex items-center justify-between mb-3">
+                    <div key="reading-goal" className="pt-8 pb-2">
+                      <h3 className="text-sm font-medium text-muted-foreground mb-4">{new Date().getFullYear()} reading goal</h3>
+                      <div className="max-w-xs">
+                        <div className="flex items-center justify-between mb-2">
                           <span className="text-sm text-foreground font-medium">
                             {booksReadThisYear} of {goal.target} books
                           </span>
@@ -532,7 +524,7 @@ export default async function HomePage() {
                             {Math.round((booksReadThisYear / goal.target) * 100)}%
                           </span>
                         </div>
-                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                        <div className="h-1 bg-muted rounded-full overflow-hidden">
                           <div
                             className="h-full bg-primary rounded-full transition-all"
                             style={{ width: `${Math.min(100, Math.round((booksReadThisYear / goal.target) * 100))}%` }}
@@ -544,10 +536,8 @@ export default async function HomePage() {
 
                 case "recently_read":
                   return (
-                    <div key="recently-read" className="pt-2">
-                      <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3 block">
-                        Recently read
-                      </span>
+                    <div key="recently-read" className="pt-8 pb-2">
+                      <h3 className="text-sm font-medium text-muted-foreground mb-4">Recently read</h3>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                         {recentBooks.map((ub) => (
                           <div key={ub.id} className="group">

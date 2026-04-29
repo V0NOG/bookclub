@@ -41,8 +41,8 @@ export function PeopleSuggestion({
   const genreLabel = sharedGenres.slice(0, 2).join(" · ");
 
   return (
-    <div className="flex items-center gap-3 p-4 bg-card border border-border rounded-xl hover:-translate-y-0.5 transition-transform shadow-sm">
-      <div className="w-10 h-10 rounded-full bg-accent flex-shrink-0 flex items-center justify-center overflow-hidden">
+    <div className="flex items-center gap-3 py-3.5 border-b border-border/40">
+      <div className="w-9 h-9 rounded-full bg-accent flex-shrink-0 flex items-center justify-center overflow-hidden">
         {avatar ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={avatar} alt="" className="w-full h-full object-cover" />
@@ -56,7 +56,7 @@ export function PeopleSuggestion({
         {username && (
           <p className="text-xs text-muted-foreground truncate">@{username}</p>
         )}
-        <p className="text-xs text-primary mt-0.5 font-medium">
+        <p className="text-xs text-primary/80 mt-0.5 font-medium">
           {matchScore}% match{genreLabel ? ` · ${genreLabel}` : ""}
         </p>
       </div>
@@ -65,7 +65,7 @@ export function PeopleSuggestion({
         onClick={handleToggle}
         disabled={pending}
         aria-label={following ? `Unfollow ${name}` : `Follow ${name}`}
-        className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors flex-shrink-0 disabled:opacity-50 ${
+        className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors flex-shrink-0 disabled:opacity-50 ${
           following
             ? "border-border text-muted-foreground hover:border-destructive/40 hover:text-destructive bg-transparent"
             : "bg-primary hover:bg-primary/90 text-primary-foreground border-transparent"

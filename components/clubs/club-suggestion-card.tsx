@@ -19,9 +19,9 @@ export function ClubSuggestionCard({
     .join(" · ");
 
   return (
-    <Link href={`/clubs/${clubId}`}>
-      <div className="flex items-center gap-3 p-4 bg-card border border-border rounded-xl hover:border-foreground/15 hover:-translate-y-0.5 transition-all group cursor-pointer shadow-sm">
-        <div className="w-10 h-10 rounded-lg bg-accent flex-shrink-0 flex items-center justify-center overflow-hidden">
+    <Link href={`/clubs/${clubId}`} className="block group">
+      <div className="flex items-center gap-3 py-3.5 border-b border-border/40">
+        <div className="w-9 h-9 rounded-lg bg-accent flex-shrink-0 flex items-center justify-center overflow-hidden">
           {avatar ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={avatar} alt="" className="w-full h-full object-cover rounded-lg" />
