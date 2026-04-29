@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   BookOpen, Home, Compass, Users, Library, Activity,
-  Trophy, Rss, User, Settings, LogOut
+  Trophy, Rss, User, Settings, LogOut, Sparkles
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -17,6 +17,7 @@ const navItems = [
   { href: "/tracker", icon: Activity, label: "Tracker" },
   { href: "/challenges", icon: Trophy, label: "Challenges" },
   { href: "/feed", icon: Rss, label: "Feed" },
+  { href: "/showcase", icon: Sparkles, label: "Showcase" },
 ];
 
 const bottomNavItems = [
