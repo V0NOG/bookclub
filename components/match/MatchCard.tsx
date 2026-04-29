@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { colors, typography, spacing, radius, shadow } from "@/styles/design-tokens";
-import { BookOpen, Users } from "lucide-react";
+import { BookOpen, Users, ThumbsDown, Heart } from "lucide-react";
 import { upsertFeedback } from "@/app/actions/feedback";
 import { FeedbackTargetType, FeedbackAction } from "@/lib/generated/prisma/enums";
 
@@ -105,71 +105,84 @@ function CoverPlaceholder({ variant }: { variant: Props["variant"] }) {
   );
 }
 
-function FeedbackButtons({ variant, targetId }: { variant: Props["variant"]; targetId: string }) {
-  const [dismissPending, setDismissPending] = useState(false);
+type FeedbackButtonsProps = {
+  variant: Props["variant"];
+  targetId: string;
+  dismissed: boolean;
+  liked: boolean;
+  onDismiss: () => void;
+  onLike: () => void;
+};
+
+function FeedbackButtons({ variant, targetId, dismissed, liked, onDismiss, onLike }: FeedbackButtonsProps) {
   const [likePending, setLikePending] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
-  const [liked, setLiked] = useState(false);
 
   const targetType: FeedbackTargetType =
     variant === "person" ? FeedbackTargetType.USER :
     variant === "book"   ? FeedbackTargetType.BOOK : FeedbackTargetType.CLUB;
 
-  async function handleDismiss() {
-    if (dismissPending || likePending) return;
-    setDismissPending(true);
-    try {
-      const result = await upsertFeedback({ targetType, targetId, action: FeedbackAction.DISLIKE });
-      if (result.success) setDismissed(true);
-    } catch {
-      // transport error — silently ignore, button returns to normal
-    } finally {
-      setDismissPending(false);
-    }
+  function handleDismiss() {
+    if (dismissed || liked || likePending) return;
+    onDismiss();
+    upsertFeedback({ targetType, targetId, action: FeedbackAction.DISLIKE }).catch(() => {});
   }
 
   async function handleLike() {
-    if (dismissPending || likePending) return;
+    if (dismissed || liked || likePending) return;
     setLikePending(true);
     try {
       const result = await upsertFeedback({ targetType, targetId, action: FeedbackAction.LIKE });
-      if (result.success) setLiked(true);
+      if (result.success) onLike();
     } catch {
-      // transport error — silently ignore, button returns to normal
+      // transport error — button returns to normal
     } finally {
       setLikePending(false);
     }
   }
 
   return (
-    <div style={{ display: "flex", gap: spacing.sm }}>
+    <div style={{ display: "flex", gap: spacing.sm, alignItems: "center" }}>
       <button
         onClick={handleDismiss}
-        disabled={dismissPending || likePending || dismissed || liked}
+        disabled={dismissed || liked || likePending}
+        aria-label="Not for me"
+        title="Not for me"
         style={{
-          background: "none", border: "none", cursor: dismissed ? "default" : "pointer",
+          background: "none",
+          border: "none",
+          cursor: dismissed ? "default" : "pointer",
           padding: 0,
-          color: dismissed ? colors.primary : colors.accentMuted,
-          fontSize: "11px", fontFamily: typography.fontFamily.serif,
-          opacity: dismissPending ? 0.5 : 1,
+          display: "flex",
+          alignItems: "center",
+          color: colors.accentMuted,
+          opacity: dismissed ? 0.4 : 1,
           transition: "color 200ms ease, opacity 200ms ease",
         }}
       >
-        {dismissed ? "Noted" : "Not for me"}
+        <ThumbsDown size={13} />
       </button>
       <button
         onClick={handleLike}
-        disabled={dismissPending || likePending || dismissed || liked}
+        disabled={dismissed || liked || likePending}
+        aria-label="More like this"
+        title="More like this"
         style={{
-          background: "none", border: "none", cursor: liked ? "default" : "pointer",
+          background: "none",
+          border: "none",
+          cursor: liked ? "default" : "pointer",
           padding: 0,
-          color: liked ? colors.primary : colors.secondary,
-          fontSize: "11px", fontFamily: typography.fontFamily.serif,
+          display: "flex",
+          alignItems: "center",
+          color: liked ? colors.secondary : colors.accentMuted,
           opacity: likePending ? 0.5 : 1,
           transition: "color 200ms ease, opacity 200ms ease",
         }}
       >
-        {liked ? "Got it" : "More like this"}
+        <Heart
+          size={13}
+          fill={liked ? colors.secondary : "none"}
+          stroke={liked ? colors.secondary : "currentColor"}
+        />
       </button>
     </div>
   );
@@ -180,6 +193,17 @@ export function MatchCard({
   featured, topMatch, exploratory, badge, targetId,
 }: Props) {
   const [hovered, setHovered] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [hidden, setHidden] = useState(false);
+
+  useEffect(() => {
+    if (!dismissed) return;
+    const timer = setTimeout(() => setHidden(true), 250);
+    return () => clearTimeout(timer);
+  }, [dismissed]);
+
+  if (hidden) return null;
 
   const visibleReasons = reasons.filter(Boolean).slice(0, 1);
 
@@ -188,19 +212,45 @@ export function MatchCard({
   const hoverShadow = featured
     ? "0 8px 24px rgba(139,58,47,0.22)"
     : "0 6px 18px rgba(0,0,0,0.11)";
+  const likedShadow = `0 0 0 2px ${colors.secondary}40`;
+
+  const articleBorder = liked
+    ? `2px solid ${colors.secondary}`
+    : featured
+    ? `2px solid ${colors.primary}`
+    : exploratory
+    ? `1px solid ${colors.secondary}55`
+    : `1px solid ${colors.border}`;
+
+  const articleBackground = exploratory ? `${colors.secondary}06` : colors.surface;
+
+  const articleBoxShadow = liked
+    ? likedShadow
+    : hovered
+    ? hoverShadow
+    : featured
+    ? featuredShadow
+    : defaultShadow;
+
+  const articleTransform = dismissed
+    ? "scale(0.98)"
+    : hovered
+    ? "translateY(-2px)"
+    : "translateY(0)";
 
   return (
     <article
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        backgroundColor: colors.surface,
-        border: featured ? `2px solid ${colors.primary}` : `1px solid ${colors.border}`,
+        backgroundColor: articleBackground,
+        border: articleBorder,
         borderRadius: radius.lg,
         padding: "12px",
-        boxShadow: hovered ? hoverShadow : (featured ? featuredShadow : defaultShadow),
-        transform: hovered ? "translateY(-2px)" : "translateY(0)",
-        transition: "box-shadow 160ms ease, transform 160ms ease",
+        boxShadow: articleBoxShadow,
+        transform: articleTransform,
+        opacity: dismissed ? 0 : 1,
+        transition: "box-shadow 160ms ease, transform 200ms ease, opacity 200ms ease, border-color 200ms ease",
         minWidth: variant === "book" ? 152 : 196,
         maxWidth: variant === "book" ? 152 : 236,
         flexShrink: 0,
@@ -208,7 +258,6 @@ export function MatchCard({
         flexDirection: "column",
       }}
     >
-      {/* Header chip — one of: top match, exploratory, or custom badge */}
       {topMatch && <Chip label="Top match" color="#fff" bg={colors.primary} />}
       {!topMatch && exploratory && (
         <Chip label="Try something different" color={colors.secondary} bg={`${colors.secondary}20`} />
@@ -217,7 +266,6 @@ export function MatchCard({
         <Chip label={badge} color={colors.textSecondary} bg={colors.accentMuted} />
       )}
 
-      {/* Cover / Avatar */}
       {variant === "book" ? (
         coverImage ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -260,7 +308,7 @@ export function MatchCard({
               {title}
             </p>
             {subtitle && (
-              <p style={{ color: colors.textSecondary, fontSize: typography.fontSize.xs, fontFamily: typography.fontFamily.serif, margin: 0 }}>
+              <p style={{ color: colors.textSecondary, fontSize: typography.fontSize.xs, fontFamily: typography.fontFamily.serif, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {subtitle}
               </p>
             )}
@@ -274,22 +322,33 @@ export function MatchCard({
             {title}
           </p>
           {subtitle && (
-            <p style={{ color: colors.textSecondary, fontSize: typography.fontSize.xs, fontFamily: typography.fontFamily.serif, margin: `${spacing.xs} 0 0` }}>
+            <p style={{ color: colors.textSecondary, fontSize: typography.fontSize.xs, fontFamily: typography.fontFamily.serif, margin: `${spacing.xs} 0 0`, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {subtitle}
             </p>
           )}
         </div>
       )}
 
-      {/* Score badge — only for matched items, not exploratory or badge-only */}
       {score !== undefined && confidence !== undefined && !exploratory && !badge && (
         <ScoreBadge score={score} confidence={confidence} />
       )}
 
-      {/* Reasons */}
       <div style={{ display: "flex", flexDirection: "column", gap: spacing.xs }}>
         {visibleReasons.map((reason, i) => (
-          <p key={i} style={{ color: colors.textSecondary, fontSize: typography.fontSize.xs, fontFamily: typography.fontFamily.serif, margin: 0, lineHeight: "1.4" }}>
+          <p
+            key={i}
+            style={{
+              color: colors.textSecondary,
+              fontSize: typography.fontSize.xs,
+              fontFamily: typography.fontFamily.serif,
+              margin: 0,
+              lineHeight: "1.4",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            } as React.CSSProperties}
+          >
             {reason}
           </p>
         ))}
@@ -300,10 +359,9 @@ export function MatchCard({
         )}
       </div>
 
-      {/* Bottom: meta + feedback hooks */}
       <div style={{ marginTop: "auto", paddingTop: spacing.sm }}>
         {meta && (
-          <p style={{ color: colors.accentMuted, fontSize: typography.fontSize.xs, fontFamily: typography.fontFamily.serif, margin: `0 0 ${spacing.xs}` }}>
+          <p style={{ color: colors.accentMuted, fontSize: typography.fontSize.xs, fontFamily: typography.fontFamily.serif, margin: `0 0 ${spacing.xs}`, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {meta}
           </p>
         )}
@@ -311,6 +369,10 @@ export function MatchCard({
           <FeedbackButtons
             variant={variant}
             targetId={targetId}
+            dismissed={dismissed}
+            liked={liked}
+            onDismiss={() => setDismissed(true)}
+            onLike={() => setLiked(true)}
           />
         )}
       </div>
