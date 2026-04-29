@@ -145,6 +145,8 @@ model User {
   userAchievements      UserAchievement[]
   feedItems             FeedItem[]
   recommendationFeedback RecommendationFeedback[]
+  activityEvents        ActivityEvent[]
+  targetedActivities    ActivityEvent[]    @relation("ActivityTargetUser")
 
   @@index([email])
 }
@@ -215,6 +217,7 @@ model Book {
   clubPollOptions   ClubPollOption[]
   challengeBooks    ReadingChallenge[]
   readingHistories  ClubReadingHistory[]
+  activityEvents    ActivityEvent[]
 
   @@index([author])
 }
@@ -436,6 +439,7 @@ model Club {
   polls            ClubPoll[]
   readingHistory   ClubReadingHistory[]
   challenges       ReadingChallenge[]
+  activityEvents   ActivityEvent[]
 
   @@index([genres])
   @@index([isOnline])
@@ -697,6 +701,27 @@ model FeedItem {
   createdAt      DateTime     @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+// ─── Activity Events ─────────────────────────────────────────────────────────
+// Actor-centric log of what users did. Used to build the social feed.
+// type values: "finished" | "started" | "rated" | "followed" | "joined_club"
+
+model ActivityEvent {
+  id           String   @id @default(cuid())
+  userId       String
+  type         String
+  bookId       String?
+  targetUserId String?
+  clubId       String?
+  createdAt    DateTime @default(now())
+
+  user       User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book       Book? @relation(fields: [bookId], references: [id], onDelete: SetNull)
+  targetUser User? @relation("ActivityTargetUser", fields: [targetUserId], references: [id], onDelete: SetNull)
+  club       Club? @relation(fields: [clubId], references: [id], onDelete: SetNull)
 
   @@index([userId, createdAt])
 }

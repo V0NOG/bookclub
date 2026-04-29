@@ -35,45 +35,49 @@ function extractTriggerBook(reasons: string[]): string | null {
   return m ? m[1] : null;
 }
 
-// ── Mock friend activity ──────────────────────────────────────────────────────
-// Replace with real FeedItem queries once the feed pipeline is built.
+// ── Activity helpers ──────────────────────────────────────────────────────────
 
-const MOCK_ACTIVITY: ActivityItem[] = [
-  {
-    id: "mock-1",
-    actorName: "Marcus Chen",
-    actorAvatar: null,
-    action: "finished",
-    bookTitle: "The Name of the Wind",
-    rating: 5,
-    timestamp: "5 minutes ago",
-  },
-  {
-    id: "mock-2",
-    actorName: "Priya Sharma",
-    actorAvatar: null,
-    action: "started",
-    bookTitle: "Beautiful World, Where Are You",
-    timestamp: "2 hours ago",
-  },
-  {
-    id: "mock-3",
-    actorName: "Jamie Reed",
-    actorAvatar: null,
-    action: "rated",
-    bookTitle: "Piranesi",
-    rating: 4,
-    timestamp: "Yesterday",
-  },
-  {
-    id: "mock-4",
-    actorName: "Lucia Santos",
-    actorAvatar: null,
-    action: "joined_club",
-    clubName: "The Midnight Library Club",
-    timestamp: "2 days ago",
-  },
-];
+function formatTimestamp(date: Date): string {
+  const diffMs = Date.now() - date.getTime();
+  const m = Math.floor(diffMs / 60_000);
+  const h = Math.floor(diffMs / 3_600_000);
+  const d = Math.floor(diffMs / 86_400_000);
+  if (m < 1) return "Just now";
+  if (m < 60) return `${m}m ago`;
+  if (h < 24) return `${h}h ago`;
+  if (d === 1) return "Yesterday";
+  if (d < 7) return `${d} days ago`;
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
+
+type RawEvent = {
+  id: string;
+  type: string;
+  createdAt: Date;
+  user: { name: string | null; username: string | null; avatar: string | null };
+  book: { title: string } | null;
+  club: { name: string } | null;
+};
+
+function mapToActivityItem(event: RawEvent): ActivityItem | null {
+  const actorName = event.user.name ?? event.user.username ?? "Someone";
+  const timestamp = formatTimestamp(event.createdAt);
+  const base = { id: event.id, actorName, actorAvatar: event.user.avatar, timestamp };
+
+  switch (event.type) {
+    case "finished":
+    case "started":
+      return event.book
+        ? { ...base, action: event.type as "finished" | "started", bookTitle: event.book.title }
+        : null;
+    case "rated":
+      return event.book ? { ...base, action: "rated" as const, bookTitle: event.book.title } : null;
+    case "joined_club":
+      return event.club ? { ...base, action: "joined_club" as const, clubName: event.club.name } : null;
+    default:
+      return null;
+  }
+}
 
 // ── Cold-start book fallback ──────────────────────────────────────────────────
 
@@ -172,20 +176,34 @@ export default async function HomePage() {
     (r) => [...r.club.genres].sort().join("|")
   ).slice(0, 6);
 
-  // Fetch cadences for matched clubs (not in the cache shape)
+  // Fetch cadences, popular books (cold start), and real activity in parallel
   const matchedClubIds = clubsForDisplay.map((c) => c.club.id);
-  const clubCadenceRows =
+  const actorIds = [userId, ...followingData.map((f) => f.followingId)];
+
+  const [clubCadenceRows, popularBooks, rawActivityEvents] = await Promise.all([
     matchedClubIds.length > 0
-      ? await db.club.findMany({
+      ? db.club.findMany({
           where: { id: { in: matchedClubIds } },
           select: { id: true, meetingCadence: true },
         })
-      : [];
-  const cadenceMap = new Map(clubCadenceRows.map((c) => [c.id, c.meetingCadence]));
+      : Promise.resolve([]),
+    topPicksDisplay.length === 0 ? fetchPopularBooks(userId) : Promise.resolve([]),
+    db.activityEvent.findMany({
+      where: { userId: { in: actorIds } },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      include: {
+        user: { select: { id: true, name: true, username: true, avatar: true } },
+        book: { select: { id: true, title: true } },
+        club: { select: { id: true, name: true } },
+      },
+    }),
+  ]);
 
-  // Cold start
-  const popularBooks =
-    topPicksDisplay.length === 0 ? await fetchPopularBooks(userId) : [];
+  const cadenceMap = new Map(clubCadenceRows.map((c) => [c.id, c.meetingCadence]));
+  const activityItems: ActivityItem[] = rawActivityEvents
+    .map(mapToActivityItem)
+    .filter((item): item is ActivityItem => item !== null);
 
   return (
     <div className="p-6 max-w-4xl">
@@ -212,16 +230,18 @@ export default async function HomePage() {
       <SearchBar />
 
       {/* Friend Activity */}
-      <section className="mb-10">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
-          Friend Activity
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {MOCK_ACTIVITY.map((item) => (
-            <ActivityCard key={item.id} {...item} />
-          ))}
-        </div>
-      </section>
+      {activityItems.length > 0 && (
+        <section className="mb-10">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+            Friend Activity
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {activityItems.map((item) => (
+              <ActivityCard key={item.id} {...item} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Section A: Top Picks for You */}
       <section className="mb-8">

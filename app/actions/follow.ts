@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
+import { logActivity } from "@/lib/activity";
 
 export async function toggleFollow(
   targetUserId: string
@@ -24,6 +25,7 @@ export async function toggleFollow(
       return { success: true, following: false };
     } else {
       await db.follow.create({ data: { followerId: userId, followingId: targetUserId } });
+      await logActivity({ userId, type: "followed", targetUserId });
       return { success: true, following: true };
     }
   } catch {
