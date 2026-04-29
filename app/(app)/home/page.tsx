@@ -124,6 +124,29 @@ function mapToActivityItem(event: RawEvent): ActivityItem | null {
   }
 }
 
+// ── Narrative display helpers ────────────────────────────────────────────────
+
+function narrativePeopleHeading(items: ScoredUser[]): string {
+  const genres = Array.from(new Set(items.flatMap((s) => s.match.sharedGenres))).slice(0, 2);
+  if (genres.length >= 2) return `Readers who love ${genres[0].toLowerCase()} and ${genres[1].toLowerCase()}`;
+  if (genres.length === 1) return `Readers who share your love of ${genres[0].toLowerCase()}`;
+  return "Readers with a similar taste in books";
+}
+
+function narrativeClubsHeading(items: ScoredClub[]): string {
+  const genres = Array.from(new Set(items.flatMap((s) => s.match.sharedGenres))).slice(0, 2);
+  if (genres.length >= 2) return `Clubs for ${genres[0].toLowerCase()} and ${genres[1].toLowerCase()} readers`;
+  if (genres.length === 1) return `Clubs for ${genres[0].toLowerCase()} readers`;
+  return "Clubs matched to your reading taste";
+}
+
+function narrativeBooksHeading(items: ScoredBook[], fallback: string): string {
+  const genres = Array.from(new Set(items.flatMap((s) => s.match.sharedGenres))).slice(0, 2);
+  if (genres.length >= 2) return `${genres[0]} and ${genres[1]} reads for you`;
+  if (genres.length === 1) return `${genres[0]} reads you might enjoy`;
+  return fallback;
+}
+
 // ── Cold-start book fallback ──────────────────────────────────────────────────
 
 async function fetchPopularBooks(userId: string) {
@@ -373,13 +396,12 @@ export default async function HomePage() {
                 case "people":
                   return (
                     <div key={`people-${i}`} className="pt-8 pb-2">
-                      <div className="flex items-baseline justify-between mb-1">
-                        <h3 className="text-base font-semibold text-foreground">Readers similar to you</h3>
+                      <div className="flex items-baseline justify-between mb-3">
+                        <p className="text-sm text-foreground">{narrativePeopleHeading(slot.items)}</p>
                         {peopleToFollow.length > 2 && (
-                          <Link href="/discover" className="text-xs text-primary hover:underline">See all</Link>
+                          <Link href="/discover" className="text-xs text-muted-foreground hover:text-primary transition-colors flex-shrink-0 ml-4">See all</Link>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground mb-4">People who read what you read</p>
                       <div>
                         {slot.items.map(({ user, match }) => (
                           <PeopleSuggestion
@@ -400,13 +422,12 @@ export default async function HomePage() {
                 case "clubs":
                   return (
                     <div key={`clubs-${i}`} className="pt-8 pb-2">
-                      <div className="flex items-baseline justify-between mb-1">
-                        <h3 className="text-base font-semibold text-foreground">Clubs you&apos;d love</h3>
+                      <div className="flex items-baseline justify-between mb-3">
+                        <p className="text-sm text-foreground">{narrativeClubsHeading(slot.items)}</p>
                         {clubsForDisplay.length > 2 && (
-                          <Link href="/clubs" className="text-xs text-primary hover:underline">Browse all</Link>
+                          <Link href="/clubs" className="text-xs text-muted-foreground hover:text-primary transition-colors flex-shrink-0 ml-4">Browse all</Link>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground mb-4">Matched to your reading taste</p>
                       <div>
                         {slot.items.map(({ club, match }) => (
                           <ClubSuggestionCard
@@ -428,13 +449,23 @@ export default async function HomePage() {
                   return (
                     <div key={`books-${i}`} className="pt-8 pb-2">
                       <div className="mb-4">
-                        <h3 className="text-base font-semibold text-foreground">
-                          {slot.isTrigger && slot.triggerName
-                            ? <>Because you liked <span className="text-primary italic">{slot.triggerName}</span></>
-                            : slot.label}
-                        </h3>
-                        {slot.sublabel && (
-                          <p className="text-xs text-muted-foreground mt-0.5">{slot.sublabel}</p>
+                        {slot.isTrigger && slot.triggerName ? (
+                          <>
+                            <p className="text-sm text-foreground">
+                              Because you liked <span className="italic">{slot.triggerName}</span>
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">Similar themes, tone, and pacing</p>
+                          </>
+                        ) : slot.isExploratory ? (
+                          <>
+                            <p className="text-sm text-foreground">Explore something different</p>
+                            {slot.sublabel && <p className="text-xs text-muted-foreground mt-1">{slot.sublabel}</p>}
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-sm text-foreground">{narrativeBooksHeading(slot.items, slot.label)}</p>
+                            {slot.sublabel && <p className="text-xs text-muted-foreground mt-1">{slot.sublabel}</p>}
+                          </>
                         )}
                       </div>
                       <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
@@ -462,7 +493,7 @@ export default async function HomePage() {
                 case "popular":
                   return (
                     <div key={`popular-${i}`} className="pt-8 pb-2">
-                      <h3 className="text-base font-semibold text-foreground mb-4">Popular right now</h3>
+                      <p className="text-sm text-foreground mb-4">What readers are picking up</p>
                       <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
                         {slot.items.map((b) => (
                           <MatchCard
