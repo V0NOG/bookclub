@@ -116,6 +116,8 @@ type FeedbackButtonsProps = {
 
 function FeedbackButtons({ variant, targetId, dismissed, liked, onDismiss, onLike }: FeedbackButtonsProps) {
   const [likePending, setLikePending] = useState(false);
+  const [hoveredDismiss, setHoveredDismiss] = useState(false);
+  const [hoveredLike, setHoveredLike] = useState(false);
 
   const targetType: FeedbackTargetType =
     variant === "person" ? FeedbackTargetType.USER :
@@ -140,29 +142,36 @@ function FeedbackButtons({ variant, targetId, dismissed, liked, onDismiss, onLik
     }
   }
 
+  const dismissColor = hoveredDismiss && !dismissed && !liked ? colors.textSecondary : colors.accentMuted;
+  const likeColor = liked ? colors.secondary : hoveredLike && !dismissed ? colors.textSecondary : colors.accentMuted;
+
   return (
     <div style={{ display: "flex", gap: spacing.sm, alignItems: "center" }}>
       <button
         onClick={handleDismiss}
+        onMouseEnter={() => setHoveredDismiss(true)}
+        onMouseLeave={() => setHoveredDismiss(false)}
         disabled={dismissed || liked || likePending}
         aria-label="Not for me"
         title="Not for me"
         style={{
           background: "none",
           border: "none",
-          cursor: dismissed ? "default" : "pointer",
+          cursor: dismissed || liked ? "default" : "pointer",
           padding: 0,
           display: "flex",
           alignItems: "center",
-          color: colors.accentMuted,
-          opacity: dismissed ? 0.4 : 1,
-          transition: "color 200ms ease, opacity 200ms ease",
+          color: dismissColor,
+          opacity: dismissed ? 0.4 : 0.8,
+          transition: "color 180ms ease, opacity 180ms ease",
         }}
       >
         <ThumbsDown size={13} />
       </button>
       <button
         onClick={handleLike}
+        onMouseEnter={() => setHoveredLike(true)}
+        onMouseLeave={() => setHoveredLike(false)}
         disabled={dismissed || liked || likePending}
         aria-label="More like this"
         title="More like this"
@@ -173,9 +182,9 @@ function FeedbackButtons({ variant, targetId, dismissed, liked, onDismiss, onLik
           padding: 0,
           display: "flex",
           alignItems: "center",
-          color: liked ? colors.secondary : colors.accentMuted,
-          opacity: likePending ? 0.5 : 1,
-          transition: "color 200ms ease, opacity 200ms ease",
+          color: likeColor,
+          opacity: likePending ? 0.5 : 0.8,
+          transition: "color 180ms ease, opacity 180ms ease",
         }}
       >
         <Heart
@@ -196,6 +205,13 @@ export function MatchCard({
   const [dismissed, setDismissed] = useState(false);
   const [liked, setLiked] = useState(false);
   const [hidden, setHidden] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [likedAnimating, setLikedAnimating] = useState(false);
+
+  useEffect(() => {
+    const t = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(t);
+  }, []);
 
   useEffect(() => {
     if (!dismissed) return;
@@ -210,8 +226,8 @@ export function MatchCard({
   const defaultShadow = shadow.soft;
   const featuredShadow = "0 4px 16px rgba(139,58,47,0.14)";
   const hoverShadow = featured
-    ? "0 8px 24px rgba(139,58,47,0.22)"
-    : "0 6px 18px rgba(0,0,0,0.11)";
+    ? "0 10px 28px rgba(139,58,47,0.26)"
+    : "0 8px 24px rgba(0,0,0,0.14)";
   const likedShadow = `0 0 0 2px ${colors.secondary}40`;
 
   const articleBorder = liked
@@ -234,8 +250,10 @@ export function MatchCard({
 
   const articleTransform = dismissed
     ? "scale(0.98)"
+    : likedAnimating
+    ? "scale(1.02)"
     : hovered
-    ? "translateY(-2px)"
+    ? "translateY(-3px)"
     : "translateY(0)";
 
   return (
@@ -249,8 +267,8 @@ export function MatchCard({
         padding: "12px",
         boxShadow: articleBoxShadow,
         transform: articleTransform,
-        opacity: dismissed ? 0 : 1,
-        transition: "box-shadow 160ms ease, transform 200ms ease, opacity 200ms ease, border-color 200ms ease",
+        opacity: dismissed ? 0 : mounted ? 1 : 0,
+        transition: "box-shadow 200ms ease, transform 200ms ease, opacity 200ms ease, border-color 200ms ease",
         minWidth: variant === "book" ? 152 : 196,
         maxWidth: variant === "book" ? 152 : 236,
         flexShrink: 0,
@@ -372,7 +390,11 @@ export function MatchCard({
             dismissed={dismissed}
             liked={liked}
             onDismiss={() => setDismissed(true)}
-            onLike={() => setLiked(true)}
+            onLike={() => {
+              setLiked(true);
+              setLikedAnimating(true);
+              setTimeout(() => setLikedAnimating(false), 220);
+            }}
           />
         )}
       </div>
