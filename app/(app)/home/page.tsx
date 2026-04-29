@@ -26,6 +26,12 @@ function diversify<T>(items: T[], getGenre: (item: T) => string | undefined, lim
   });
 }
 
+// Extract trigger book name from a reason like "Because you loved Six of Crows."
+function extractTriggerBook(reasons: string[]): string | null {
+  const m = (reasons[0] ?? "").match(/^Because you loved (.+)\.$/);
+  return m ? m[1] : null;
+}
+
 async function fetchColdStart(userId: string) {
   return Promise.all([
     db.book.findMany({
@@ -81,58 +87,73 @@ export default async function HomePage() {
     ? Math.round((currentBook.progress / currentBook.book.pageCount) * 100)
     : 0;
 
-  // ── Apply display pipeline ───────────────────────────────────────────────────
+  // ── Section A: Top Picks for You ─────────────────────────────────────────────
+  // Partition: books with a trigger-book signal go to Section B; the rest go here.
+  const candidates = applyThreshold(rawMatches.bookMatches);
+  const triggerGroupMap = new Map<string, ScoredBook[]>();
+  const nonTriggerBooks: ScoredBook[] = [];
 
-  const userMatches: ScoredUser[] = diversify(
+  for (const bm of candidates) {
+    const trigger = extractTriggerBook(bm.match.matchReasons);
+    if (trigger) {
+      const arr = triggerGroupMap.get(trigger) ?? [];
+      arr.push(bm);
+      triggerGroupMap.set(trigger, arr);
+    } else {
+      nonTriggerBooks.push(bm);
+    }
+  }
+
+  // If no non-trigger books exist, fall back to showing all candidates in Section A.
+  const topPicksSource = nonTriggerBooks.length >= 3 ? nonTriggerBooks : candidates;
+  const topPicksDisplay: ScoredBook[] = diversify(
+    topPicksSource,
+    (r) => [...r.book.genres].sort().join("|")
+  ).slice(0, 12);
+
+  const bookTopMatch =
+    topPicksDisplay.length >= 2 &&
+    topPicksDisplay[0].match.score - topPicksDisplay[1].match.score >= 8;
+
+  // ── Section B: Because You Liked [X] ────────────────────────────────────────
+  // Find the trigger book with the most associated matches.
+  const triggerEntries = Array.from(triggerGroupMap.entries()).sort((a, b) => b[1].length - a[1].length);
+  const triggerTitle = triggerEntries[0]?.[0] ?? null;
+  const triggerGroup: ScoredBook[] = triggerEntries[0]?.[1]?.slice(0, 8) ?? [];
+
+  // ── Section C: Explore Something Different ────────────────────────────────────
+  const exploratoryBooksDisplay: ScoredBook[] = rawMatches.exploratoryBooks.slice(0, 3);
+
+  // ── Section D: Readers Like You ──────────────────────────────────────────────
+  const readersLikeYou: ScoredUser[] = diversify(
     applyThreshold(rawMatches.userMatches),
-    (r) => Array.from(r.match.sharedGenres).sort().join("|")
+    (r) => [...r.match.sharedGenres].sort().join("|")
   ).slice(0, 6);
 
-  const bookMatches: ScoredBook[] = diversify(
-    applyThreshold(rawMatches.bookMatches),
-    (r) => Array.from(r.book.genres).sort().join("|")
-  ).slice(0, 6);
+  const userTopMatch =
+    readersLikeYou.length >= 2 &&
+    readersLikeYou[0].match.score - readersLikeYou[1].match.score >= 8;
 
+  // ── Clubs for you ─────────────────────────────────────────────────────────────
   const clubMatches: ScoredClub[] = diversify(
     applyThreshold(rawMatches.clubMatches),
-    (r) => Array.from(r.club.genres).sort().join("|")
+    (r) => [...r.club.genres].sort().join("|")
   ).slice(0, 6);
+  const clubTopMatch =
+    clubMatches.length >= 2 &&
+    clubMatches[0].match.score - clubMatches[1].match.score >= 8;
 
-  // ── Exploration injection ────────────────────────────────────────────────────
-
-  const exploratoryUsers = rawMatches.exploratoryUsers.slice(0, 2);
-  const exploratoryBooks = rawMatches.exploratoryBooks.slice(0, 2);
-  const exploratoryClubs = rawMatches.exploratoryClubs.slice(0, 2);
-
-  const displayUsers: Array<ScoredUser & { exploratory?: boolean }> = [
-    ...userMatches,
-    ...exploratoryUsers.map((u) => ({ ...u, exploratory: true })),
-  ];
-  const displayBooks: Array<ScoredBook & { exploratory?: boolean }> = [
-    ...bookMatches,
-    ...exploratoryBooks.map((b) => ({ ...b, exploratory: true })),
-  ];
   const displayClubs: Array<ScoredClub & { exploratory?: boolean }> = [
     ...clubMatches,
-    ...exploratoryClubs.map((c) => ({ ...c, exploratory: true })),
+    ...rawMatches.exploratoryClubs.slice(0, 1).map((c) => ({ ...c, exploratory: true as const })),
   ];
 
-  // ── Cold start fallback ──────────────────────────────────────────────────────
-
+  // ── Cold start fallback ───────────────────────────────────────────────────────
   const needsColdStart =
-    userMatches.length === 0 || bookMatches.length === 0 || clubMatches.length === 0;
+    topPicksDisplay.length === 0 || readersLikeYou.length === 0 || clubMatches.length === 0;
   const [popularBooks, trendingUsers, activeClubs] = needsColdStart
     ? await fetchColdStart(userId)
     : [[], [], []];
-
-  // ── Top match badge logic ────────────────────────────────────────────────────
-
-  const userTopMatch =
-    userMatches.length >= 2 && userMatches[0].match.score - userMatches[1].match.score >= 8;
-  const bookTopMatch =
-    bookMatches.length >= 2 && bookMatches[0].match.score - bookMatches[1].match.score >= 8;
-  const clubTopMatch =
-    clubMatches.length >= 2 && clubMatches[0].match.score - clubMatches[1].match.score >= 8;
 
   return (
     <div className="p-6 max-w-4xl">
@@ -199,63 +220,16 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* People you'll love */}
+      {/* Section A: Top Picks for You */}
       <section className="mb-8">
-        {displayUsers.length > 0 ? (
+        {topPicksDisplay.length > 0 ? (
           <>
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">People you&apos;ll love</h2>
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
-              {displayUsers.map(({ user, match, exploratory }, i) => (
-                <MatchCard
-                  key={user.id}
-                  variant="person"
-                  title={user.name ?? user.username ?? "Reader"}
-                  subtitle={match.sharedGenres[0]}
-                  coverImage={user.avatar}
-                  score={match.score}
-                  confidence={match.confidence}
-                  reasons={match.matchReasons}
-                  meta={match.sharedGenres.slice(0, 2).join(" · ") || undefined}
-                  featured={i === 0 && !exploratory}
-                  topMatch={i === 0 && userTopMatch && !exploratory}
-                  exploratory={exploratory}
-                  targetId={user.id}
-                />
-              ))}
+            <div className="mb-3">
+              <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Top Picks for You</h2>
+              <p className="text-xs text-muted-foreground/60 mt-0.5">Based on your reading taste</p>
             </div>
-          </>
-        ) : trendingUsers.length > 0 ? (
-          <>
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Readers you might like</h2>
             <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
-              {trendingUsers.map((u) => (
-                <MatchCard
-                  key={u.id}
-                  variant="person"
-                  title={u.name ?? u.username ?? "Reader"}
-                  coverImage={u.avatar}
-                  badge="Trending"
-                  targetId={u.id}
-                />
-              ))}
-            </div>
-          </>
-        ) : (
-          <div>
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">People you&apos;ll love</h2>
-            <p className="text-sm text-muted-foreground mb-1">Rate more books to find readers with similar taste.</p>
-            <Link href="/library" className="text-xs text-emerald-400 hover:underline">Start rating books →</Link>
-          </div>
-        )}
-      </section>
-
-      {/* Books for you */}
-      <section className="mb-8">
-        {displayBooks.length > 0 ? (
-          <>
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Books for you</h2>
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
-              {displayBooks.map(({ book, match, exploratory }, i) => (
+              {topPicksDisplay.map(({ book, match }, i) => (
                 <MatchCard
                   key={book.id}
                   variant="book"
@@ -266,9 +240,8 @@ export default async function HomePage() {
                   confidence={match.confidence}
                   reasons={match.matchReasons}
                   meta={match.sharedGenres.slice(0, 2).join(" · ") || undefined}
-                  featured={i === 0 && !exploratory}
-                  topMatch={i === 0 && bookTopMatch && !exploratory}
-                  exploratory={exploratory}
+                  featured={i === 0}
+                  topMatch={i === 0 && bookTopMatch}
                   targetId={book.id}
                 />
               ))}
@@ -278,7 +251,7 @@ export default async function HomePage() {
           <>
             <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Popular right now</h2>
             <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
-              {popularBooks.map((b) => (
+              {(popularBooks as Array<{ id: string; title: string; author: string; cover: string | null }>).map((b) => (
                 <MatchCard
                   key={b.id}
                   variant="book"
@@ -293,9 +266,112 @@ export default async function HomePage() {
           </>
         ) : (
           <div>
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Books for you</h2>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Top Picks for You</h2>
             <p className="text-sm text-muted-foreground mb-1">Rate a few books and we&apos;ll find titles you&apos;ll love.</p>
             <Link href="/library" className="text-xs text-emerald-400 hover:underline">Browse your library →</Link>
+          </div>
+        )}
+      </section>
+
+      {/* Section B: Because You Liked [X] */}
+      {triggerTitle && triggerGroup.length >= 2 && (
+        <section className="mb-8">
+          <div className="mb-3">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              Because You Liked{" "}
+              <span className="text-emerald-400 normal-case">{triggerTitle}</span>
+            </h2>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
+            {triggerGroup.map(({ book, match }) => (
+              <MatchCard
+                key={book.id}
+                variant="book"
+                title={book.title}
+                subtitle={book.author}
+                coverImage={book.cover ?? null}
+                score={match.score}
+                confidence={match.confidence}
+                reasons={match.matchReasons}
+                meta={match.sharedGenres.slice(0, 2).join(" · ") || undefined}
+                targetId={book.id}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Section C: Explore Something Different */}
+      {exploratoryBooksDisplay.length > 0 && (
+        <section className="mb-8 bg-card/40 border border-border/60 rounded-xl p-4">
+          <div className="mb-3">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Explore Something Different</h2>
+            <p className="text-xs text-muted-foreground/60 mt-0.5">Outside your usual genres — selected because they match your reading style</p>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 no-scrollbar">
+            {exploratoryBooksDisplay.map(({ book, match }) => (
+              <MatchCard
+                key={book.id}
+                variant="book"
+                title={book.title}
+                subtitle={book.author}
+                coverImage={book.cover ?? null}
+                score={match.score}
+                confidence={match.confidence}
+                reasons={match.matchReasons}
+                exploratory
+                targetId={book.id}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Section D: Readers Like You */}
+      <section className="mb-8">
+        {readersLikeYou.length > 0 ? (
+          <>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Readers Like You</h2>
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
+              {readersLikeYou.map(({ user, match }, i) => (
+                <MatchCard
+                  key={user.id}
+                  variant="person"
+                  title={user.name ?? user.username ?? "Reader"}
+                  subtitle={match.sharedGenres[0]}
+                  coverImage={user.avatar}
+                  score={match.score}
+                  confidence={match.confidence}
+                  reasons={match.matchReasons}
+                  meta={match.sharedGenres.slice(0, 2).join(" · ") || undefined}
+                  featured={i === 0}
+                  topMatch={i === 0 && userTopMatch}
+                  targetId={user.id}
+                />
+              ))}
+            </div>
+          </>
+        ) : trendingUsers.length > 0 ? (
+          <>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Readers you might like</h2>
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
+              {(trendingUsers as Array<{ id: string; name: string | null; username: string | null; avatar: string | null }>).map((u) => (
+                <MatchCard
+                  key={u.id}
+                  variant="person"
+                  title={u.name ?? u.username ?? "Reader"}
+                  coverImage={u.avatar}
+                  badge="Trending"
+                  targetId={u.id}
+                />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Readers Like You</h2>
+            <p className="text-sm text-muted-foreground mb-1">Rate more books to find readers with similar taste.</p>
+            <Link href="/library" className="text-xs text-emerald-400 hover:underline">Start rating books →</Link>
           </div>
         )}
       </section>
@@ -329,7 +405,7 @@ export default async function HomePage() {
           <>
             <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Active clubs</h2>
             <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
-              {activeClubs.map((c) => (
+              {(activeClubs as Array<{ id: string; name: string; avatar: string | null; genres: string[]; _count: { members: number } }>).map((c) => (
                 <MatchCard
                   key={c.id}
                   variant="club"
