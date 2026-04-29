@@ -54,7 +54,7 @@ export default async function HomePage() {
   const userId = session!.user.id;
   const firstName = session?.user.name?.split(" ")[0] ?? "there";
 
-  const [currentBook, recentBooks, goal, rawMatches] = await Promise.all([
+  const [currentBook, recentBooks, goal, rawMatches, ratedCount] = await Promise.all([
     db.userBook.findFirst({
       where: { userId, status: "CURRENTLY_READING" },
       include: { book: true },
@@ -70,6 +70,7 @@ export default async function HomePage() {
       where: { userId, type: "BOOKS_PER_YEAR", year: new Date().getFullYear() },
     }),
     getMatchesForUser(userId),
+    db.userBook.count({ where: { userId, rating: { not: null } } }),
   ]);
 
   const booksReadThisYear = goal
@@ -138,7 +139,16 @@ export default async function HomePage() {
       <h1 className="text-2xl font-bold text-white mb-1">
         Good reading, {firstName}
       </h1>
-      <p className="text-muted-foreground mb-8 text-sm">Here&apos;s where you left off.</p>
+      <div className="flex items-center justify-between mb-8">
+        <p className="text-muted-foreground text-sm">
+          {ratedCount > 0
+            ? `Recommendations based on ${ratedCount} book${ratedCount === 1 ? "" : "s"} you've rated`
+            : "Rate books to unlock personalised recommendations"}
+        </p>
+        <Link href="/how-it-works" className="text-xs text-emerald-400 hover:underline shrink-0 ml-4">
+          How it works
+        </Link>
+      </div>
 
       {/* Currently reading */}
       {currentBook && (
@@ -231,9 +241,11 @@ export default async function HomePage() {
             </div>
           </>
         ) : (
-          <p className="text-sm text-muted-foreground">
-            Follow more readers or rate books to find your crowd.
-          </p>
+          <div>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">People you&apos;ll love</h2>
+            <p className="text-sm text-muted-foreground mb-1">Rate more books to find readers with similar taste.</p>
+            <Link href="/library" className="text-xs text-emerald-400 hover:underline">Start rating books →</Link>
+          </div>
         )}
       </section>
 
@@ -280,9 +292,11 @@ export default async function HomePage() {
             </div>
           </>
         ) : (
-          <p className="text-sm text-muted-foreground">
-            Rate more books to unlock better recommendations.
-          </p>
+          <div>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Books for you</h2>
+            <p className="text-sm text-muted-foreground mb-1">Rate a few books and we&apos;ll find titles you&apos;ll love.</p>
+            <Link href="/library" className="text-xs text-emerald-400 hover:underline">Browse your library →</Link>
+          </div>
         )}
       </section>
 
@@ -330,9 +344,11 @@ export default async function HomePage() {
             </div>
           </>
         ) : (
-          <p className="text-sm text-muted-foreground">
-            Explore more genres or join clubs to improve matches.
-          </p>
+          <div>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Clubs for you</h2>
+            <p className="text-sm text-muted-foreground mb-1">Rate more books to see clubs that match your reading style.</p>
+            <Link href="/clubs" className="text-xs text-emerald-400 hover:underline">Explore clubs →</Link>
+          </div>
         )}
       </section>
 
@@ -372,9 +388,17 @@ export default async function HomePage() {
       {!currentBook && recentBooks.length === 0 && (
         <div className="text-center py-16 text-muted-foreground">
           <BookOpen className="h-10 w-10 mx-auto mb-3 opacity-30" />
-          <p className="text-sm font-medium mb-2">Your reading journey starts here</p>
-          <p className="text-xs mb-4">Add books to your library to track your progress.</p>
-          <Link href="/library" className="text-emerald-400 hover:underline text-sm">Browse your library →</Link>
+          <p className="text-sm font-medium mb-2 text-white">Your reading journey starts here</p>
+          <p className="text-xs mb-1">Start by rating a few books you&apos;ve already read.</p>
+          <p className="text-xs mb-5 opacity-70">Even 3–5 ratings unlock personalised recommendations.</p>
+          <div className="flex gap-3 justify-center">
+            <Link href="/library" className="text-sm bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg transition-colors">
+              Rate books
+            </Link>
+            <Link href="/how-it-works" className="text-sm text-emerald-400 hover:underline py-2">
+              How it works
+            </Link>
+          </div>
         </div>
       )}
     </div>
