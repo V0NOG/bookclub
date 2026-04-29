@@ -2,10 +2,15 @@ import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
 import { BookOpen, Star } from "lucide-react";
 import Link from "next/link";
-import { getMatchesForUser, ScoredUser, ScoredBook, ScoredClub } from "@/lib/matching/cache";
+import { getMatchesForUser, ScoredBook, ScoredUser, ScoredClub } from "@/lib/matching/cache";
 import { MatchCard } from "@/components/match/MatchCard";
+import { SearchBar } from "@/components/feed/search-bar";
+import { ActivityCard, ActivityItem } from "@/components/feed/activity-card";
+import { PeopleSuggestion } from "@/components/feed/people-suggestion";
+import { ClubSuggestionCard } from "@/components/clubs/club-suggestion-card";
 
-// Suppress section when best match is weak; otherwise keep items >= 60% of top score.
+// ── Display pipeline helpers ──────────────────────────────────────────────────
+
 function applyThreshold<T extends { match: { score: number } }>(items: T[]): T[] {
   if (items.length === 0) return [];
   const top = Math.max(...items.map((r) => r.match.score));
@@ -14,7 +19,6 @@ function applyThreshold<T extends { match: { score: number } }>(items: T[]): T[]
   return items.filter((r) => r.match.score >= floor);
 }
 
-// Greedy genre diversity: max `limit` items per genre cluster, preserving score order.
 function diversify<T>(items: T[], getGenre: (item: T) => string | undefined, limit = 2): T[] {
   const counts = new Map<string, number>();
   return items.filter((item) => {
@@ -26,58 +30,89 @@ function diversify<T>(items: T[], getGenre: (item: T) => string | undefined, lim
   });
 }
 
-// Extract trigger book name from a reason like "Because you loved Six of Crows."
 function extractTriggerBook(reasons: string[]): string | null {
   const m = (reasons[0] ?? "").match(/^Because you loved (.+)\.$/);
   return m ? m[1] : null;
 }
 
-async function fetchColdStart(userId: string) {
-  return Promise.all([
-    db.book.findMany({
-      where: { userBooks: { none: { userId } } },
-      orderBy: [{ ratingsCount: "desc" }],
-      take: 6,
-      select: { id: true, title: true, author: true, cover: true, genres: true },
-    }),
-    db.user.findMany({
-      where: { id: { not: userId }, tasteProfile: { isNot: null } },
-      orderBy: { updatedAt: "desc" },
-      take: 6,
-      select: { id: true, name: true, username: true, avatar: true },
-    }),
-    db.club.findMany({
-      where: { visibility: "PUBLIC", members: { none: { userId } } },
-      include: { _count: { select: { members: true } } },
-      orderBy: { updatedAt: "desc" },
-      take: 6,
-    }),
-  ]);
+// ── Mock friend activity ──────────────────────────────────────────────────────
+// Replace with real FeedItem queries once the feed pipeline is built.
+
+const MOCK_ACTIVITY: ActivityItem[] = [
+  {
+    id: "mock-1",
+    actorName: "Marcus Chen",
+    actorAvatar: null,
+    action: "finished",
+    bookTitle: "The Name of the Wind",
+    rating: 5,
+    timestamp: "5 minutes ago",
+  },
+  {
+    id: "mock-2",
+    actorName: "Priya Sharma",
+    actorAvatar: null,
+    action: "started",
+    bookTitle: "Beautiful World, Where Are You",
+    timestamp: "2 hours ago",
+  },
+  {
+    id: "mock-3",
+    actorName: "Jamie Reed",
+    actorAvatar: null,
+    action: "rated",
+    bookTitle: "Piranesi",
+    rating: 4,
+    timestamp: "Yesterday",
+  },
+  {
+    id: "mock-4",
+    actorName: "Lucia Santos",
+    actorAvatar: null,
+    action: "joined_club",
+    clubName: "The Midnight Library Club",
+    timestamp: "2 days ago",
+  },
+];
+
+// ── Cold-start book fallback ──────────────────────────────────────────────────
+
+async function fetchPopularBooks(userId: string) {
+  return db.book.findMany({
+    where: { userBooks: { none: { userId } } },
+    orderBy: [{ ratingsCount: "desc" }],
+    take: 8,
+    select: { id: true, title: true, author: true, cover: true, genres: true },
+  });
 }
+
+// ── Page ──────────────────────────────────────────────────────────────────────
 
 export default async function HomePage() {
   const session = await getSession();
   const userId = session!.user.id;
   const firstName = session?.user.name?.split(" ")[0] ?? "there";
 
-  const [currentBook, recentBooks, goal, rawMatches, ratedCount] = await Promise.all([
-    db.userBook.findFirst({
-      where: { userId, status: "CURRENTLY_READING" },
-      include: { book: true },
-      orderBy: { updatedAt: "desc" },
-    }),
-    db.userBook.findMany({
-      where: { userId, status: "READ" },
-      include: { book: true },
-      orderBy: { updatedAt: "desc" },
-      take: 4,
-    }),
-    db.readingGoal.findFirst({
-      where: { userId, type: "BOOKS_PER_YEAR", year: new Date().getFullYear() },
-    }),
-    getMatchesForUser(userId),
-    db.userBook.count({ where: { userId, rating: { not: null } } }),
-  ]);
+  const [currentBook, recentBooks, goal, rawMatches, ratedCount, followingData] =
+    await Promise.all([
+      db.userBook.findFirst({
+        where: { userId, status: "CURRENTLY_READING" },
+        include: { book: true },
+        orderBy: { updatedAt: "desc" },
+      }),
+      db.userBook.findMany({
+        where: { userId, status: "READ" },
+        include: { book: true },
+        orderBy: { updatedAt: "desc" },
+        take: 4,
+      }),
+      db.readingGoal.findFirst({
+        where: { userId, type: "BOOKS_PER_YEAR", year: new Date().getFullYear() },
+      }),
+      getMatchesForUser(userId),
+      db.userBook.count({ where: { userId, rating: { not: null } } }),
+      db.follow.findMany({ where: { followerId: userId }, select: { followingId: true } }),
+    ]);
 
   const booksReadThisYear = goal
     ? await db.userBook.count({ where: { userId, status: "READ" } })
@@ -87,8 +122,9 @@ export default async function HomePage() {
     ? Math.round((currentBook.progress / currentBook.book.pageCount) * 100)
     : 0;
 
+  const followingSet = new Set(followingData.map((f) => f.followingId));
+
   // ── Section A: Top Picks for You ─────────────────────────────────────────────
-  // Partition: books with a trigger-book signal go to Section B; the rest go here.
   const candidates = applyThreshold(rawMatches.bookMatches);
   const triggerGroupMap = new Map<string, ScoredBook[]>();
   const nonTriggerBooks: ScoredBook[] = [];
@@ -104,7 +140,6 @@ export default async function HomePage() {
     }
   }
 
-  // If no non-trigger books exist, fall back to showing all candidates in Section A.
   const topPicksSource = nonTriggerBooks.length >= 3 ? nonTriggerBooks : candidates;
   const topPicksDisplay: ScoredBook[] = diversify(
     topPicksSource,
@@ -116,116 +151,86 @@ export default async function HomePage() {
     topPicksDisplay[0].match.score - topPicksDisplay[1].match.score >= 8;
 
   // ── Section B: Because You Liked [X] ────────────────────────────────────────
-  // Find the trigger book with the most associated matches.
-  const triggerEntries = Array.from(triggerGroupMap.entries()).sort((a, b) => b[1].length - a[1].length);
+  const triggerEntries = Array.from(triggerGroupMap.entries()).sort(
+    (a, b) => b[1].length - a[1].length
+  );
   const triggerTitle = triggerEntries[0]?.[0] ?? null;
   const triggerGroup: ScoredBook[] = triggerEntries[0]?.[1]?.slice(0, 8) ?? [];
 
   // ── Section C: Explore Something Different ────────────────────────────────────
   const exploratoryBooksDisplay: ScoredBook[] = rawMatches.exploratoryBooks.slice(0, 3);
 
-  // ── Section D: Readers Like You ──────────────────────────────────────────────
-  const readersLikeYou: ScoredUser[] = diversify(
+  // ── People to Follow ──────────────────────────────────────────────────────────
+  const peopleToFollow: ScoredUser[] = diversify(
     applyThreshold(rawMatches.userMatches),
     (r) => [...r.match.sharedGenres].sort().join("|")
   ).slice(0, 6);
 
-  const userTopMatch =
-    readersLikeYou.length >= 2 &&
-    readersLikeYou[0].match.score - readersLikeYou[1].match.score >= 8;
-
-  // ── Clubs for you ─────────────────────────────────────────────────────────────
-  const clubMatches: ScoredClub[] = diversify(
+  // ── Clubs You'd Love ─────────────────────────────────────────────────────────
+  const clubsForDisplay: ScoredClub[] = diversify(
     applyThreshold(rawMatches.clubMatches),
     (r) => [...r.club.genres].sort().join("|")
   ).slice(0, 6);
-  const clubTopMatch =
-    clubMatches.length >= 2 &&
-    clubMatches[0].match.score - clubMatches[1].match.score >= 8;
 
-  const displayClubs: Array<ScoredClub & { exploratory?: boolean }> = [
-    ...clubMatches,
-    ...rawMatches.exploratoryClubs.slice(0, 1).map((c) => ({ ...c, exploratory: true as const })),
-  ];
+  // Fetch cadences for matched clubs (not in the cache shape)
+  const matchedClubIds = clubsForDisplay.map((c) => c.club.id);
+  const clubCadenceRows =
+    matchedClubIds.length > 0
+      ? await db.club.findMany({
+          where: { id: { in: matchedClubIds } },
+          select: { id: true, meetingCadence: true },
+        })
+      : [];
+  const cadenceMap = new Map(clubCadenceRows.map((c) => [c.id, c.meetingCadence]));
 
-  // ── Cold start fallback ───────────────────────────────────────────────────────
-  const needsColdStart =
-    topPicksDisplay.length === 0 || readersLikeYou.length === 0 || clubMatches.length === 0;
-  const [popularBooks, trendingUsers, activeClubs] = needsColdStart
-    ? await fetchColdStart(userId)
-    : [[], [], []];
+  // Cold start
+  const popularBooks =
+    topPicksDisplay.length === 0 ? await fetchPopularBooks(userId) : [];
 
   return (
     <div className="p-6 max-w-4xl">
-      <h1 className="text-2xl font-bold text-white mb-1">
-        Good reading, {firstName}
-      </h1>
-      <div className="flex items-center justify-between mb-8">
-        <p className="text-muted-foreground text-sm">
-          {ratedCount > 0
-            ? `Recommendations based on ${ratedCount} book${ratedCount === 1 ? "" : "s"} you've rated`
-            : "Rate books to unlock personalised recommendations"}
-        </p>
-        <Link href="/how-it-works" className="text-xs text-emerald-400 hover:underline shrink-0 ml-4">
-          How it works
-        </Link>
+
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-white mb-1">Good reading, {firstName}</h1>
+        <div className="flex items-center justify-between">
+          <p className="text-muted-foreground text-sm">
+            {ratedCount > 0
+              ? `Recommendations based on ${ratedCount} book${ratedCount === 1 ? "" : "s"} you've rated`
+              : "Rate books to unlock personalised recommendations"}
+          </p>
+          <Link
+            href="/how-it-works"
+            className="text-xs text-emerald-400 hover:underline shrink-0 ml-4"
+          >
+            How it works
+          </Link>
+        </div>
       </div>
 
-      {/* Currently reading */}
-      {currentBook && (
-        <section className="mb-8">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Currently reading</h2>
-          <div className="bg-card border border-border rounded-xl p-4 flex gap-4 items-start max-w-lg">
-            <div className="flex-shrink-0">
-              {currentBook.book.cover ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={currentBook.book.cover} alt="" className="h-20 w-14 object-cover rounded-md shadow" />
-              ) : (
-                <div className="h-20 w-14 bg-muted rounded-md flex items-center justify-center">
-                  <BookOpen className="h-5 w-5 text-muted-foreground" />
-                </div>
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-white truncate">{currentBook.book.title}</p>
-              <p className="text-sm text-muted-foreground mb-3">{currentBook.book.author}</p>
-              <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1">
-                <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${currentPercent}%` }} />
-              </div>
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>{currentBook.progress} / {currentBook.book.pageCount ?? "?"} pages</span>
-                <span>{currentPercent}%</span>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
+      {/* Search */}
+      <SearchBar />
 
-      {/* Reading goal */}
-      {goal && (
-        <section className="mb-8">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Reading goal {new Date().getFullYear()}</h2>
-          <div className="bg-card border border-border rounded-xl p-4 max-w-lg">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-white font-medium">{booksReadThisYear} of {goal.target} books</span>
-              <span className="text-xs text-emerald-400">{Math.round((booksReadThisYear / goal.target) * 100)}%</span>
-            </div>
-            <div className="h-2 bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-emerald-500 rounded-full transition-all"
-                style={{ width: `${Math.min(100, Math.round((booksReadThisYear / goal.target) * 100))}%` }}
-              />
-            </div>
-          </div>
-        </section>
-      )}
+      {/* Friend Activity */}
+      <section className="mb-10">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+          Friend Activity
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          {MOCK_ACTIVITY.map((item) => (
+            <ActivityCard key={item.id} {...item} />
+          ))}
+        </div>
+      </section>
 
       {/* Section A: Top Picks for You */}
       <section className="mb-8">
         {topPicksDisplay.length > 0 ? (
           <>
             <div className="mb-3">
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Top Picks for You</h2>
+              <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                Top Picks for You
+              </h2>
               <p className="text-xs text-muted-foreground/60 mt-0.5">Based on your reading taste</p>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
@@ -249,9 +254,18 @@ export default async function HomePage() {
           </>
         ) : popularBooks.length > 0 ? (
           <>
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Popular right now</h2>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+              Popular right now
+            </h2>
             <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
-              {(popularBooks as Array<{ id: string; title: string; author: string; cover: string | null }>).map((b) => (
+              {(
+                popularBooks as Array<{
+                  id: string;
+                  title: string;
+                  author: string;
+                  cover: string | null;
+                }>
+              ).map((b) => (
                 <MatchCard
                   key={b.id}
                   variant="book"
@@ -266,9 +280,15 @@ export default async function HomePage() {
           </>
         ) : (
           <div>
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Top Picks for You</h2>
-            <p className="text-sm text-muted-foreground mb-1">Rate a few books and we&apos;ll find titles you&apos;ll love.</p>
-            <Link href="/library" className="text-xs text-emerald-400 hover:underline">Browse your library →</Link>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">
+              Top Picks for You
+            </h2>
+            <p className="text-sm text-muted-foreground mb-1">
+              Rate a few books and we&apos;ll find titles you&apos;ll love.
+            </p>
+            <Link href="/library" className="text-xs text-emerald-400 hover:underline">
+              Browse your library →
+            </Link>
           </div>
         )}
       </section>
@@ -303,10 +323,14 @@ export default async function HomePage() {
 
       {/* Section C: Explore Something Different */}
       {exploratoryBooksDisplay.length > 0 && (
-        <section className="mb-8 bg-card/40 border border-border/60 rounded-xl p-4">
+        <section className="mb-10 bg-card/40 border border-border/60 rounded-xl p-4">
           <div className="mb-3">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Explore Something Different</h2>
-            <p className="text-xs text-muted-foreground/60 mt-0.5">Outside your usual genres — selected because they match your reading style</p>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              Explore Something Different
+            </h2>
+            <p className="text-xs text-muted-foreground/60 mt-0.5">
+              Outside your usual genres — selected because they match your reading style
+            </p>
           </div>
           <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 no-scrollbar">
             {exploratoryBooksDisplay.map(({ book, match }) => (
@@ -327,118 +351,147 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Section D: Readers Like You */}
-      <section className="mb-8">
-        {readersLikeYou.length > 0 ? (
-          <>
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Readers Like You</h2>
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
-              {readersLikeYou.map(({ user, match }, i) => (
-                <MatchCard
-                  key={user.id}
-                  variant="person"
-                  title={user.name ?? user.username ?? "Reader"}
-                  subtitle={match.sharedGenres[0]}
-                  coverImage={user.avatar}
-                  score={match.score}
-                  confidence={match.confidence}
-                  reasons={match.matchReasons}
-                  meta={match.sharedGenres.slice(0, 2).join(" · ") || undefined}
-                  featured={i === 0}
-                  topMatch={i === 0 && userTopMatch}
-                  targetId={user.id}
-                />
-              ))}
-            </div>
-          </>
-        ) : trendingUsers.length > 0 ? (
-          <>
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Readers you might like</h2>
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
-              {(trendingUsers as Array<{ id: string; name: string | null; username: string | null; avatar: string | null }>).map((u) => (
-                <MatchCard
-                  key={u.id}
-                  variant="person"
-                  title={u.name ?? u.username ?? "Reader"}
-                  coverImage={u.avatar}
-                  badge="Trending"
-                  targetId={u.id}
-                />
-              ))}
-            </div>
-          </>
-        ) : (
-          <div>
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Readers Like You</h2>
-            <p className="text-sm text-muted-foreground mb-1">Rate more books to find readers with similar taste.</p>
-            <Link href="/library" className="text-xs text-emerald-400 hover:underline">Start rating books →</Link>
+      {/* People to Follow */}
+      {peopleToFollow.length > 0 && (
+        <section className="mb-10">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              People to Follow
+            </h2>
+            <Link href="/discover" className="text-xs text-emerald-400 hover:underline">
+              See all →
+            </Link>
           </div>
-        )}
-      </section>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {peopleToFollow.map(({ user, match }) => (
+              <PeopleSuggestion
+                key={user.id}
+                userId={user.id}
+                name={user.name ?? user.username ?? "Reader"}
+                username={user.username}
+                avatar={user.avatar}
+                matchScore={match.score}
+                sharedGenres={match.sharedGenres}
+                isFollowing={followingSet.has(user.id)}
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
-      {/* Clubs for you */}
-      <section className="mb-8">
-        {displayClubs.length > 0 ? (
-          <>
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Clubs for you</h2>
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
-              {displayClubs.map(({ club, match, exploratory }, i) => (
-                <MatchCard
-                  key={club.id}
-                  variant="club"
-                  title={club.name}
-                  subtitle={club.genres.slice(0, 2).join(", ")}
-                  coverImage={club.avatar ?? null}
-                  score={match.score}
-                  confidence={match.confidence}
-                  reasons={match.matchReasons}
-                  meta={`${club._count.members} members`}
-                  featured={i === 0 && !exploratory}
-                  topMatch={i === 0 && clubTopMatch && !exploratory}
-                  exploratory={exploratory}
-                  targetId={club.id}
-                />
-              ))}
-            </div>
-          </>
-        ) : activeClubs.length > 0 ? (
-          <>
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Active clubs</h2>
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
-              {(activeClubs as Array<{ id: string; name: string; avatar: string | null; genres: string[]; _count: { members: number } }>).map((c) => (
-                <MatchCard
-                  key={c.id}
-                  variant="club"
-                  title={c.name}
-                  subtitle={c.genres.slice(0, 2).join(", ")}
-                  coverImage={c.avatar ?? null}
-                  meta={`${c._count.members} members`}
-                  badge="Active"
-                  targetId={c.id}
-                />
-              ))}
-            </div>
-          </>
-        ) : (
-          <div>
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Clubs for you</h2>
-            <p className="text-sm text-muted-foreground mb-1">Rate more books to see clubs that match your reading style.</p>
-            <Link href="/clubs" className="text-xs text-emerald-400 hover:underline">Explore clubs →</Link>
+      {/* Clubs You'd Love */}
+      {clubsForDisplay.length > 0 && (
+        <section className="mb-10">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              Clubs You&apos;d Love
+            </h2>
+            <Link href="/clubs" className="text-xs text-emerald-400 hover:underline">
+              Browse all →
+            </Link>
           </div>
-        )}
-      </section>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {clubsForDisplay.map(({ club, match }) => (
+              <ClubSuggestionCard
+                key={club.id}
+                clubId={club.id}
+                name={club.name}
+                avatar={club.avatar}
+                cadence={cadenceMap.get(club.id)}
+                memberCount={club._count.members}
+                matchScore={match.score}
+                matchReason={match.matchReasons[0]}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Currently reading */}
+      {currentBook && (
+        <section className="mb-8">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+            Currently reading
+          </h2>
+          <div className="bg-card border border-border rounded-xl p-4 flex gap-4 items-start max-w-lg">
+            <div className="flex-shrink-0">
+              {currentBook.book.cover ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={currentBook.book.cover}
+                  alt=""
+                  className="h-20 w-14 object-cover rounded-md shadow"
+                />
+              ) : (
+                <div className="h-20 w-14 bg-muted rounded-md flex items-center justify-center">
+                  <BookOpen className="h-5 w-5 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-white truncate">{currentBook.book.title}</p>
+              <p className="text-sm text-muted-foreground mb-3">{currentBook.book.author}</p>
+              <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1">
+                <div
+                  className="h-full bg-emerald-500 rounded-full"
+                  style={{ width: `${currentPercent}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>
+                  {currentBook.progress} / {currentBook.book.pageCount ?? "?"} pages
+                </span>
+                <span>{currentPercent}%</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Reading goal */}
+      {goal && (
+        <section className="mb-8">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+            Reading goal {new Date().getFullYear()}
+          </h2>
+          <div className="bg-card border border-border rounded-xl p-4 max-w-lg">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-white font-medium">
+                {booksReadThisYear} of {goal.target} books
+              </span>
+              <span className="text-xs text-emerald-400">
+                {Math.round((booksReadThisYear / goal.target) * 100)}%
+              </span>
+            </div>
+            <div className="h-2 bg-muted rounded-full overflow-hidden">
+              <div
+                className="h-full bg-emerald-500 rounded-full transition-all"
+                style={{
+                  width: `${Math.min(100, Math.round((booksReadThisYear / goal.target) * 100))}%`,
+                }}
+              />
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Recently read */}
       {recentBooks.length > 0 && (
         <section className="mb-8">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Recently read</h2>
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+            Recently read
+          </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {recentBooks.map((ub) => (
               <div key={ub.id} className="group">
                 <div className="aspect-[2/3] bg-muted rounded-lg overflow-hidden mb-2 shadow">
                   {ub.book.cover ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={ub.book.cover} alt="" className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <img
+                      src={ub.book.cover}
+                      alt=""
+                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
                   ) : (
                     <div className="h-full w-full flex items-center justify-center">
                       <BookOpen className="h-6 w-6 text-muted-foreground" />
@@ -460,15 +513,20 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Empty state for new users */}
-      {!currentBook && recentBooks.length === 0 && (
+      {/* Empty state */}
+      {!currentBook && recentBooks.length === 0 && topPicksDisplay.length === 0 && (
         <div className="text-center py-16 text-muted-foreground">
           <BookOpen className="h-10 w-10 mx-auto mb-3 opacity-30" />
           <p className="text-sm font-medium mb-2 text-white">Your reading journey starts here</p>
           <p className="text-xs mb-1">Start by rating a few books you&apos;ve already read.</p>
-          <p className="text-xs mb-5 opacity-70">Even 3–5 ratings unlock personalised recommendations.</p>
+          <p className="text-xs mb-5 opacity-70">
+            Even 3–5 ratings unlock personalised recommendations.
+          </p>
           <div className="flex gap-3 justify-center">
-            <Link href="/library" className="text-sm bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg transition-colors">
+            <Link
+              href="/library"
+              className="text-sm bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg transition-colors"
+            >
               Rate books
             </Link>
             <Link href="/how-it-works" className="text-sm text-emerald-400 hover:underline py-2">
