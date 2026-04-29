@@ -272,355 +272,317 @@ export default async function HomePage() {
     .map(({ event }) => mapToActivityItem(event))
     .filter((item): item is ActivityItem => item !== null);
 
+  // ── Build blended feed ────────────────────────────────────────────────────────
+
+  type FeedSlot =
+    | { kind: "activity"; item: ActivityItem }
+    | { kind: "people"; items: ScoredUser[] }
+    | { kind: "clubs"; items: ScoredClub[] }
+    | { kind: "books"; label: string; sublabel?: string; items: ScoredBook[]; isTrigger?: boolean; triggerName?: string; isExploratory?: boolean }
+    | { kind: "popular"; items: Array<{ id: string; title: string; author: string; cover: string | null }> }
+    | { kind: "currently_reading" }
+    | { kind: "reading_goal" }
+    | { kind: "recently_read" };
+
+  const suggPool: FeedSlot[] = [];
+
+  if (topPicksDisplay.length > 0) {
+    suggPool.push({ kind: "books", label: "Top Picks for You", sublabel: "Based on your reading taste", items: topPicksDisplay });
+  } else if (popularBooks.length > 0) {
+    suggPool.push({ kind: "popular", items: popularBooks as Array<{ id: string; title: string; author: string; cover: string | null }> });
+  }
+  if (peopleToFollow.length > 0) {
+    suggPool.push({ kind: "people", items: peopleToFollow.slice(0, 2) });
+  }
+  if (clubsForDisplay.length > 0) {
+    suggPool.push({ kind: "clubs", items: clubsForDisplay.slice(0, 2) });
+  }
+  if (triggerTitle && triggerGroup.length >= 2) {
+    suggPool.push({ kind: "books", label: "Because you liked", items: triggerGroup, isTrigger: true, triggerName: triggerTitle });
+  }
+  if (exploratoryBooksDisplay.length > 0) {
+    suggPool.push({ kind: "books", label: "Explore Something Different", sublabel: "Outside your usual genres", items: exploratoryBooksDisplay, isExploratory: true });
+  }
+
+  const contentSlots: FeedSlot[] = [];
+  let sIdx = 0;
+  for (let i = 0; i < activityItems.length; i++) {
+    contentSlots.push({ kind: "activity", item: activityItems[i] });
+    if ((i + 1) % 2 === 0 && sIdx < suggPool.length) {
+      contentSlots.push(suggPool[sIdx++]);
+    }
+  }
+  while (sIdx < suggPool.length) contentSlots.push(suggPool[sIdx++]);
+
+  const anchorSlots: FeedSlot[] = [];
+  if (currentBook) anchorSlots.push({ kind: "currently_reading" });
+  if (goal) anchorSlots.push({ kind: "reading_goal" });
+  if (recentBooks.length > 0) anchorSlots.push({ kind: "recently_read" });
+
+  const feedSlots: FeedSlot[] = [...contentSlots, ...anchorSlots];
+  const isEmpty = feedSlots.length === 0;
+
+  // ── Render ────────────────────────────────────────────────────────────────────
+
   return (
-    <div className="p-6 max-w-4xl">
+    <div className="px-6 py-8 max-w-3xl">
 
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground mb-1">Good reading, {firstName}</h1>
-        <div className="flex items-center justify-between">
-          <p className="text-muted-foreground text-sm">
-            {ratedCount > 0
-              ? `Recommendations based on ${ratedCount} book${ratedCount === 1 ? "" : "s"} you've rated`
-              : "Rate books to unlock personalised recommendations"}
-          </p>
-          <Link
-            href="/how-it-works"
-            className="text-xs text-primary hover:underline shrink-0 ml-4"
-          >
-            How it works
-          </Link>
-        </div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-foreground mb-2">Good reading, {firstName}</h1>
+        <p className="text-sm text-muted-foreground">
+          {ratedCount > 0
+            ? <>Personalised from {ratedCount} book{ratedCount === 1 ? "" : "s"} you&apos;ve rated{" · "}<Link href="/how-it-works" className="text-primary hover:underline">How it works</Link></>
+            : "Rate books to unlock personalised recommendations"
+          }
+        </p>
       </div>
 
       {/* Search */}
       <SearchBar />
 
-      {/* Friend Activity */}
-      {activityItems.length > 0 && (
-        <section className="mb-10">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
-            Friend Activity
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {activityItems.map((item) => (
-              <ActivityCard key={item.id} {...item} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Section A: Top Picks for You */}
-      <section className="mb-8">
-        {topPicksDisplay.length > 0 ? (
-          <>
-            <div className="mb-3">
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                Top Picks for You
-              </h2>
-              <p className="text-xs text-muted-foreground/60 mt-0.5">Based on your reading taste</p>
-            </div>
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
-              {topPicksDisplay.map(({ book, match }, i) => (
-                <MatchCard
-                  key={book.id}
-                  variant="book"
-                  title={book.title}
-                  subtitle={book.author}
-                  coverImage={book.cover ?? null}
-                  score={match.score}
-                  confidence={match.confidence}
-                  reasons={match.matchReasons}
-                  meta={match.sharedGenres.slice(0, 2).join(" · ") || undefined}
-                  featured={i === 0}
-                  topMatch={i === 0 && bookTopMatch}
-                  targetId={book.id}
-                />
-              ))}
-            </div>
-          </>
-        ) : popularBooks.length > 0 ? (
-          <>
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
-              Popular right now
-            </h2>
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
-              {(
-                popularBooks as Array<{
-                  id: string;
-                  title: string;
-                  author: string;
-                  cover: string | null;
-                }>
-              ).map((b) => (
-                <MatchCard
-                  key={b.id}
-                  variant="book"
-                  title={b.title}
-                  subtitle={b.author}
-                  coverImage={b.cover ?? null}
-                  badge="Popular"
-                  targetId={b.id}
-                />
-              ))}
-            </div>
-          </>
-        ) : (
-          <div>
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">
-              Top Picks for You
-            </h2>
-            <p className="text-sm text-muted-foreground mb-1">
-              Rate a few books and we&apos;ll find titles you&apos;ll love.
-            </p>
-            <Link href="/library" className="text-xs text-primary hover:underline">
-              Browse your library →
-            </Link>
-          </div>
-        )}
-      </section>
-
-      {/* Section B: Because You Liked [X] */}
-      {triggerTitle && triggerGroup.length >= 2 && (
-        <section className="mb-8">
-          <div className="mb-3">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Because You Liked{" "}
-              <span className="text-primary normal-case italic">{triggerTitle}</span>
-            </h2>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
-            {triggerGroup.map(({ book, match }) => (
-              <MatchCard
-                key={book.id}
-                variant="book"
-                title={book.title}
-                subtitle={book.author}
-                coverImage={book.cover ?? null}
-                score={match.score}
-                confidence={match.confidence}
-                reasons={match.matchReasons}
-                meta={match.sharedGenres.slice(0, 2).join(" · ") || undefined}
-                targetId={book.id}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Section C: Explore Something Different */}
-      {exploratoryBooksDisplay.length > 0 && (
-        <section className="mb-10 bg-card/40 border border-border/60 rounded-xl p-4">
-          <div className="mb-3">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Explore Something Different
-            </h2>
-            <p className="text-xs text-muted-foreground/60 mt-0.5">
-              Outside your usual genres — selected because they match your reading style
-            </p>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 no-scrollbar">
-            {exploratoryBooksDisplay.map(({ book, match }) => (
-              <MatchCard
-                key={book.id}
-                variant="book"
-                title={book.title}
-                subtitle={book.author}
-                coverImage={book.cover ?? null}
-                score={match.score}
-                confidence={match.confidence}
-                reasons={match.matchReasons}
-                exploratory
-                targetId={book.id}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* People to Follow */}
-      {peopleToFollow.length > 0 && (
-        <section className="mb-10">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              People to Follow
-            </h2>
-            <Link href="/discover" className="text-xs text-primary hover:underline">
-              See all →
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {peopleToFollow.map(({ user, match }) => (
-              <PeopleSuggestion
-                key={user.id}
-                userId={user.id}
-                name={user.name ?? user.username ?? "Reader"}
-                username={user.username}
-                avatar={user.avatar}
-                matchScore={match.score}
-                sharedGenres={match.sharedGenres}
-                isFollowing={followingSet.has(user.id)}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Clubs You'd Love */}
-      {clubsForDisplay.length > 0 && (
-        <section className="mb-10">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Clubs You&apos;d Love
-            </h2>
-            <Link href="/clubs" className="text-xs text-primary hover:underline">
-              Browse all →
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {clubsForDisplay.map(({ club, match }) => (
-              <ClubSuggestionCard
-                key={club.id}
-                clubId={club.id}
-                name={club.name}
-                avatar={club.avatar}
-                cadence={cadenceMap.get(club.id)}
-                memberCount={club._count.members}
-                matchScore={match.score}
-                matchReason={match.matchReasons[0]}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Currently reading */}
-      {currentBook && (
-        <section className="mb-8">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
-            Currently reading
-          </h2>
-          <div className="bg-card border border-border rounded-xl p-4 flex gap-4 items-start max-w-lg">
-            <div className="flex-shrink-0">
-              {currentBook.book.cover ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={currentBook.book.cover}
-                  alt=""
-                  className="h-20 w-14 object-cover rounded-md shadow"
-                />
-              ) : (
-                <div className="h-20 w-14 bg-muted rounded-md flex items-center justify-center">
-                  <BookOpen className="h-5 w-5 text-muted-foreground" />
-                </div>
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-foreground italic truncate">{currentBook.book.title}</p>
-              <p className="text-sm text-muted-foreground mb-3">{currentBook.book.author}</p>
-              <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1">
-                <div
-                  className="h-full bg-primary rounded-full"
-                  style={{ width: `${currentPercent}%` }}
-                />
-              </div>
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>
-                  {currentBook.progress} / {currentBook.book.pageCount ?? "?"} pages
-                </span>
-                <span>{currentPercent}%</span>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Reading goal */}
-      {goal && (
-        <section className="mb-8">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
-            Reading goal {new Date().getFullYear()}
-          </h2>
-          <div className="bg-card border border-border rounded-xl p-4 max-w-lg">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-foreground font-medium">
-                {booksReadThisYear} of {goal.target} books
-              </span>
-              <span className="text-xs text-primary font-semibold">
-                {Math.round((booksReadThisYear / goal.target) * 100)}%
-              </span>
-            </div>
-            <div className="h-2 bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary rounded-full transition-all"
-                style={{
-                  width: `${Math.min(100, Math.round((booksReadThisYear / goal.target) * 100))}%`,
-                }}
-              />
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Recently read */}
-      {recentBooks.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
-            Recently read
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {recentBooks.map((ub) => (
-              <div key={ub.id} className="group">
-                <div className="aspect-[2/3] bg-muted rounded-lg overflow-hidden mb-2 shadow">
-                  {ub.book.cover ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={ub.book.cover}
-                      alt=""
-                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center">
-                      <BookOpen className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                  )}
-                </div>
-                <p className="text-sm font-medium text-foreground italic truncate">{ub.book.title}</p>
-                <p className="text-xs text-muted-foreground truncate">{ub.book.author}</p>
-                {ub.rating && (
-                  <div className="flex items-center gap-0.5 mt-1">
-                    {Array.from({ length: ub.rating }).map((_, i) => (
-                      <Star key={i} className="h-3 w-3 fill-primary text-primary" />
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Empty state */}
-      {!currentBook && recentBooks.length === 0 && topPicksDisplay.length === 0 && (
-        <div className="text-center py-16 text-muted-foreground">
-          <BookOpen className="h-10 w-10 mx-auto mb-3 opacity-30" />
-          <p className="text-sm font-medium mb-2 text-foreground">Your reading journey starts here</p>
-          <p className="text-xs mb-1">Start by rating a few books you&apos;ve already read.</p>
-          <p className="text-xs mb-5 opacity-70">
-            Even 3–5 ratings unlock personalised recommendations.
-          </p>
+      {/* Today + feed */}
+      {isEmpty ? (
+        <div className="text-center py-20 text-muted-foreground">
+          <BookOpen className="h-10 w-10 mx-auto mb-4 opacity-25" />
+          <p className="text-base font-semibold mb-2 text-foreground">Your reading journey starts here</p>
+          <p className="text-sm mb-1">Rate a few books you&apos;ve already read.</p>
+          <p className="text-sm mb-8 opacity-60">Even 3–5 ratings unlock personalised recommendations.</p>
           <div className="flex gap-3 justify-center">
-            <Link
-              href="/library"
-              className="text-sm bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg transition-colors"
-            >
+            <Link href="/library" className="text-sm bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-lg transition-colors">
               Rate books
             </Link>
-            <Link href="/how-it-works" className="text-sm text-primary hover:underline py-2">
+            <Link href="/how-it-works" className="text-sm text-primary hover:underline py-2.5">
               How it works
             </Link>
           </div>
         </div>
+      ) : (
+        <>
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-foreground">Today</h2>
+          </div>
+
+          <div className="space-y-5">
+            {feedSlots.map((slot, i) => {
+              switch (slot.kind) {
+
+                case "activity":
+                  return <ActivityCard key={`a-${slot.item.id}`} {...slot.item} />;
+
+                case "people":
+                  return (
+                    <div key={`people-${i}`} className="pt-2">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                          Readers like you
+                        </span>
+                        {peopleToFollow.length > 2 && (
+                          <Link href="/discover" className="text-xs text-primary hover:underline">See all →</Link>
+                        )}
+                      </div>
+                      <div className="space-y-2.5">
+                        {slot.items.map(({ user, match }) => (
+                          <PeopleSuggestion
+                            key={user.id}
+                            userId={user.id}
+                            name={user.name ?? user.username ?? "Reader"}
+                            username={user.username}
+                            avatar={user.avatar}
+                            matchScore={match.score}
+                            sharedGenres={match.sharedGenres}
+                            isFollowing={followingSet.has(user.id)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  );
+
+                case "clubs":
+                  return (
+                    <div key={`clubs-${i}`} className="pt-2">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                          Clubs you&apos;d love
+                        </span>
+                        {clubsForDisplay.length > 2 && (
+                          <Link href="/clubs" className="text-xs text-primary hover:underline">Browse all →</Link>
+                        )}
+                      </div>
+                      <div className="space-y-2.5">
+                        {slot.items.map(({ club, match }) => (
+                          <ClubSuggestionCard
+                            key={club.id}
+                            clubId={club.id}
+                            name={club.name}
+                            avatar={club.avatar}
+                            cadence={cadenceMap.get(club.id)}
+                            memberCount={club._count.members}
+                            matchScore={match.score}
+                            matchReason={match.matchReasons[0]}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  );
+
+                case "books":
+                  return (
+                    <div key={`books-${i}`} className="pt-2">
+                      <div className="mb-3">
+                        <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                          {slot.isTrigger && slot.triggerName
+                            ? <>Because you liked{" "}<span className="text-primary italic normal-case">{slot.triggerName}</span></>
+                            : slot.label}
+                        </span>
+                        {slot.sublabel && (
+                          <p className="text-xs text-muted-foreground/60 mt-0.5">{slot.sublabel}</p>
+                        )}
+                      </div>
+                      <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
+                        {slot.items.map(({ book, match }, idx) => (
+                          <MatchCard
+                            key={book.id}
+                            variant="book"
+                            title={book.title}
+                            subtitle={book.author}
+                            coverImage={book.cover ?? null}
+                            score={match.score}
+                            confidence={match.confidence}
+                            reasons={match.matchReasons}
+                            meta={match.sharedGenres.slice(0, 2).join(" · ") || undefined}
+                            featured={idx === 0 && !slot.isExploratory && !slot.isTrigger}
+                            topMatch={idx === 0 && bookTopMatch && !slot.isExploratory && !slot.isTrigger}
+                            exploratory={slot.isExploratory}
+                            targetId={book.id}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  );
+
+                case "popular":
+                  return (
+                    <div key={`popular-${i}`} className="pt-2">
+                      <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3 block">
+                        Popular right now
+                      </span>
+                      <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
+                        {slot.items.map((b) => (
+                          <MatchCard
+                            key={b.id}
+                            variant="book"
+                            title={b.title}
+                            subtitle={b.author}
+                            coverImage={b.cover ?? null}
+                            badge="Popular"
+                            targetId={b.id}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  );
+
+                case "currently_reading":
+                  if (!currentBook) return null;
+                  return (
+                    <div key="currently-reading" className="pt-2">
+                      <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3 block">
+                        On your nightstand
+                      </span>
+                      <div className="bg-card border border-border rounded-xl p-5 flex gap-4 items-start max-w-lg">
+                        <div className="flex-shrink-0">
+                          {currentBook.book.cover ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={currentBook.book.cover} alt="" className="h-20 w-14 object-cover rounded-md shadow-sm" />
+                          ) : (
+                            <div className="h-20 w-14 bg-muted rounded-md flex items-center justify-center">
+                              <BookOpen className="h-5 w-5 text-muted-foreground" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-foreground italic truncate">{currentBook.book.title}</p>
+                          <p className="text-sm text-muted-foreground mb-4">{currentBook.book.author}</p>
+                          <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1.5">
+                            <div className="h-full bg-primary rounded-full" style={{ width: `${currentPercent}%` }} />
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>{currentBook.progress} / {currentBook.book.pageCount ?? "?"} pages</span>
+                            <span>{currentPercent}%</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+
+                case "reading_goal":
+                  if (!goal) return null;
+                  return (
+                    <div key="reading-goal" className="pt-2">
+                      <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3 block">
+                        {new Date().getFullYear()} reading goal
+                      </span>
+                      <div className="bg-card border border-border rounded-xl p-5 max-w-lg">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm text-foreground font-medium">
+                            {booksReadThisYear} of {goal.target} books
+                          </span>
+                          <span className="text-xs text-primary font-semibold">
+                            {Math.round((booksReadThisYear / goal.target) * 100)}%
+                          </span>
+                        </div>
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary rounded-full transition-all"
+                            style={{ width: `${Math.min(100, Math.round((booksReadThisYear / goal.target) * 100))}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+
+                case "recently_read":
+                  return (
+                    <div key="recently-read" className="pt-2">
+                      <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-3 block">
+                        Recently read
+                      </span>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        {recentBooks.map((ub) => (
+                          <div key={ub.id} className="group">
+                            <div className="aspect-[2/3] bg-muted rounded-lg overflow-hidden mb-2 shadow-sm">
+                              {ub.book.cover ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={ub.book.cover}
+                                  alt=""
+                                  className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                              ) : (
+                                <div className="h-full w-full flex items-center justify-center">
+                                  <BookOpen className="h-6 w-6 text-muted-foreground" />
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-sm font-medium text-foreground italic truncate">{ub.book.title}</p>
+                            <p className="text-xs text-muted-foreground truncate">{ub.book.author}</p>
+                            {ub.rating && (
+                              <div className="flex items-center gap-0.5 mt-1">
+                                {Array.from({ length: ub.rating }).map((_, idx) => (
+                                  <Star key={idx} className="h-3 w-3 fill-primary text-primary" />
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+              }
+            })}
+          </div>
+        </>
       )}
     </div>
   );
