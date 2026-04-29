@@ -146,6 +146,7 @@ model User {
   feedItems             FeedItem[]
   recommendationFeedback RecommendationFeedback[]
   activityEvents        ActivityEvent[]
+  activityLikes         ActivityLike[]
   targetedActivities    ActivityEvent[]    @relation("ActivityTargetUser")
 
   @@index([email])
@@ -722,8 +723,22 @@ model ActivityEvent {
   book       Book? @relation(fields: [bookId], references: [id], onDelete: SetNull)
   targetUser User? @relation("ActivityTargetUser", fields: [targetUserId], references: [id], onDelete: SetNull)
   club       Club? @relation(fields: [clubId], references: [id], onDelete: SetNull)
+  likes      ActivityLike[]
 
   @@index([userId, createdAt])
+}
+
+model ActivityLike {
+  id         String   @id @default(cuid())
+  userId     String
+  activityId String
+  createdAt  DateTime @default(now())
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activity ActivityEvent @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, activityId])
+  @@index([activityId])
 }
 
 // ─── Recommendation Feedback ─────────────────────────────────────────────────

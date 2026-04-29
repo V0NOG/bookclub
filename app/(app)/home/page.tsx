@@ -59,25 +59,29 @@ type RawEvent = {
   user: { id: string; name: string | null; username: string | null; avatar: string | null };
   book: { id: string; title: string } | null;
   club: { id: string; name: string } | null;
+  likes: { activityId: string }[];
+  _count: { likes: number };
 };
 
 type FeedScore = {
   score: number;
-  debug: { recencyScore: number; tasteMatchScore: number; userMatchScore: number; finalScore: number };
+  debug: { recencyScore: number; tasteMatchScore: number; userMatchScore: number; interactionBoost: number; finalScore: number };
 };
 
 function scoreFeedItem(
   event: RawEvent,
   bookScoreMap: Map<string, number>,
-  userScoreMap: Map<string, number>
+  userScoreMap: Map<string, number>,
+  likedBookIds: Set<string>
 ): FeedScore {
   const hoursElapsed = (Date.now() - event.createdAt.getTime()) / 3_600_000;
   const recencyScore = 1 / (hoursElapsed + 1);
   const tasteMatchScore = event.bookId ? (bookScoreMap.get(event.bookId) ?? 0) / 100 : 0;
   const userMatchScore = (userScoreMap.get(event.userId) ?? 0) / 100;
+  const interactionBoost = event.bookId && likedBookIds.has(event.bookId) ? 0.05 : 0;
   const finalScore =
-    0.5 * recencyScore + 0.3 * tasteMatchScore + 0.2 * userMatchScore + Math.random() * 0.03;
-  return { score: finalScore, debug: { recencyScore, tasteMatchScore, userMatchScore, finalScore } };
+    0.5 * recencyScore + 0.3 * tasteMatchScore + 0.2 * userMatchScore + interactionBoost + Math.random() * 0.03;
+  return { score: finalScore, debug: { recencyScore, tasteMatchScore, userMatchScore, interactionBoost, finalScore } };
 }
 
 function applyFeedDiversity(
@@ -99,16 +103,20 @@ function applyFeedDiversity(
 function mapToActivityItem(event: RawEvent): ActivityItem | null {
   const actorName = event.user.name ?? event.user.username ?? "Someone";
   const timestamp = formatTimestamp(event.createdAt);
-  const base = { id: event.id, actorName, actorAvatar: event.user.avatar, timestamp };
+  const likeCount = event._count.likes;
+  const isLiked = event.likes.length > 0;
+  const base = { id: event.id, actorName, actorAvatar: event.user.avatar, timestamp, likeCount, isLiked };
 
   switch (event.type) {
     case "finished":
     case "started":
       return event.book
-        ? { ...base, action: event.type as "finished" | "started", bookTitle: event.book.title }
+        ? { ...base, action: event.type as "finished" | "started", bookTitle: event.book.title, bookId: event.book.id }
         : null;
     case "rated":
-      return event.book ? { ...base, action: "rated" as const, bookTitle: event.book.title } : null;
+      return event.book
+        ? { ...base, action: "rated" as const, bookTitle: event.book.title, bookId: event.book.id }
+        : null;
     case "joined_club":
       return event.club ? { ...base, action: "joined_club" as const, clubName: event.club.name } : null;
     default:
@@ -228,11 +236,13 @@ export default async function HomePage() {
     db.activityEvent.findMany({
       where: { userId: { in: actorIds } },
       orderBy: { createdAt: "desc" },
-      take: 10,
+      take: 20,
       include: {
         user: { select: { id: true, name: true, username: true, avatar: true } },
         book: { select: { id: true, title: true } },
         club: { select: { id: true, name: true } },
+        likes: { where: { userId }, select: { activityId: true } },
+        _count: { select: { likes: true } },
       },
     }),
   ]);
@@ -242,10 +252,16 @@ export default async function HomePage() {
   const bookScoreMap = new Map(rawMatches.bookMatches.map((r) => [r.book.id, r.match.score]));
   const userScoreMap = new Map(rawMatches.userMatches.map((r) => [r.user.id, r.match.score]));
 
+  const likedBookIds = new Set(
+    rawActivityEvents
+      .filter((e) => e.likes.length > 0 && e.bookId)
+      .map((e) => e.bookId!)
+  );
+
   const activityItems: ActivityItem[] = applyFeedDiversity(
     rawActivityEvents
       .map((event) => {
-        const { score, debug } = scoreFeedItem(event, bookScoreMap, userScoreMap);
+        const { score, debug } = scoreFeedItem(event, bookScoreMap, userScoreMap, likedBookIds);
         if (process.env.NODE_ENV === "development") {
           console.log(`[feed] ${event.type}@${event.userId}`, debug);
         }
