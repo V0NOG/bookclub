@@ -52,12 +52,26 @@ function formatTimestamp(date: Date): string {
 
 type RawEvent = {
   id: string;
+  userId: string;
+  bookId: string | null;
   type: string;
   createdAt: Date;
-  user: { name: string | null; username: string | null; avatar: string | null };
-  book: { title: string } | null;
-  club: { name: string } | null;
+  user: { id: string; name: string | null; username: string | null; avatar: string | null };
+  book: { id: string; title: string } | null;
+  club: { id: string; name: string } | null;
 };
+
+function scoreFeedItem(
+  event: RawEvent,
+  bookScoreMap: Map<string, number>,
+  userScoreMap: Map<string, number>
+): number {
+  const hoursElapsed = (Date.now() - event.createdAt.getTime()) / 3_600_000;
+  const recencyScore = 1 / (hoursElapsed + 1);
+  const tasteMatchScore = event.bookId ? (bookScoreMap.get(event.bookId) ?? 0) / 100 : 0;
+  const userMatchScore = (userScoreMap.get(event.userId) ?? 0) / 100;
+  return 0.5 * recencyScore + 0.3 * tasteMatchScore + 0.2 * userMatchScore;
+}
 
 function mapToActivityItem(event: RawEvent): ActivityItem | null {
   const actorName = event.user.name ?? event.user.username ?? "Someone";
@@ -201,8 +215,14 @@ export default async function HomePage() {
   ]);
 
   const cadenceMap = new Map(clubCadenceRows.map((c) => [c.id, c.meetingCadence]));
+
+  const bookScoreMap = new Map(rawMatches.bookMatches.map((r) => [r.book.id, r.match.score]));
+  const userScoreMap = new Map(rawMatches.userMatches.map((r) => [r.user.id, r.match.score]));
+
   const activityItems: ActivityItem[] = rawActivityEvents
-    .map(mapToActivityItem)
+    .map((event) => ({ event, score: scoreFeedItem(event, bookScoreMap, userScoreMap) }))
+    .sort((a, b) => b.score - a.score)
+    .map(({ event }) => mapToActivityItem(event))
     .filter((item): item is ActivityItem => item !== null);
 
   return (
