@@ -6,7 +6,7 @@ Books enter the Library through actions such as Want to Read, Currently Reading,
 
 Experience intent:
 
-The Library should feel like a growing personal collection. Every add or status change should make the shelf feel more complete and more organized, without requiring the user to understand where the data moved.
+The Library should feel like a growing personal collection. Every add or status change should make the shelf feel more complete and more organized, without requiring the user to understand where the data moved. Users should never question whether an action succeeded.
 
 Flow:
 
@@ -20,13 +20,17 @@ Flow:
 
 The Library also surfaces a small Recently Added section using existing `UserBook.createdAt`, giving users visible confirmation that their collection is growing.
 
+### Feedback Layer
+
+Toast confirms the action. Inline highlight shows where the book appeared or changed, so the user can connect the action to the updated collection.
+
 ## Tracker Flow
 
 Tracker turns reading activity into visible progress.
 
 Experience intent:
 
-Tracker should reinforce habit. Logging a session should feel like a small act of momentum: progress moves, recent history grows, and milestones acknowledge meaningful steps without turning reading into a noisy game.
+Tracker should reinforce habit. Logging should feel fast and frictionless: progress moves, recent history grows, and milestones acknowledge meaningful steps without turning reading into a noisy game.
 
 Flow:
 
@@ -39,6 +43,10 @@ Flow:
 7. Milestone feedback appears when progress reaches 25%, 50%, 75%, or 100%.
 
 Tracker feedback should emphasize progress, not gamification noise.
+
+### Feedback Layer
+
+Progress animation shows the result of the session. Milestone feedback appears only at meaningful thresholds, so routine logging stays calm while real progress feels visible.
 
 ## Clubs Flow
 
@@ -60,13 +68,17 @@ Flow:
 
 Club detail should feel active through member presence and recent activity, even when the club has limited content.
 
+### Feedback Layer
+
+Join and leave actions use concise confirmation plus an updated control state. Member presence and recent activity provide context so even low-content clubs feel active.
+
 ## Feed Flow
 
 Feed interactions are optimistic where safe.
 
 Experience intent:
 
-Feed should feel alive but calm. Likes, follows, and saves should respond quickly, while the overall stream remains editorial and readable rather than social-media noisy.
+Feed should feel alive but calm. Likes, follows, and saves should feel immediate but not noisy, while the overall stream remains editorial and readable rather than social-media driven.
 
 Flow:
 
@@ -81,13 +93,17 @@ The Feed supports two modes:
 - **For you**: broader recommendation-oriented activity.
 - **Social feed**: current user plus followed readers.
 
+### Feedback Layer
+
+Optimistic UI makes the action feel immediate. A small row-level confirmation or toast explains the result only when the state change might otherwise be missed.
+
 ## Challenges Flow
 
 Challenges build motivation from existing participation data.
 
 Experience intent:
 
-Challenges should motivate without gamification overload. Joining should feel like a lightweight commitment, and progress should be clear enough to encourage return visits without overwhelming the reading experience.
+Challenges should motivate without gamification overload. Joining should feel like a lightweight commitment, and progress should feel visible without turning into a game.
 
 Flow:
 
@@ -99,3 +115,7 @@ Flow:
 6. Leave actions remove participation and refresh the page.
 
 Challenge feedback should make participation feel acknowledged while keeping the interface lightweight.
+
+### Feedback Layer
+
+Join and leave actions update participation state directly. Progress bars and milestone labels show movement toward the goal without adding extra reward mechanics.

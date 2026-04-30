@@ -48,6 +48,10 @@ Progress animation should only appear where the numeric progress itself is meani
 
 ## Decision Rules
 
+Each action should use only one primary feedback type. Do not stack toast, highlight, and animation unless the action is a true milestone.
+
+Prefer the smallest feedback that makes the result clear.
+
 Use `folio-updated` when a specific visible element changed and the user should be able to locate that change. Examples: a feed row after liking, a newly added library item, or a join/leave control after success.
 
 Use `folio-milestone` when progress crosses a meaningful threshold. Examples: 25%, 50%, 75%, 100%, completing a book, or reaching challenge progress. Do not use it for routine saves.
@@ -55,8 +59,6 @@ Use `folio-milestone` when progress crosses a meaningful threshold. Examples: 25
 Use only a toast when the action succeeds but the visible UI already communicates the result, or when the changed data is elsewhere. Examples: saving settings, updating profile fields, or a background revalidation.
 
 Use no animation when the interaction already has an obvious spatial response. Examples: opening menus, navigating routes, switching tabs, or revealing a panel.
-
-If multiple feedback types could apply, choose the smallest one that makes the result clear.
 
 ## Motion Hierarchy
 
@@ -97,3 +99,10 @@ Animations should be fast, small, and purposeful.
 - Keep secondary UI quieter than primary content.
 
 The goal is to make Folio feel responsive and alive while preserving the calm editorial Stacks direction.
+
+### What NOT to do
+
+- Do not use `folio-milestone` for normal saves.
+- Do not apply `folio-updated` to entire pages.
+- Do not animate every repeated list item.
+- Do not use shimmer outside loading states.
