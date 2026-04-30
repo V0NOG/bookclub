@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { toggleChallengeParticipation } from "@/app/actions/challenge";
 
 export function ChallengeToggleButton({
@@ -22,9 +23,13 @@ export function ChallengeToggleButton({
       const result = await toggleChallengeParticipation(challengeId);
       if (result.success) {
         setJoined(result.joined);
+        const nextMessage = result.joined ? "Joined challenge." : "Left challenge.";
+        setMessage(nextMessage);
+        toast.success(nextMessage);
       } else {
         setJoined(previous);
         setMessage(result.error);
+        toast.error(result.error);
       }
     });
   }
@@ -41,9 +46,13 @@ export function ChallengeToggleButton({
             : "border-transparent bg-primary text-primary-foreground hover:bg-primary/90"
         }`}
       >
-        {pending ? "Saving..." : joined ? "Leave" : "Join"}
+        {pending ? (joined ? "Leaving..." : "Joining...") : joined ? "Leave" : "Join"}
       </button>
-      {message && <p className="max-w-40 text-right text-xs text-destructive">{message}</p>}
+      {message && (
+        <p className={`max-w-40 text-right text-xs ${message.endsWith(".") ? "text-secondary" : "text-destructive"}`}>
+          {message}
+        </p>
+      )}
     </div>
   );
 }

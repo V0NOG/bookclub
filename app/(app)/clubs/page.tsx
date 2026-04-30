@@ -138,12 +138,12 @@ export default async function ClubsPage() {
         <div className="text-center py-20 text-muted-foreground">
           <Users className="h-10 w-10 mx-auto mb-4 opacity-25" />
           <p className="text-base font-semibold mb-2 text-foreground">No clubs yet</p>
-          <p className="text-sm mb-8">Rate books in your library to get matched with clubs that suit your taste.</p>
+          <p className="text-sm mb-8">Discover clubs matched to your taste, then join the ones that are open.</p>
           <Link
-            href="/library"
+            href="/discover"
             className="text-sm bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-lg transition-colors"
           >
-            Go to library
+            Discover clubs
           </Link>
         </div>
       )}

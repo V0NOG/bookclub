@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
 import { CalendarDays, Trophy, Users } from "lucide-react";
 import { ChallengeToggleButton } from "@/components/challenges/challenge-toggle-button";
+import Link from "next/link";
 
 function ChallengeCard({
   title,
@@ -103,12 +104,15 @@ export default async function ChallengesPage() {
           </div>
         ) : (
           <div className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
-            You have not joined a challenge yet. Open community challenges are listed below.
+            <p>You have not joined a challenge yet. Open community challenges are listed below.</p>
+            <a href="#open-challenges" className="mt-3 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
+              Browse open challenges
+            </a>
           </div>
         )}
       </section>
 
-      <section>
+      <section id="open-challenges">
         <h2 className="text-lg font-semibold text-foreground mb-4">Open challenges</h2>
         {openChallenges.length > 0 ? (
           <div>
@@ -135,6 +139,9 @@ export default async function ChallengesPage() {
             <Trophy className="h-10 w-10 text-muted-foreground/40 mx-auto mb-4" />
             <p className="text-base font-semibold text-foreground">No open challenges</p>
             <p className="text-sm text-muted-foreground mt-2">Club and public challenges will appear here when available.</p>
+            <Link href="/clubs" className="mt-5 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
+              Explore clubs
+            </Link>
           </div>
         )}
       </section>

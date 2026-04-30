@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Star } from "lucide-react";
+import { toast } from "sonner";
 import { rateBook, setBookStatus } from "@/app/actions/user-book";
 
 type Status = "WANT_TO_READ" | "CURRENTLY_READING" | "READ" | "ABANDONED";
@@ -12,6 +13,13 @@ const STATUSES: { value: Status; label: string }[] = [
   { value: "READ", label: "Read" },
   { value: "ABANDONED", label: "Abandoned" },
 ];
+
+const STATUS_LABEL: Record<Status, string> = {
+  WANT_TO_READ: "Want to read",
+  CURRENTLY_READING: "Currently Reading",
+  READ: "Read",
+  ABANDONED: "Abandoned",
+};
 
 export function LibraryBookActions({
   bookId,
@@ -36,6 +44,11 @@ export function LibraryBookActions({
       if (!result.success) {
         setStatus(previous);
         setMessage(result.error);
+        toast.error(result.error);
+      } else {
+        const nextMessage = `Moved to ${STATUS_LABEL[nextStatus]}.`;
+        setMessage(nextMessage);
+        toast.success(nextMessage);
       }
     });
   }
@@ -49,8 +62,12 @@ export function LibraryBookActions({
       if (!result.success) {
         setRating(previous);
         setMessage(result.error);
+        toast.error(result.error);
       } else {
         setStatus("READ");
+        const nextMessage = `Rated ${nextRating} star${nextRating === 1 ? "" : "s"}.`;
+        setMessage(nextMessage);
+        toast.success(nextMessage);
       }
     });
   }
@@ -82,7 +99,11 @@ export function LibraryBookActions({
           </button>
         ))}
       </div>
-      {message && <p className="basis-full text-xs text-destructive">{message}</p>}
+      {message && (
+        <p className={`basis-full text-xs ${message.endsWith(".") ? "text-secondary" : "text-destructive"}`}>
+          {message}
+        </p>
+      )}
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
 import { BookOpen, Rss } from "lucide-react";
 import { FeedActivityRow } from "@/components/feed/feed-activity-row";
+import Link from "next/link";
 
 function activityText(activity: {
   type: string;
@@ -160,6 +161,14 @@ export default async function FeedPage() {
           <p className="text-sm text-muted-foreground mt-2">
             Start, finish, or rate books to create activity for the feed.
           </p>
+          <div className="mt-5 flex flex-wrap justify-center gap-3">
+            <Link href="/discover" className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
+              Follow readers
+            </Link>
+            <Link href="/library" className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-accent">
+              Rate books
+            </Link>
+          </div>
         </div>
       )}
     </div>

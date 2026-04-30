@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
 import { Activity, BookOpen, Clock, Sparkles, Target } from "lucide-react";
 import { ReadingSessionForm } from "@/components/tracker/reading-session-form";
+import Link from "next/link";
 
 function dateKey(date: Date) {
   return date.toISOString().slice(0, 10);
@@ -138,7 +139,10 @@ export default async function TrackerPage() {
               </div>
             ) : (
               <div className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
-                Mark a book as currently reading to see it here.
+                <p>Mark a book as currently reading to see it here.</p>
+                <Link href="/library" className="mt-3 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
+                  Choose a book
+                </Link>
               </div>
             )}
           </section>

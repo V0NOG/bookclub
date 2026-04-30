@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { updateProfileAction } from "@/app/actions/profile";
 
 type ProfileValues = {
@@ -19,7 +20,13 @@ export function ProfileEditForm({ profile }: { profile: ProfileValues }) {
     setMessage(null);
     startTransition(async () => {
       const result = await updateProfileAction(formData);
-      setMessage(result.success ? "Profile updated." : result.error);
+      if (result.success) {
+        setMessage("Profile updated.");
+        toast.success("Profile updated.");
+      } else {
+        setMessage(result.error);
+        toast.error(result.error);
+      }
     });
   }
 
@@ -40,7 +47,7 @@ export function ProfileEditForm({ profile }: { profile: ProfileValues }) {
           {pending ? "Saving..." : "Save profile"}
         </button>
         {message && (
-          <p className={`text-xs ${message.endsWith(".") ? "text-secondary" : "text-destructive"}`}>{message}</p>
+          <p className={`text-xs ${message === "Profile updated." ? "text-secondary" : "text-destructive"}`}>{message}</p>
         )}
       </div>
     </form>

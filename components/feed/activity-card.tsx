@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Star, Heart, BookmarkPlus } from "lucide-react";
+import { toast } from "sonner";
 import { toggleActivityLike } from "@/app/actions/activity-like";
 import { setBookStatus } from "@/app/actions/user-book";
 
@@ -77,8 +78,11 @@ export function ActivityCard({
     if (!result.success) {
       setLiked(prev.liked);
       setLikeCount(prev.likeCount);
+      toast.error(result.error);
     } else {
+      setLiked(result.liked);
       setLikeCount(result.count);
+      toast.success(result.liked ? "Activity liked." : "Activity unliked.");
     }
     setLikePending(false);
   }
@@ -88,7 +92,12 @@ export function ActivityCard({
     setWtrPending(true);
     setWantToRead(true);
     const result = await setBookStatus(bookId, "WANT_TO_READ");
-    if (!result.success) setWantToRead(false);
+    if (result.success) {
+      toast.success("Saved to want-to-read.");
+    } else {
+      setWantToRead(false);
+      toast.error(result.error);
+    }
     setWtrPending(false);
   }
 
@@ -131,7 +140,7 @@ export function ActivityCard({
               }`}
             >
               <BookmarkPlus className="h-3 w-3" />
-              {wantToRead ? "Added" : "Want to read"}
+              {wtrPending ? "Saving..." : wantToRead ? "Added" : "Want to read"}
             </button>
           )}
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { updatePreferencesAction } from "@/app/actions/profile";
 
 type UserType = "READER" | "ORGANISER" | "MEMBER" | "INFLUENCER";
@@ -25,7 +26,13 @@ export function PreferencesForm({
     setMessage(null);
     startTransition(async () => {
       const result = await updatePreferencesAction(formData);
-      setMessage(result.success ? "Preferences updated." : result.error);
+      if (result.success) {
+        setMessage("Preferences updated.");
+        toast.success("Preferences updated.");
+      } else {
+        setMessage(result.error);
+        toast.error(result.error);
+      }
     });
   }
 
@@ -68,7 +75,7 @@ export function PreferencesForm({
           {pending ? "Saving..." : "Save preferences"}
         </button>
         {message && (
-          <p className={`text-xs ${message.endsWith(".") ? "text-secondary" : "text-destructive"}`}>{message}</p>
+          <p className={`text-xs ${message === "Preferences updated." ? "text-secondary" : "text-destructive"}`}>{message}</p>
         )}
       </div>
     </form>

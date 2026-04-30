@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { BookOpen, Heart, Star, Users, UserPlus, BookmarkPlus } from "lucide-react";
+import { toast } from "sonner";
 import { toggleActivityLike } from "@/app/actions/activity-like";
 import { toggleFollow } from "@/app/actions/follow";
 import { setBookStatus } from "@/app/actions/user-book";
@@ -58,9 +59,11 @@ export function FeedActivityRow({
       if (result.success) {
         setLiked(result.liked);
         setLikeCount(result.count);
+        toast.success(result.liked ? "Activity liked." : "Activity unliked.");
       } else {
         setLiked(previous.liked);
         setLikeCount(previous.likeCount);
+        toast.error(result.error);
       }
     });
   }
@@ -70,8 +73,13 @@ export function FeedActivityRow({
     setFollowing(!following);
     startTransition(async () => {
       const result = await toggleFollow(actorId);
-      if (result.success) setFollowing(result.following);
-      else setFollowing(previous);
+      if (result.success) {
+        setFollowing(result.following);
+        toast.success(result.following ? `Following ${actorName}.` : `Unfollowed ${actorName}.`);
+      } else {
+        setFollowing(previous);
+        toast.error(result.error);
+      }
     });
   }
 
@@ -80,7 +88,12 @@ export function FeedActivityRow({
     setSaved(true);
     startTransition(async () => {
       const result = await setBookStatus(bookId, "WANT_TO_READ");
-      if (!result.success) setSaved(false);
+      if (result.success) {
+        toast.success("Saved to want-to-read.");
+      } else {
+        setSaved(false);
+        toast.error(result.error);
+      }
     });
   }
 
@@ -104,13 +117,13 @@ export function FeedActivityRow({
           {bookId && (
             <button type="button" onClick={wantToRead} disabled={pending || saved} className="inline-flex items-center gap-1 hover:text-primary disabled:text-primary">
               <BookmarkPlus className="h-3.5 w-3.5" />
-              {saved ? "Added" : "Want to read"}
+              {pending && !saved ? "Saving..." : saved ? "Added" : "Want to read"}
             </button>
           )}
           {!isCurrentUser && (
             <button type="button" onClick={follow} disabled={pending} className="inline-flex items-center gap-1 hover:text-primary">
               <UserPlus className="h-3.5 w-3.5" />
-              {following ? "Following" : `Follow ${actorName.split(" ")[0]}`}
+              {pending ? "Saving..." : following ? "Following" : `Follow ${actorName.split(" ")[0]}`}
             </button>
           )}
         </div>

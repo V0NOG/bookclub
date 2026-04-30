@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { toggleFollow } from "@/app/actions/follow";
 
 type Props = {
@@ -28,11 +29,14 @@ export function PeopleSuggestion({
       const result = await toggleFollow(userId);
       if (result.success) {
         setFollowing(result.following);
+        toast.success(result.following ? `Following ${name}.` : `Unfollowed ${name}.`);
       } else {
         setFollowing(prev);
+        toast.error(result.error);
       }
     } catch {
       setFollowing(prev);
+      toast.error("Failed to update follow.");
     } finally {
       setPending(false);
     }
@@ -71,7 +75,7 @@ export function PeopleSuggestion({
             : "bg-primary hover:bg-primary/90 text-primary-foreground border-transparent"
         }`}
       >
-        {pending ? "…" : following ? "Following" : "Follow"}
+        {pending ? "Saving..." : following ? "Following" : "Follow"}
       </button>
     </div>
   );

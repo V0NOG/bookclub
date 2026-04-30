@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
+import { toast } from "sonner";
 import { logReadingSession } from "@/app/actions/reading";
 
 type BookOption = {
@@ -35,9 +37,11 @@ export function ReadingSessionForm({ books }: { books: BookOption[] }) {
         setMinutesRead("");
         setCurrentPage("");
         setNotes("");
-        setMessage("Session logged.");
+        setMessage("Session logged + progress updated.");
+        toast.success("Session logged + progress updated.");
       } else {
         setMessage(result.error);
+        toast.error(result.error);
       }
     });
   }
@@ -45,7 +49,10 @@ export function ReadingSessionForm({ books }: { books: BookOption[] }) {
   if (books.length === 0) {
     return (
       <div className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
-        Add a currently-reading book before logging sessions.
+        <p>Add a currently-reading book before logging sessions.</p>
+        <Link href="/library" className="mt-3 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
+          Go to library
+        </Link>
       </div>
     );
   }
@@ -107,7 +114,7 @@ export function ReadingSessionForm({ books }: { books: BookOption[] }) {
           {pending ? "Logging..." : "Log session"}
         </button>
         {message && (
-          <p className={`text-xs ${message.endsWith(".") ? "text-secondary" : "text-destructive"}`}>{message}</p>
+          <p className={`text-xs ${message === "Session logged + progress updated." ? "text-secondary" : "text-destructive"}`}>{message}</p>
         )}
       </div>
     </div>

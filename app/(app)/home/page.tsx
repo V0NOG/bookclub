@@ -8,6 +8,7 @@ import { SearchBar } from "@/components/feed/search-bar";
 import { ActivityCard, ActivityItem } from "@/components/feed/activity-card";
 import { PeopleSuggestion } from "@/components/feed/people-suggestion";
 import { ClubSuggestionCard } from "@/components/clubs/club-suggestion-card";
+import { HorizontalScrollRow } from "@/components/ui/horizontal-scroll-row";
 
 // ── Display pipeline helpers ──────────────────────────────────────────────────
 
@@ -469,7 +470,7 @@ export default async function HomePage() {
                           </>
                         )}
                       </div>
-                      <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
+                      <HorizontalScrollRow>
                         {slot.items.map(({ book, match }, idx) => (
                           <MatchCard
                             key={book.id}
@@ -487,7 +488,7 @@ export default async function HomePage() {
                             targetId={book.id}
                           />
                         ))}
-                      </div>
+                      </HorizontalScrollRow>
                     </div>
                   );
 
@@ -495,7 +496,7 @@ export default async function HomePage() {
                   return (
                     <div key={`popular-${i}`} className="pt-8 pb-2">
                       <p className="text-sm text-foreground mb-4">What readers are picking up</p>
-                      <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
+                      <HorizontalScrollRow>
                         {slot.items.map((b) => (
                           <MatchCard
                             key={b.id}
@@ -507,7 +508,7 @@ export default async function HomePage() {
                             targetId={b.id}
                           />
                         ))}
-                      </div>
+                      </HorizontalScrollRow>
                     </div>
                   );
 

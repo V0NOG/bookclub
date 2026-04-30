@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import { AppSessionProvider } from "@/components/layout/session-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 const sourceSerif4 = Source_Serif_4({
   subsets: ["latin"],
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={sourceSerif4.variable}>
       <body className="font-serif antialiased">
         <AppSessionProvider>{children}</AppSessionProvider>
+        <Toaster position="bottom-right" />
       </body>
     </html>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { colors, typography, spacing, radius, shadow } from "@/styles/design-tokens";
 import { BookOpen, Users, ThumbsDown, Heart } from "lucide-react";
 import { upsertFeedback } from "@/app/actions/feedback";
@@ -126,7 +127,10 @@ function FeedbackButtons({ variant, targetId, dismissed, liked, onDismiss, onLik
   function handleDismiss() {
     if (dismissed || liked || likePending) return;
     onDismiss();
-    upsertFeedback({ targetType, targetId, action: FeedbackAction.DISLIKE }).catch(() => {});
+    toast.success("We'll show you less like this.");
+    upsertFeedback({ targetType, targetId, action: FeedbackAction.DISLIKE }).catch(() => {
+      toast.error("Failed to save feedback.");
+    });
   }
 
   async function handleLike() {
@@ -134,9 +138,14 @@ function FeedbackButtons({ variant, targetId, dismissed, liked, onDismiss, onLik
     setLikePending(true);
     try {
       const result = await upsertFeedback({ targetType, targetId, action: FeedbackAction.LIKE });
-      if (result.success) onLike();
+      if (result.success) {
+        onLike();
+        toast.success("We'll prioritise similar titles.");
+      } else {
+        toast.error(result.error);
+      }
     } catch {
-      // transport error — button returns to normal
+      toast.error("Failed to save feedback.");
     } finally {
       setLikePending(false);
     }

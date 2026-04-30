@@ -7,6 +7,7 @@ import { MatchCard } from "@/components/match/MatchCard";
 import { SearchBar } from "@/components/feed/search-bar";
 import { PeopleSuggestion } from "@/components/feed/people-suggestion";
 import { ClubSuggestionCard } from "@/components/clubs/club-suggestion-card";
+import { HorizontalScrollRow } from "@/components/ui/horizontal-scroll-row";
 
 type TrendingBook = {
   id: string;
@@ -112,7 +113,7 @@ export default async function DiscoverPage() {
               Rate more books
             </Link>
           </div>
-          <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
+          <HorizontalScrollRow>
             {topBooks.map(({ book, match }, idx) => (
               <MatchCard
                 key={book.id}
@@ -128,7 +129,7 @@ export default async function DiscoverPage() {
                 targetId={book.id}
               />
             ))}
-          </div>
+          </HorizontalScrollRow>
         </section>
       )}
 
@@ -140,7 +141,7 @@ export default async function DiscoverPage() {
           <p className="text-xs text-muted-foreground mb-4">
             Recent activity around {tasteProfile?.cluster ?? (tasteGenres.slice(0, 2).join(" and ") || "your top genres")}
           </p>
-          <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
+          <HorizontalScrollRow>
             {trendingBooks.map((book) => (
               <MatchCard
                 key={book.id}
@@ -157,7 +158,7 @@ export default async function DiscoverPage() {
                 targetId={book.id}
               />
             ))}
-          </div>
+          </HorizontalScrollRow>
         </section>
       )}
 
@@ -165,7 +166,7 @@ export default async function DiscoverPage() {
         <section className="mt-10">
           <h2 className="text-lg font-semibold text-foreground mb-1">Explore something different</h2>
           <p className="text-xs text-muted-foreground mb-4">Outside your usual genres, matched to your reading style</p>
-          <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
+          <HorizontalScrollRow>
             {exploratoryBooks.map(({ book, match }) => (
               <MatchCard
                 key={book.id}
@@ -180,7 +181,7 @@ export default async function DiscoverPage() {
                 targetId={book.id}
               />
             ))}
-          </div>
+          </HorizontalScrollRow>
         </section>
       )}
 
