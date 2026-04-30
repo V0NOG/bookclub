@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
 import { Bell, BookOpen, Lock, Settings, User } from "lucide-react";
+import { PreferencesForm } from "@/components/settings/preferences-form";
+import { UserType } from "@/lib/generated/prisma/enums";
 
 function SettingRow({
   title,
@@ -60,6 +62,14 @@ export default async function SettingsPage() {
       </div>
 
       <div className="space-y-8">
+        <PreferencesForm
+          userType={user?.userType ?? UserType.READER}
+          readingGoal={user?.onboardingData?.readingGoalBooksPerYear}
+          clubPreference={user?.onboardingData?.clubPreference}
+          interestedInClubs={Boolean(user?.onboardingData?.interestedInClubs)}
+          interestedInChallenges={Boolean(user?.onboardingData?.interestedInChallenges)}
+        />
+
         <section className="rounded-xl border border-border bg-card p-5">
           <h2 className="text-base font-semibold text-foreground mb-1 flex items-center gap-2">
             <User className="h-4 w-4 text-primary" />

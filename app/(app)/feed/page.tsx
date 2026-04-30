@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
-import { BookOpen, Heart, Rss, Star, Users } from "lucide-react";
+import { BookOpen, Rss } from "lucide-react";
+import { FeedActivityRow } from "@/components/feed/feed-activity-row";
 
 function activityText(activity: {
   type: string;
@@ -30,22 +31,41 @@ function activityText(activity: {
   }
 }
 
-function ActivityIcon({ type }: { type: string }) {
-  if (type === "joined_club" || type === "followed") return <Users className="h-4 w-4 text-secondary" />;
-  if (type === "rated") return <Star className="h-4 w-4 text-primary" />;
-  return <BookOpen className="h-4 w-4 text-primary" />;
+function activityContext(activity: {
+  type: string;
+  user: { id: string };
+  book: { author: string; genres: string[] } | null;
+}, params: {
+  userId: string;
+  followingIds: Set<string>;
+  likedAuthors: Set<string>;
+  likedGenres: Set<string>;
+  topGenres: Set<string>;
+}) {
+  if (activity.user.id === params.userId) return "Your activity helps Folio tune future recommendations.";
+  if (activity.book) {
+    const genreOverlap = activity.book.genres.some((genre) => params.likedGenres.has(genre) || params.topGenres.has(genre));
+    if (params.likedAuthors.has(activity.book.author) || genreOverlap) {
+      return "Because you rated similar books highly.";
+    }
+    if (activity.type === "started" || activity.type === "finished" || activity.type === "rated") {
+      return "Readers with similar taste also read this.";
+    }
+  }
+  if (params.followingIds.has(activity.user.id)) return "From someone you follow.";
+  return "Popular among readers near your taste profile.";
 }
 
 export default async function FeedPage() {
   const session = await getSession();
   const userId = session!.user.id;
 
-  const [following, activities] = await Promise.all([
-    db.follow.count({ where: { followerId: userId } }),
+  const [following, activities, tasteProfile, likedBooks] = await Promise.all([
+    db.follow.findMany({ where: { followerId: userId }, select: { followingId: true } }),
     db.activityEvent.findMany({
       include: {
-        user: { select: { name: true, username: true, avatar: true } },
-        book: { select: { title: true, author: true, cover: true } },
+        user: { select: { id: true, name: true, username: true, avatar: true } },
+        book: { select: { id: true, title: true, author: true, cover: true, genres: true } },
         club: { select: { name: true } },
         targetUser: { select: { name: true, username: true } },
         likes: { select: { userId: true } },
@@ -53,7 +73,17 @@ export default async function FeedPage() {
       orderBy: { createdAt: "desc" },
       take: 12,
     }),
+    db.tasteProfile.findUnique({ where: { userId }, select: { topGenres: true } }),
+    db.userBook.findMany({
+      where: { userId, rating: { gte: 4 } },
+      include: { book: { select: { author: true, genres: true } } },
+      take: 50,
+    }),
   ]);
+  const followingSet = new Set(following.map((f) => f.followingId));
+  const likedAuthors = new Set(likedBooks.map((entry) => entry.book.author));
+  const likedGenres = new Set(likedBooks.flatMap((entry) => entry.book.genres));
+  const topGenres = new Set(tasteProfile?.topGenres ?? []);
 
   return (
     <div className="px-6 py-8 max-w-3xl">
@@ -73,7 +103,7 @@ export default async function FeedPage() {
           <div>
             <p className="text-sm font-semibold text-foreground">Your social graph</p>
             <p className="text-xs text-muted-foreground">
-              You follow {following} reader{following === 1 ? "" : "s"}.
+              You follow {following.length} reader{following.length === 1 ? "" : "s"}.
             </p>
           </div>
         </div>
@@ -84,28 +114,28 @@ export default async function FeedPage() {
           {activities.map((activity) => {
             const likedByYou = activity.likes.some((like) => like.userId === userId);
             return (
-              <article key={activity.id} className="flex gap-3 border-b border-border/50 py-4">
-                <div className="mt-0.5 h-9 w-9 rounded-full bg-accent flex items-center justify-center overflow-hidden flex-shrink-0">
-                  {activity.user.avatar ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={activity.user.avatar} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    <ActivityIcon type={activity.type} />
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-foreground leading-relaxed">
-                    {activityText(activity)}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(activity.createdAt)}
-                  </p>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Heart className={`h-3.5 w-3.5 ${likedByYou ? "fill-secondary text-secondary" : ""}`} />
-                  {activity.likes.length}
-                </div>
-              </article>
+              <FeedActivityRow
+                key={activity.id}
+                id={activity.id}
+                actorId={activity.user.id}
+                actorName={activity.user.name ?? activity.user.username ?? "Reader"}
+                actorAvatar={activity.user.avatar}
+                type={activity.type}
+                text={activityText(activity)}
+                timestamp={new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(activity.createdAt)}
+                context={activityContext(activity, {
+                  userId,
+                  followingIds: followingSet,
+                  likedAuthors,
+                  likedGenres,
+                  topGenres,
+                })}
+                bookId={activity.book?.id}
+                likeCount={activity.likes.length}
+                isLiked={likedByYou}
+                isFollowing={followingSet.has(activity.user.id)}
+                isCurrentUser={activity.user.id === userId}
+              />
             );
           })}
         </div>

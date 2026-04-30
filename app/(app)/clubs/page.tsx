@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
 import { getMatchesForUser } from "@/lib/matching/cache";
 import { ClubSuggestionCard } from "@/components/clubs/club-suggestion-card";
+import { ClubMembershipButton } from "@/components/clubs/club-membership-button";
 import Link from "next/link";
 import { Users, Plus } from "lucide-react";
 
@@ -67,9 +68,8 @@ export default async function ClubsPage() {
           <h2 className="text-base font-semibold text-foreground mb-4">Your clubs</h2>
           <div className="space-y-0">
             {memberships.map(({ club, role }) => (
-              <Link
+              <div
                 key={club.id}
-                href={`/clubs/${club.id}`}
                 className="flex items-center gap-3 py-4 border-b border-border/50 group hover:bg-muted/30 -mx-2 px-2 rounded transition-colors"
               >
                 {club.avatar ? (
@@ -80,9 +80,9 @@ export default async function ClubsPage() {
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                  <Link href={`/clubs/${club.id}`} className="block text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
                     {club.name}
-                  </p>
+                  </Link>
                   <p className="text-xs text-muted-foreground">
                     {club._count.members} member{club._count.members !== 1 ? "s" : ""}
                     {club.meetingCadence ? ` · ${club.meetingCadence.toLowerCase()}` : ""}
@@ -93,7 +93,8 @@ export default async function ClubsPage() {
                     {role.toLowerCase()}
                   </span>
                 )}
-              </Link>
+                <ClubMembershipButton clubId={club.id} initialJoined disabled={role !== "MEMBER"} />
+              </div>
             ))}
           </div>
         </section>
@@ -107,16 +108,20 @@ export default async function ClubsPage() {
           <p className="text-xs text-muted-foreground mb-4">Matched based on your reading taste profile</p>
           <div className="space-y-0">
             {suggestedClubs.map(({ club, match }) => (
-              <ClubSuggestionCard
-                key={club.id}
-                clubId={club.id}
-                name={club.name}
-                avatar={club.avatar}
-                cadence={cadenceMap.get(club.id)}
-                memberCount={club._count.members}
-                matchScore={match.score}
-                matchReason={match.matchReasons[0]}
-              />
+              <div key={club.id} className="flex items-center gap-3 border-b border-border/40">
+                <div className="flex-1 min-w-0">
+                  <ClubSuggestionCard
+                    clubId={club.id}
+                    name={club.name}
+                    avatar={club.avatar}
+                    cadence={cadenceMap.get(club.id)}
+                    memberCount={club._count.members}
+                    matchScore={match.score}
+                    matchReason={match.matchReasons[0]}
+                  />
+                </div>
+                <ClubMembershipButton clubId={club.id} initialJoined={false} />
+              </div>
             ))}
           </div>
           <div className="mt-4">

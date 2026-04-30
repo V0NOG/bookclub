@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
 import { BookOpen, Library, MapPin, Sparkles, Star, Users } from "lucide-react";
+import { ProfileEditForm } from "@/components/profile/profile-edit-form";
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
@@ -9,6 +10,43 @@ function Stat({ label, value }: { label: string; value: string | number }) {
       <p className="text-xs text-muted-foreground">{label}</p>
     </div>
   );
+}
+
+function formatNumber(value: number, digits = 1) {
+  return Number.isFinite(value) ? value.toFixed(digits) : "0.0";
+}
+
+function variance(values: number[]) {
+  if (values.length < 2) return 0;
+  const avg = values.reduce((sum, value) => sum + value, 0) / values.length;
+  return values.reduce((sum, value) => sum + Math.pow(value - avg, 2), 0) / values.length;
+}
+
+function buildTasteSummary({
+  topGenres,
+  topAuthors,
+  topMoods,
+  averageRating,
+  ratingVariance,
+  completionRate,
+  pagesPerSession,
+}: {
+  topGenres: string[];
+  topAuthors: string[];
+  topMoods: string[];
+  averageRating: number;
+  ratingVariance: number;
+  completionRate: number;
+  pagesPerSession: number;
+}) {
+  const genreText = topGenres.length ? topGenres.slice(0, 2).join(" and ") : "a broad mix of genres";
+  const authorText = topAuthors.length ? `, with ${topAuthors[0]} standing out` : "";
+  const ratingStyle = ratingVariance >= 1 ? "selective" : averageRating >= 4 ? "generous when a book fits" : "measured";
+  const completionText = completionRate >= 75 ? "usually finishes what they start" : completionRate >= 45 ? "keeps a balanced shelf of finished and in-progress books" : "is still building a completion history";
+  const paceText = pagesPerSession > 0 ? ` around ${Math.round(pagesPerSession)} pages per logged session` : " an emerging reading pace";
+  const moodText = topMoods.length ? ` The tone skews ${topMoods.slice(0, 2).join(" and ").toLowerCase()}.` : "";
+
+  return `This reader leans toward ${genreText}${authorText}, rates in a ${ratingStyle} way, and ${completionText}. Recent logs suggest${paceText}.${moodText}`;
 }
 
 export default async function ProfilePage() {
@@ -24,6 +62,8 @@ export default async function ProfilePage() {
     following,
     clubs,
     recentReads,
+    allBooks,
+    readingSessions,
   ] = await Promise.all([
     db.user.findUnique({
       where: { id: userId },
@@ -58,11 +98,42 @@ export default async function ProfilePage() {
       orderBy: { updatedAt: "desc" },
       take: 4,
     }),
+    db.userBook.findMany({
+      where: { userId },
+      select: { rating: true, status: true },
+    }),
+    db.readingSession.findMany({
+      where: { userId },
+      select: { pagesRead: true, minutesRead: true },
+      orderBy: { date: "desc" },
+      take: 50,
+    }),
   ]);
 
   const displayName = user?.name ?? user?.username ?? "Reader";
   const initials = displayName.slice(0, 1).toUpperCase();
   const taste = user?.tasteProfile;
+  const ratings = allBooks.map((book) => book.rating).filter((rating): rating is number => rating !== null);
+  const averageRating = ratings.length ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length : 0;
+  const ratingVariance = variance(ratings);
+  const completionRate = allBooks.length ? Math.round((allBooks.filter((book) => book.status === "READ").length / allBooks.length) * 100) : 0;
+  const sessionsWithPages = readingSessions.filter((entry) => entry.pagesRead);
+  const sessionsWithMinutes = readingSessions.filter((entry) => entry.minutesRead);
+  const pagesPerSession = sessionsWithPages.length
+    ? sessionsWithPages.reduce((sum, entry) => sum + (entry.pagesRead ?? 0), 0) / sessionsWithPages.length
+    : 0;
+  const minutesPerSession = sessionsWithMinutes.length
+    ? sessionsWithMinutes.reduce((sum, entry) => sum + (entry.minutesRead ?? 0), 0) / sessionsWithMinutes.length
+    : 0;
+  const tasteSummary = buildTasteSummary({
+    topGenres: taste?.topGenres ?? [],
+    topAuthors: taste?.topAuthors ?? [],
+    topMoods: taste?.topMoods ?? [],
+    averageRating,
+    ratingVariance,
+    completionRate,
+    pagesPerSession,
+  });
 
   return (
     <div className="px-6 py-8 max-w-4xl">
@@ -118,12 +189,26 @@ export default async function ProfilePage() {
                 </span>
               </div>
               <div className="space-y-4">
+                <div className="rounded-lg border border-border/70 bg-background/50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Taste summary</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{tasteSummary}</p>
+                </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Genres</p>
                   <div className="flex flex-wrap gap-2">
                     {(taste?.topGenres?.length ? taste.topGenres : ["Rate books to unlock genres"]).slice(0, 6).map((genre) => (
                       <span key={genre} className="rounded-full border border-border bg-background px-3 py-1 text-xs text-foreground">
                         {genre}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Authors</p>
+                  <div className="flex flex-wrap gap-2">
+                    {(taste?.topAuthors?.length ? taste.topAuthors : ["Rate more books to reveal authors"]).slice(0, 6).map((author) => (
+                      <span key={author} className="rounded-full border border-border bg-background px-3 py-1 text-xs text-foreground">
+                        {author}
                       </span>
                     ))}
                   </div>
@@ -137,6 +222,12 @@ export default async function ProfilePage() {
                       </span>
                     ))}
                   </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 pt-2 sm:grid-cols-4">
+                  <Stat label="Average rating" value={ratings.length ? formatNumber(averageRating) : "N/A"} />
+                  <Stat label="Rating variance" value={ratings.length > 1 ? formatNumber(ratingVariance) : "N/A"} />
+                  <Stat label="Completion rate" value={`${completionRate}%`} />
+                  <Stat label="Reading speed" value={pagesPerSession ? `${Math.round(pagesPerSession)}p` : minutesPerSession ? `${Math.round(minutesPerSession)}m` : "N/A"} />
                 </div>
               </div>
             </div>
@@ -176,6 +267,16 @@ export default async function ProfilePage() {
         </div>
 
         <aside className="space-y-6">
+          <ProfileEditForm
+            profile={{
+              name: user?.name,
+              username: user?.username,
+              bio: user?.bio,
+              location: user?.location,
+              avatar: user?.avatar,
+            }}
+          />
+
           <div className="rounded-xl border border-border bg-card p-5">
             <h2 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
               <Library className="h-4 w-4 text-primary" />

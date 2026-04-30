@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
 import Link from "next/link";
 import { BookOpen, Star, BookMarked, BookX } from "lucide-react";
+import { LibraryBookActions } from "@/components/library/library-book-actions";
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -87,7 +88,7 @@ export default async function LibraryPage() {
             Currently reading
           </h2>
           <div className="space-y-0">
-            {currentlyReading.map(({ book, progress }) => {
+            {currentlyReading.map(({ book, progress, status, rating }) => {
               const pct = book.pageCount && progress ? Math.min(100, Math.round((progress / book.pageCount) * 100)) : null;
               return (
                 <div key={book.id} className="flex items-center gap-4 py-4 border-b border-border/50">
@@ -111,6 +112,7 @@ export default async function LibraryPage() {
                     ) : (
                       <p className="text-xs text-muted-foreground">Progress not tracked</p>
                     )}
+                    <LibraryBookActions bookId={book.id} initialStatus={status} initialRating={rating} />
                   </div>
                 </div>
               );
@@ -127,7 +129,7 @@ export default async function LibraryPage() {
             <span className="text-xs font-normal text-muted-foreground ml-1">({wantToRead.length})</span>
           </h2>
           <div className="space-y-0">
-            {wantToRead.map(({ book }) => (
+            {wantToRead.map(({ book, status, rating }) => (
               <div key={book.id} className="flex items-center gap-3 py-3 border-b border-border/40">
                 {book.cover ? (
                   <img src={book.cover} alt="" className="h-12 w-8 object-cover rounded flex-shrink-0" />
@@ -137,6 +139,7 @@ export default async function LibraryPage() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{book.title}</p>
                   <p className="text-xs text-muted-foreground">{book.author}</p>
+                  <LibraryBookActions bookId={book.id} initialStatus={status} initialRating={rating} />
                 </div>
               </div>
             ))}
@@ -152,7 +155,7 @@ export default async function LibraryPage() {
             <span className="text-xs font-normal text-muted-foreground ml-1">({read.length})</span>
           </h2>
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-            {read.map(({ book, rating }) => (
+            {read.map(({ book, rating, status }) => (
               <div key={book.id} className="flex flex-col gap-1.5">
                 {book.cover ? (
                   <img src={book.cover} alt={book.title} className="w-full aspect-[2/3] object-cover rounded" />
@@ -163,6 +166,7 @@ export default async function LibraryPage() {
                 )}
                 <p className="text-xs text-foreground leading-tight line-clamp-2">{book.title}</p>
                 {rating && <StarRating rating={rating} />}
+                <LibraryBookActions bookId={book.id} initialStatus={status} initialRating={rating} />
               </div>
             ))}
           </div>
@@ -177,7 +181,7 @@ export default async function LibraryPage() {
             <span className="text-xs font-normal text-muted-foreground ml-1">({abandoned.length})</span>
           </h2>
           <div className="space-y-0">
-            {abandoned.map(({ book }) => (
+            {abandoned.map(({ book, status, rating }) => (
               <div key={book.id} className="flex items-center gap-3 py-3 border-b border-border/40">
                 {book.cover ? (
                   <img src={book.cover} alt="" className="h-10 w-7 object-cover rounded opacity-50 flex-shrink-0" />
@@ -187,6 +191,7 @@ export default async function LibraryPage() {
                 <div className="min-w-0">
                   <p className="text-sm text-muted-foreground truncate">{book.title}</p>
                   <p className="text-xs text-muted-foreground/60">{book.author}</p>
+                  <LibraryBookActions bookId={book.id} initialStatus={status} initialRating={rating} />
                 </div>
               </div>
             ))}

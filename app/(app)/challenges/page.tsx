@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
 import { CalendarDays, Trophy, Users } from "lucide-react";
+import { ChallengeToggleButton } from "@/components/challenges/challenge-toggle-button";
 
 function ChallengeCard({
   title,
@@ -8,7 +9,9 @@ function ChallengeCard({
   dates,
   meta,
   joined,
+  challengeId,
 }: {
+  challengeId: string;
   title: string;
   description?: string | null;
   dates: string;
@@ -32,11 +35,7 @@ function ChallengeCard({
             </span>
           </div>
         </div>
-        {joined && (
-          <span className="rounded-full bg-secondary/10 px-3 py-1 text-xs font-semibold text-secondary">
-            Joined
-          </span>
-        )}
+        <ChallengeToggleButton challengeId={challengeId} initialJoined={Boolean(joined)} />
       </div>
     </article>
   );
@@ -92,6 +91,7 @@ export default async function ChallengesPage() {
             {joinedChallenges.map((challenge) => (
               <ChallengeCard
                 key={challenge.id}
+                challengeId={challenge.id}
                 title={challenge.title}
                 description={challenge.description}
                 dates={`${formatDate(challenge.startDate)} - ${formatDate(challenge.endDate)}`}
@@ -120,6 +120,7 @@ export default async function ChallengesPage() {
               return (
                 <ChallengeCard
                   key={challenge.id}
+                  challengeId={challenge.id}
                   title={challenge.title}
                   description={challenge.description}
                   dates={`${formatDate(challenge.startDate)} - ${formatDate(challenge.endDate)}`}

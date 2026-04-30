@@ -8,14 +8,27 @@ import { SearchBar } from "@/components/feed/search-bar";
 import { PeopleSuggestion } from "@/components/feed/people-suggestion";
 import { ClubSuggestionCard } from "@/components/clubs/club-suggestion-card";
 
+type TrendingBook = {
+  id: string;
+  title: string;
+  author: string;
+  cover: string | null;
+  genres: string[];
+  activityCount: number;
+};
+
 export default async function DiscoverPage() {
   const session = await getSession();
   const userId = session!.user.id;
 
-  const [rawMatches, ratedCount, followingData] = await Promise.all([
+  const [rawMatches, ratedCount, followingData, tasteProfile] = await Promise.all([
     getMatchesForUser(userId),
     db.userBook.count({ where: { userId, rating: { not: null } } }),
     db.follow.findMany({ where: { followerId: userId }, select: { followingId: true } }),
+    db.tasteProfile.findUnique({
+      where: { userId },
+      select: { cluster: true, topGenres: true, topAuthors: true },
+    }),
   ]);
 
   const followingSet = new Set(followingData.map((f) => f.followingId));
@@ -24,6 +37,34 @@ export default async function DiscoverPage() {
   const topPeople = rawMatches.userMatches.slice(0, 6);
   const topClubs = rawMatches.clubMatches.slice(0, 6);
   const exploratoryBooks = rawMatches.exploratoryBooks.slice(0, 4);
+  const tasteGenres = tasteProfile?.topGenres ?? [];
+  const trendingEvents = tasteGenres.length
+    ? await db.activityEvent.findMany({
+        where: {
+          bookId: { not: null },
+          book: { genres: { hasSome: tasteGenres } },
+        },
+        include: { book: { select: { id: true, title: true, author: true, cover: true, genres: true } } },
+        orderBy: { createdAt: "desc" },
+        take: 80,
+      })
+    : [];
+  const trendingMap = new Map<string, TrendingBook>();
+  for (const event of trendingEvents) {
+    if (!event.book) continue;
+    const existing = trendingMap.get(event.book.id);
+    trendingMap.set(event.book.id, {
+      id: event.book.id,
+      title: event.book.title,
+      author: event.book.author,
+      cover: event.book.cover,
+      genres: event.book.genres,
+      activityCount: (existing?.activityCount ?? 0) + 1,
+    });
+  }
+  const trendingBooks = Array.from(trendingMap.values())
+    .sort((a, b) => b.activityCount - a.activityCount)
+    .slice(0, 6);
 
   const matchedClubIds = topClubs.map((c) => c.club.id);
   const cadenceRows = matchedClubIds.length > 0
@@ -91,6 +132,35 @@ export default async function DiscoverPage() {
         </section>
       )}
 
+      {trendingBooks.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-lg font-semibold text-foreground mb-1">
+            Trending in your taste cluster
+          </h2>
+          <p className="text-xs text-muted-foreground mb-4">
+            Recent activity around {tasteProfile?.cluster ?? (tasteGenres.slice(0, 2).join(" and ") || "your top genres")}
+          </p>
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar">
+            {trendingBooks.map((book) => (
+              <MatchCard
+                key={book.id}
+                variant="book"
+                title={book.title}
+                subtitle={book.author}
+                coverImage={book.cover}
+                reasons={[
+                  "Readers with similar taste also read this.",
+                  `${book.activityCount} recent signal${book.activityCount === 1 ? "" : "s"} in your taste cluster.`,
+                ]}
+                meta={book.genres.filter((genre) => tasteGenres.includes(genre)).slice(0, 2).join(" · ") || undefined}
+                badge="Trending"
+                targetId={book.id}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
       {exploratoryBooks.length > 0 && (
         <section className="mt-10">
           <h2 className="text-lg font-semibold text-foreground mb-1">Explore something different</h2>
@@ -116,7 +186,10 @@ export default async function DiscoverPage() {
 
       {topPeople.length > 0 && (
         <section className="mt-10">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Readers similar to you</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-1">Readers like you</h2>
+          <p className="text-xs text-muted-foreground mb-4">
+            Matched through shared genres, authors, and rating patterns
+          </p>
           <div>
             {topPeople.slice(0, 4).map(({ user, match }) => (
               <PeopleSuggestion

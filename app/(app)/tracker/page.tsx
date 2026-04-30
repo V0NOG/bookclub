@@ -1,12 +1,48 @@
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
-import { Activity, BookOpen, Clock, Target } from "lucide-react";
+import { Activity, BookOpen, Clock, Sparkles, Target } from "lucide-react";
+import { ReadingSessionForm } from "@/components/tracker/reading-session-form";
+
+function dateKey(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function calculateStreak(dates: Date[]) {
+  const days = new Set(dates.map(dateKey));
+  if (days.size === 0) return 0;
+  const cursor = new Date();
+  cursor.setHours(0, 0, 0, 0);
+  if (!days.has(dateKey(cursor))) {
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  let streak = 0;
+  while (days.has(dateKey(cursor))) {
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}
+
+function patternInsight(sessions: { date: Date; pagesRead: number | null }[]) {
+  if (sessions.length < 3) return "Log a few more sessions to reveal weekly patterns.";
+  const weekend = sessions.filter((session) => [0, 6].includes(session.date.getDay()));
+  const weekday = sessions.filter((session) => ![0, 6].includes(session.date.getDay()));
+  const avg = (items: typeof sessions) =>
+    items.length ? items.reduce((sum, session) => sum + (session.pagesRead ?? 0), 0) / items.length : 0;
+  const weekendAvg = avg(weekend);
+  const weekdayAvg = avg(weekday);
+
+  if (weekendAvg > weekdayAvg * 1.15) return "You read more on weekends.";
+  if (weekdayAvg > weekendAvg * 1.15) return "You read more on weekdays.";
+  return "Your reading is fairly balanced across the week.";
+}
 
 export default async function TrackerPage() {
   const session = await getSession();
   const userId = session!.user.id;
 
-  const [currentBooks, sessions, goal] = await Promise.all([
+  const [currentBooks, sessions, insightSessions, goal] = await Promise.all([
     db.userBook.findMany({
       where: { userId, status: "CURRENTLY_READING" },
       include: { book: { select: { title: true, author: true, cover: true, pageCount: true } } },
@@ -17,6 +53,11 @@ export default async function TrackerPage() {
       where: { userId },
       orderBy: { date: "desc" },
       take: 6,
+    }),
+    db.readingSession.findMany({
+      where: { userId },
+      orderBy: { date: "desc" },
+      take: 60,
     }),
     db.readingGoal.findFirst({
       where: { userId, type: "BOOKS_PER_YEAR", year: new Date().getFullYear() },
@@ -34,6 +75,13 @@ export default async function TrackerPage() {
   const totalPages = sessions.reduce((sum, session) => sum + (session.pagesRead ?? 0), 0);
   const totalMinutes = sessions.reduce((sum, session) => sum + (session.minutesRead ?? 0), 0);
   const goalPct = goal ? Math.min(100, Math.round(((goal.current ?? 0) / goal.target) * 100)) : null;
+  const streakDays = calculateStreak(insightSessions.map((session) => session.date));
+  const activeDays = new Set(insightSessions.map((session) => dateKey(session.date))).size;
+  const consistency = Math.round((activeDays / 30) * 100);
+  const avgPages = insightSessions.length
+    ? Math.round(insightSessions.reduce((sum, session) => sum + (session.pagesRead ?? 0), 0) / insightSessions.length)
+    : 0;
+  const weeklyPattern = patternInsight(insightSessions);
 
   return (
     <div className="px-6 py-8 max-w-4xl">
@@ -47,6 +95,16 @@ export default async function TrackerPage() {
 
       <div className="grid gap-8 lg:grid-cols-[1fr_280px]">
         <div className="space-y-10">
+          <ReadingSessionForm
+            books={currentBooks.map(({ bookId, book, progress }) => ({
+              id: bookId,
+              title: book.title,
+              author: book.author,
+              progress,
+              pageCount: book.pageCount,
+            }))}
+          />
+
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
               <BookOpen className="h-4 w-4 text-primary" />
@@ -120,6 +178,26 @@ export default async function TrackerPage() {
         </div>
 
         <aside className="space-y-6">
+          <div className="rounded-xl border border-border bg-card p-5">
+            <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              Reading insights
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <p className="text-2xl font-bold text-foreground">{streakDays}</p>
+                <p className="text-xs text-muted-foreground">Day streak</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">{Math.min(100, consistency)}%</p>
+                <p className="text-xs text-muted-foreground">30-day consistency</p>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {weeklyPattern} {avgPages > 0 ? `You average ${avgPages} pages per logged session.` : ""}
+              </p>
+            </div>
+          </div>
+
           <div className="rounded-xl border border-border bg-card p-5">
             <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
               <Activity className="h-4 w-4 text-primary" />
