@@ -77,7 +77,7 @@ function GridSkeleton({ label }: { label: string }) {
 
 export default function HomeLoading() {
   return (
-    <div className="p-6 max-w-4xl">
+    <div className="w-full max-w-7xl p-6">
       {/* Header */}
       <div className="mb-6">
         <Pulse className="h-7 w-48 mb-2" />

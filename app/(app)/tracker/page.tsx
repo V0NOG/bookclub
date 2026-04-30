@@ -84,7 +84,7 @@ export default async function TrackerPage() {
   const weeklyPattern = patternInsight(insightSessions);
 
   return (
-    <div className="px-6 py-8 max-w-4xl">
+    <div className="w-full max-w-7xl px-6 py-8">
       <div className="mb-8">
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Reading rhythm</p>
         <h1 className="text-3xl font-bold text-foreground mb-2">Tracker</h1>
@@ -93,7 +93,7 @@ export default async function TrackerPage() {
         </p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_280px]">
+      <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div className="space-y-10">
           <ReadingSessionForm
             books={currentBooks.map(({ bookId, book, progress }) => ({
@@ -177,7 +177,7 @@ export default async function TrackerPage() {
           </section>
         </div>
 
-        <aside className="space-y-6">
+        <aside className="space-y-6 xl:sticky xl:top-24 xl:self-start">
           <div className="rounded-xl border border-border bg-card p-5">
             <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-primary" />

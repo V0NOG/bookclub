@@ -342,13 +342,13 @@ export default async function HomePage() {
   if (goal) anchorSlots.push({ kind: "reading_goal" });
   if (recentBooks.length > 0) anchorSlots.push({ kind: "recently_read" });
 
-  const feedSlots: FeedSlot[] = [...contentSlots, ...anchorSlots];
-  const isEmpty = feedSlots.length === 0;
+  const feedSlots: FeedSlot[] = contentSlots;
+  const isEmpty = feedSlots.length === 0 && anchorSlots.length === 0;
 
   // ── Render ────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="px-6 py-8 max-w-3xl">
+    <div className="w-full max-w-7xl px-6 py-8">
 
       {/* Header */}
       <div className="mb-8">
@@ -386,8 +386,9 @@ export default async function HomePage() {
             <h2 className="text-2xl font-bold text-foreground">Today</h2>
           </div>
 
-          <div className="space-y-0">
-            {feedSlots.map((slot, i) => {
+          <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_340px]">
+            <div className="min-w-0 space-y-0">
+              {feedSlots.map((slot, i) => {
               switch (slot.kind) {
 
                 case "activity":
@@ -601,7 +602,84 @@ export default async function HomePage() {
                     </div>
                   );
               }
-            })}
+              })}
+            </div>
+
+            {anchorSlots.length > 0 && (
+              <aside className="space-y-8 xl:sticky xl:top-24 xl:self-start">
+                {currentBook && (
+                  <section className="rounded-xl border border-border bg-card p-5">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-4">On your nightstand</h3>
+                    <div className="flex gap-4 items-start">
+                      <div className="flex-shrink-0">
+                        {currentBook.book.cover ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={currentBook.book.cover} alt="" className="h-24 w-16 object-cover rounded-md shadow-sm" />
+                        ) : (
+                          <div className="h-24 w-16 bg-muted rounded-md flex items-center justify-center">
+                            <BookOpen className="h-5 w-5 text-muted-foreground" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-foreground italic line-clamp-2">{currentBook.book.title}</p>
+                        <p className="text-sm text-muted-foreground mb-4">{currentBook.book.author}</p>
+                        <div className="h-1 bg-muted rounded-full overflow-hidden mb-1.5">
+                          <div className="h-full bg-primary rounded-full" style={{ width: `${currentPercent}%` }} />
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span>{currentBook.progress} / {currentBook.book.pageCount ?? "?"} pages</span>
+                          <span>{currentPercent}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                )}
+
+                {goal && (
+                  <section className="rounded-xl border border-border bg-card p-5">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-4">{new Date().getFullYear()} reading goal</h3>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-foreground font-medium">
+                        {booksReadThisYear} of {goal.target} books
+                      </span>
+                      <span className="text-xs text-primary font-semibold">
+                        {Math.round((booksReadThisYear / goal.target) * 100)}%
+                      </span>
+                    </div>
+                    <div className="h-1 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full transition-all"
+                        style={{ width: `${Math.min(100, Math.round((booksReadThisYear / goal.target) * 100))}%` }}
+                      />
+                    </div>
+                  </section>
+                )}
+
+                {recentBooks.length > 0 && (
+                  <section className="rounded-xl border border-border bg-card p-5">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-4">Recently read</h3>
+                    <div className="grid grid-cols-3 gap-3">
+                      {recentBooks.slice(0, 6).map((ub) => (
+                        <div key={ub.id} className="group min-w-0">
+                          <div className="aspect-[2/3] bg-muted rounded-md overflow-hidden mb-2 shadow-sm">
+                            {ub.book.cover ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={ub.book.cover} alt="" className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center">
+                                <BookOpen className="h-5 w-5 text-muted-foreground" />
+                              </div>
+                            )}
+                          </div>
+                          <p className="text-xs font-medium text-foreground italic truncate">{ub.book.title}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </aside>
+            )}
           </div>
         </>
       )}

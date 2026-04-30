@@ -40,7 +40,7 @@ export default async function LibraryPage() {
   const goalPct = goal ? Math.min(100, Math.round(((goal.current ?? 0) / goal.target) * 100)) : null;
 
   return (
-    <div className="px-6 py-8 max-w-3xl">
+    <div className="w-full max-w-7xl px-6 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground mb-2">My library</h1>
         <p className="text-sm text-muted-foreground">
@@ -87,7 +87,7 @@ export default async function LibraryPage() {
             <BookOpen className="h-4 w-4 text-primary" />
             Currently reading
           </h2>
-          <div className="space-y-0">
+          <div className="grid gap-x-8 lg:grid-cols-2">
             {currentlyReading.map(({ book, progress, status, rating }) => {
               const pct = book.pageCount && progress ? Math.min(100, Math.round((progress / book.pageCount) * 100)) : null;
               return (
@@ -128,7 +128,7 @@ export default async function LibraryPage() {
             Want to read
             <span className="text-xs font-normal text-muted-foreground ml-1">({wantToRead.length})</span>
           </h2>
-          <div className="space-y-0">
+          <div className="grid gap-x-8 md:grid-cols-2 xl:grid-cols-3">
             {wantToRead.map(({ book, status, rating }) => (
               <div key={book.id} className="flex items-center gap-3 py-3 border-b border-border/40">
                 {book.cover ? (
@@ -154,7 +154,7 @@ export default async function LibraryPage() {
             Read
             <span className="text-xs font-normal text-muted-foreground ml-1">({read.length})</span>
           </h2>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8">
             {read.map(({ book, rating, status }) => (
               <div key={book.id} className="flex flex-col gap-1.5">
                 {book.cover ? (
@@ -180,7 +180,7 @@ export default async function LibraryPage() {
             Abandoned
             <span className="text-xs font-normal text-muted-foreground ml-1">({abandoned.length})</span>
           </h2>
-          <div className="space-y-0">
+          <div className="grid gap-x-8 md:grid-cols-2 xl:grid-cols-3">
             {abandoned.map(({ book, status, rating }) => (
               <div key={book.id} className="flex items-center gap-3 py-3 border-b border-border/40">
                 {book.cover ? (

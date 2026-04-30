@@ -72,7 +72,7 @@ export default async function ChallengesPage() {
     new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(date);
 
   return (
-    <div className="px-6 py-8 max-w-3xl">
+    <div className="w-full max-w-7xl px-6 py-8">
       <div className="mb-8">
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Reading goals</p>
         <h1 className="text-3xl font-bold text-foreground mb-2">Challenges</h1>
@@ -81,7 +81,8 @@ export default async function ChallengesPage() {
         </p>
       </div>
 
-      <section className="mb-10">
+      <div className="grid gap-10 xl:grid-cols-2">
+      <section>
         <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
           <Trophy className="h-4 w-4 text-primary" />
           Your challenges
@@ -137,6 +138,7 @@ export default async function ChallengesPage() {
           </div>
         )}
       </section>
+      </div>
     </div>
   );
 }

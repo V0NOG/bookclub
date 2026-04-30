@@ -333,7 +333,7 @@ function TechStack() {
 
 export default function ShowcasePage() {
   return (
-    <div className="p-6 max-w-3xl">
+    <div className="w-full max-w-7xl p-6">
       <Hero />
       <ProblemSolution />
       <Features />

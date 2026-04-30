@@ -52,7 +52,7 @@ export default async function SettingsPage() {
   });
 
   return (
-    <div className="px-6 py-8 max-w-3xl">
+    <div className="w-full max-w-7xl px-6 py-8">
       <div className="mb-8">
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Account</p>
         <h1 className="text-3xl font-bold text-foreground mb-2">Settings</h1>
@@ -61,7 +61,7 @@ export default async function SettingsPage() {
         </p>
       </div>
 
-      <div className="space-y-8">
+      <div className="grid gap-8 lg:grid-cols-2">
         <PreferencesForm
           userType={user?.userType ?? UserType.READER}
           readingGoal={user?.onboardingData?.readingGoalBooksPerYear}

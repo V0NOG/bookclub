@@ -86,7 +86,7 @@ export default async function FeedPage() {
   const topGenres = new Set(tasteProfile?.topGenres ?? []);
 
   return (
-    <div className="px-6 py-8 max-w-3xl">
+    <div className="w-full max-w-7xl px-6 py-8">
       <div className="mb-8">
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Social reading</p>
         <h1 className="text-3xl font-bold text-foreground mb-2">Feed</h1>
@@ -110,7 +110,8 @@ export default async function FeedPage() {
       </div>
 
       {activities.length > 0 ? (
-        <div className="space-y-0">
+        <div className="grid gap-10 xl:grid-cols-[minmax(0,760px)_340px]">
+          <div className="min-w-0 space-y-0">
           {activities.map((activity) => {
             const likedByYou = activity.likes.some((like) => like.userId === userId);
             return (
@@ -138,6 +139,19 @@ export default async function FeedPage() {
               />
             );
           })}
+          </div>
+          <aside className="space-y-6 xl:sticky xl:top-24 xl:self-start">
+            <div className="rounded-xl border border-border bg-card p-5">
+              <h2 className="text-sm font-semibold text-foreground mb-3">Why these appear</h2>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Folio weighs your ratings, followed readers, and taste profile to explain which activity is most relevant.
+              </p>
+            </div>
+            <div className="rounded-xl border border-border bg-card p-5">
+              <p className="text-2xl font-bold text-foreground">{activities.length}</p>
+              <p className="text-xs text-muted-foreground">Recent community signals</p>
+            </div>
+          </aside>
         </div>
       ) : (
         <div className="rounded-xl border border-border bg-card p-8 text-center">

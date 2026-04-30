@@ -78,7 +78,7 @@ export default async function DiscoverPage() {
   const hasMatches = topBooks.length > 0 || topPeople.length > 0 || topClubs.length > 0;
 
   return (
-    <div className="px-6 py-8 max-w-4xl">
+    <div className="w-full max-w-7xl px-6 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground mb-2">Discover</h1>
         <p className="text-sm text-muted-foreground">
@@ -190,7 +190,7 @@ export default async function DiscoverPage() {
           <p className="text-xs text-muted-foreground mb-4">
             Matched through shared genres, authors, and rating patterns
           </p>
-          <div>
+          <div className="grid gap-x-8 lg:grid-cols-2">
             {topPeople.slice(0, 4).map(({ user, match }) => (
               <PeopleSuggestion
                 key={user.id}
@@ -210,7 +210,7 @@ export default async function DiscoverPage() {
       {topClubs.length > 0 && (
         <section className="mt-10">
           <h2 className="text-lg font-semibold text-foreground mb-4">Clubs matched to your taste</h2>
-          <div>
+          <div className="grid gap-x-8 lg:grid-cols-2">
             {topClubs.slice(0, 4).map(({ club, match }) => (
               <ClubSuggestionCard
                 key={club.id}

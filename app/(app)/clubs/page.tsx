@@ -44,7 +44,7 @@ export default async function ClubsPage() {
   const cadenceMap = new Map(cadenceRows.map((c) => [c.id, c.meetingCadence]));
 
   return (
-    <div className="px-6 py-8 max-w-3xl">
+    <div className="w-full max-w-7xl px-6 py-8">
       <div className="flex items-baseline justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Clubs</h1>
@@ -63,8 +63,9 @@ export default async function ClubsPage() {
         </Link>
       </div>
 
+      <div className="grid gap-10 xl:grid-cols-2">
       {memberships.length > 0 && (
-        <section className="mb-10">
+        <section>
           <h2 className="text-base font-semibold text-foreground mb-4">Your clubs</h2>
           <div className="space-y-0">
             {memberships.map(({ club, role }) => (
@@ -131,6 +132,7 @@ export default async function ClubsPage() {
           </div>
         </section>
       )}
+      </div>
 
       {memberships.length === 0 && suggestedClubs.length === 0 && (
         <div className="text-center py-20 text-muted-foreground">

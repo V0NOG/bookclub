@@ -136,7 +136,7 @@ export default async function ProfilePage() {
   });
 
   return (
-    <div className="px-6 py-8 max-w-4xl">
+    <div className="w-full max-w-7xl px-6 py-8">
       <section className="mb-10 border-b border-border/60 pb-8">
         <div className="flex items-start gap-5">
           <div className="h-20 w-20 rounded-xl bg-secondary/20 flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -167,7 +167,7 @@ export default async function ProfilePage() {
         </div>
       </section>
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_280px]">
+      <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-10">
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
@@ -266,7 +266,7 @@ export default async function ProfilePage() {
           </section>
         </div>
 
-        <aside className="space-y-6">
+        <aside className="space-y-6 xl:sticky xl:top-24 xl:self-start">
           <ProfileEditForm
             profile={{
               name: user?.name,
