@@ -24,7 +24,7 @@ export default function SignUpPage() {
   return (
     <Card className="border-border bg-card">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl text-white">Create your account</CardTitle>
+        <CardTitle className="text-2xl text-foreground">Create your account</CardTitle>
         <CardDescription>Join thousands of readers discovering their next favourite book.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -47,14 +47,14 @@ export default function SignUpPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2.5 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Creating account..." : "Create account →"}
           </button>
         </form>
         <p className="text-center text-sm text-muted-foreground mt-4">
           Already have an account?{" "}
-          <Link href="/sign-in" className="text-emerald-400 hover:underline">Sign in</Link>
+          <Link href="/sign-in" className="text-primary hover:underline">Sign in</Link>
         </p>
       </CardContent>
     </Card>

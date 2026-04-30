@@ -56,7 +56,7 @@ function SignInPageInner() {
   return (
     <Card className="border-border bg-card">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl text-white">Welcome back</CardTitle>
+        <CardTitle className="text-2xl text-foreground">Welcome back</CardTitle>
         <CardDescription>
           {registered
             ? "Account created! Sign in to continue."
@@ -68,7 +68,7 @@ function SignInPageInner() {
           type="button"
           onClick={handleDemo}
           disabled={loading}
-          className="w-full mb-4 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full mb-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2.5 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? "Loading..." : "Try Demo — sign in as Sarah"}
         </button>
@@ -81,7 +81,7 @@ function SignInPageInner() {
           </div>
         </div>
         {registered && (
-          <div className="mb-4 text-sm text-emerald-400 bg-emerald-400/10 rounded-md px-3 py-2">
+          <div className="mb-4 text-sm text-primary bg-primary/10 rounded-md px-3 py-2">
             Account created successfully! Sign in below.
           </div>
         )}
@@ -100,7 +100,7 @@ function SignInPageInner() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2.5 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Signing in..." : "Sign in →"}
           </button>
@@ -114,7 +114,7 @@ function SignInPageInner() {
         </div>
         <p className="text-center text-sm text-muted-foreground mt-4">
           Don&apos;t have an account?{" "}
-          <Link href="/sign-up" className="text-emerald-400 hover:underline">Sign up free</Link>
+          <Link href="/sign-up" className="text-primary hover:underline">Sign up free</Link>
         </p>
       </CardContent>
     </Card>

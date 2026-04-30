@@ -80,15 +80,15 @@ export function OnboardingWizard() {
             <span>{stepIndex + 1} / {STEPS.length}</span>
           </div>
           <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-            <div className="h-full bg-emerald-500 rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
+            <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
           </div>
         </div>
 
         {/* Step card */}
-        <div className="bg-card border border-border rounded-2xl p-8 min-h-[400px] flex flex-col">
+        <div className="bg-card border border-border rounded-xl p-8 min-h-[400px] flex flex-col shadow-sm">
           {currentStep === "genres" && (
             <>
-              <h2 className="text-2xl font-bold text-white mb-2">What genres do you love?</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-2">What genres do you love?</h2>
               <p className="text-muted-foreground mb-6">Pick at least 2. This shapes your taste profile.</p>
               <div className="flex flex-wrap gap-2 flex-1">
                 {GENRES.map((g) => (
@@ -98,8 +98,8 @@ export function OnboardingWizard() {
                     className={cn(
                       "px-4 py-2 rounded-full border text-sm font-medium transition-all",
                       favoriteGenres.includes(g)
-                        ? "bg-emerald-500 border-emerald-500 text-white"
-                        : "border-border text-muted-foreground hover:border-emerald-500/50 hover:text-white"
+                        ? "bg-primary border-primary text-primary-foreground"
+                        : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
                     )}
                   >
                     {g}
@@ -111,7 +111,7 @@ export function OnboardingWizard() {
 
           {currentStep === "authors" && (
             <>
-              <h2 className="text-2xl font-bold text-white mb-2">Any favourite authors?</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Any favourite authors?</h2>
               <p className="text-muted-foreground mb-6">Select any you love. Helps us find readers who read like you.</p>
               <div className="flex flex-wrap gap-2 flex-1">
                 {AUTHORS.map((a) => (
@@ -121,8 +121,8 @@ export function OnboardingWizard() {
                     className={cn(
                       "px-4 py-2 rounded-full border text-sm font-medium transition-all",
                       favoriteAuthors.includes(a)
-                        ? "bg-emerald-500 border-emerald-500 text-white"
-                        : "border-border text-muted-foreground hover:border-emerald-500/50 hover:text-white"
+                        ? "bg-primary border-primary text-primary-foreground"
+                        : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
                     )}
                   >
                     {a}
@@ -134,7 +134,7 @@ export function OnboardingWizard() {
 
           {currentStep === "moods" && (
             <>
-              <h2 className="text-2xl font-bold text-white mb-2">What moods do you read for?</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-2">What moods do you read for?</h2>
               <p className="text-muted-foreground mb-6">Pick at least 2 reading vibes.</p>
               <div className="flex flex-wrap gap-2 flex-1">
                 {MOODS.map((m) => (
@@ -144,8 +144,8 @@ export function OnboardingWizard() {
                     className={cn(
                       "px-4 py-2 rounded-full border text-sm font-medium transition-all",
                       preferredMoods.includes(m)
-                        ? "bg-emerald-500 border-emerald-500 text-white"
-                        : "border-border text-muted-foreground hover:border-emerald-500/50 hover:text-white"
+                        ? "bg-primary border-primary text-primary-foreground"
+                        : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
                     )}
                   >
                     {m}
@@ -157,7 +157,7 @@ export function OnboardingWizard() {
 
           {currentStep === "goals" && (
             <>
-              <h2 className="text-2xl font-bold text-white mb-2">How many books this year?</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-2">How many books this year?</h2>
               <p className="text-muted-foreground mb-6">Set a reading goal. You can change this any time.</p>
               <div className="grid grid-cols-5 gap-3 flex-1 content-start">
                 {GOALS.map((g) => (
@@ -167,8 +167,8 @@ export function OnboardingWizard() {
                     className={cn(
                       "flex flex-col items-center justify-center p-4 rounded-xl border text-sm font-medium transition-all aspect-square",
                       readingGoal === g
-                        ? "bg-emerald-500 border-emerald-500 text-white"
-                        : "border-border text-muted-foreground hover:border-emerald-500/50 hover:text-white"
+                        ? "bg-primary border-primary text-primary-foreground"
+                        : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
                     )}
                   >
                     <span className="text-2xl font-bold">{g}</span>
@@ -181,11 +181,11 @@ export function OnboardingWizard() {
 
           {currentStep === "clubs" && (
             <>
-              <h2 className="text-2xl font-bold text-white mb-2">Clubs and challenges?</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Clubs and challenges?</h2>
               <p className="text-muted-foreground mb-6">Help us personalise your discovery feed.</p>
               <div className="space-y-4 flex-1">
                 <div>
-                  <p className="text-sm font-medium text-white mb-2">Club preference</p>
+                  <p className="text-sm font-medium text-foreground mb-2">Club preference</p>
                   <div className="flex gap-3">
                     {["online", "local", "both"].map((p) => (
                       <button
@@ -194,8 +194,8 @@ export function OnboardingWizard() {
                         className={cn(
                           "flex-1 py-3 rounded-lg border text-sm font-medium transition-all capitalize",
                           clubPreference === p
-                            ? "bg-emerald-500 border-emerald-500 text-white"
-                            : "border-border text-muted-foreground hover:border-emerald-500/50"
+                            ? "bg-primary border-primary text-primary-foreground"
+                            : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
                         )}
                       >
                         {p}
@@ -208,21 +208,21 @@ export function OnboardingWizard() {
                     onClick={() => setInterestedInClubs(!interestedInClubs)}
                     className={cn(
                       "flex-1 flex items-center gap-3 p-4 rounded-xl border text-sm transition-all",
-                      interestedInClubs ? "bg-emerald-500/10 border-emerald-500" : "border-border"
+                      interestedInClubs ? "bg-secondary/10 border-secondary/60" : "border-border hover:border-secondary/50"
                     )}
                   >
-                    {interestedInClubs && <CheckCircle2 className="h-4 w-4 text-emerald-500 flex-shrink-0" />}
-                    <span className={interestedInClubs ? "text-emerald-400" : "text-muted-foreground"}>I&apos;m interested in book clubs</span>
+                    {interestedInClubs && <CheckCircle2 className="h-4 w-4 text-secondary flex-shrink-0" />}
+                    <span className={interestedInClubs ? "text-secondary" : "text-muted-foreground"}>I&apos;m interested in book clubs</span>
                   </button>
                   <button
                     onClick={() => setInterestedInChallenges(!interestedInChallenges)}
                     className={cn(
                       "flex-1 flex items-center gap-3 p-4 rounded-xl border text-sm transition-all",
-                      interestedInChallenges ? "bg-emerald-500/10 border-emerald-500" : "border-border"
+                      interestedInChallenges ? "bg-secondary/10 border-secondary/60" : "border-border hover:border-secondary/50"
                     )}
                   >
-                    {interestedInChallenges && <CheckCircle2 className="h-4 w-4 text-emerald-500 flex-shrink-0" />}
-                    <span className={interestedInChallenges ? "text-emerald-400" : "text-muted-foreground"}>I&apos;m interested in challenges</span>
+                    {interestedInChallenges && <CheckCircle2 className="h-4 w-4 text-secondary flex-shrink-0" />}
+                    <span className={interestedInChallenges ? "text-secondary" : "text-muted-foreground"}>I&apos;m interested in challenges</span>
                   </button>
                 </div>
               </div>
@@ -231,7 +231,7 @@ export function OnboardingWizard() {
 
           {currentStep === "type" && (
             <>
-              <h2 className="text-2xl font-bold text-white mb-2">How do you describe yourself?</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-2">How do you describe yourself?</h2>
               <p className="text-muted-foreground mb-6">This helps us tailor your experience.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1 content-start">
                 {USER_TYPES.map((t) => (
@@ -241,11 +241,11 @@ export function OnboardingWizard() {
                     className={cn(
                       "p-4 rounded-xl border text-left transition-all",
                       userType === t.value
-                        ? "bg-emerald-500/10 border-emerald-500"
-                        : "border-border hover:border-emerald-500/50"
+                        ? "bg-secondary/10 border-secondary/60"
+                        : "border-border hover:border-secondary/50"
                     )}
                   >
-                    <p className={cn("font-medium mb-1", userType === t.value ? "text-emerald-400" : "text-white")}>{t.label}</p>
+                    <p className={cn("font-medium mb-1", userType === t.value ? "text-secondary" : "text-foreground")}>{t.label}</p>
                     <p className="text-xs text-muted-foreground">{t.desc}</p>
                   </button>
                 ))}
@@ -262,7 +262,7 @@ export function OnboardingWizard() {
             <button
               onClick={() => setStepIndex((i) => Math.max(0, i - 1))}
               disabled={stepIndex === 0}
-              className="px-4 py-2 text-sm text-muted-foreground hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Back
             </button>
@@ -270,7 +270,7 @@ export function OnboardingWizard() {
               <button
                 onClick={() => setStepIndex((i) => i + 1)}
                 disabled={!canProceed}
-                className="flex items-center gap-1.5 px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 px-5 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Continue <ChevronRight className="h-4 w-4" />
               </button>
@@ -278,7 +278,7 @@ export function OnboardingWizard() {
               <button
                 onClick={handleFinish}
                 disabled={loading}
-                className="px-8 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-8 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Setting up your profile..." : "Start reading →"}
               </button>

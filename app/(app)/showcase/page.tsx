@@ -11,11 +11,11 @@ function Hero() {
   return (
     <section className="pt-12 pb-14 border-b border-border">
       <div className="flex items-center gap-2 mb-5">
-        <span className="text-xs font-semibold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full">
+        <span className="text-xs font-semibold uppercase tracking-widest text-primary bg-primary/10 px-3 py-1 rounded-full">
           Portfolio Project
         </span>
       </div>
-      <h1 className="text-4xl font-bold text-white leading-tight mb-4 max-w-2xl">
+      <h1 className="text-4xl font-bold text-foreground leading-tight mb-4 max-w-2xl">
         Intelligent Book Recommendation System
       </h1>
       <p className="text-lg text-muted-foreground mb-8 max-w-xl leading-relaxed">
@@ -24,14 +24,14 @@ function Hero() {
       <div className="flex gap-3 flex-wrap">
         <Link
           href="/sign-in"
-          className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors text-sm"
+          className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-5 py-2.5 rounded-lg transition-colors text-sm"
         >
           Try Demo
           <ArrowRight className="h-4 w-4" />
         </Link>
         <Link
           href="/how-it-works"
-          className="inline-flex items-center gap-2 border border-border text-muted-foreground hover:text-white hover:border-white/30 font-semibold px-5 py-2.5 rounded-lg transition-colors text-sm"
+          className="inline-flex items-center gap-2 border border-border text-muted-foreground hover:text-foreground hover:border-foreground/20 font-semibold px-5 py-2.5 rounded-lg transition-colors text-sm"
         >
           How It Works
         </Link>
@@ -50,7 +50,7 @@ function ProblemSolution() {
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-card border border-border rounded-xl p-6">
-          <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wide mb-4">
+          <h3 className="text-sm font-semibold text-foreground/60 uppercase tracking-wide mb-4">
             Most recommendation systems
           </h3>
           <ul className="space-y-3">
@@ -68,8 +68,8 @@ function ProblemSolution() {
             ))}
           </ul>
         </div>
-        <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-6">
-          <h3 className="text-sm font-semibold text-emerald-400 uppercase tracking-wide mb-4">
+        <div className="bg-primary/5 border border-primary/20 rounded-xl p-6">
+          <h3 className="text-sm font-semibold text-primary uppercase tracking-wide mb-4">
             Folio&apos;s approach
           </h3>
           <ul className="space-y-3">
@@ -81,7 +81,7 @@ function ProblemSolution() {
               "Controlled exploration surfaces adjacent content outside your comfort zone",
             ].map((item) => (
               <li key={item} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-400 flex-shrink-0" />
+                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0" />
                 {item}
               </li>
             ))}
@@ -134,14 +134,14 @@ function Features() {
         System capabilities
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {features.map((f) => {
+        {features.map((f, i) => {
           const Icon = f.icon;
           return (
             <div key={f.title} className="bg-card border border-border rounded-xl p-5">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center mb-4">
-                <Icon className="h-4 w-4 text-emerald-400" />
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-4 ${i % 2 === 0 ? "bg-primary/10" : "bg-secondary/10"}`}>
+                <Icon className={`h-4 w-4 ${i % 2 === 0 ? "text-primary" : "text-secondary"}`} />
               </div>
-              <h3 className="text-sm font-semibold text-white mb-2">{f.title}</h3>
+              <h3 className="text-sm font-semibold text-foreground mb-2">{f.title}</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">{f.description}</p>
             </div>
           );
@@ -174,15 +174,15 @@ function HowItWorks() {
             <div key={step.label} className="flex sm:flex-col items-center sm:items-start gap-4 sm:gap-0 flex-1">
               <div className="flex items-center gap-3 sm:gap-0 sm:flex-col sm:items-start w-full">
                 <div className="flex items-center gap-3 flex-shrink-0">
-                  <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                    <Icon className="h-4 w-4 text-emerald-400" />
+                  <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    <Icon className="h-4 w-4 text-primary" />
                   </div>
                   {!isLast && (
                     <div className="hidden sm:block h-px flex-1 bg-border" style={{ width: "100%" }} />
                   )}
                 </div>
                 <div className="sm:mt-4">
-                  <p className="text-sm font-semibold text-white">{step.label}</p>
+                  <p className="text-sm font-semibold text-foreground">{step.label}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">{step.detail}</p>
                 </div>
               </div>
@@ -191,7 +191,7 @@ function HowItWorks() {
         })}
       </div>
       <div className="mt-6">
-        <Link href="/how-it-works" className="text-sm text-emerald-400 hover:underline">
+        <Link href="/how-it-works" className="text-sm text-primary hover:underline">
           Read full explanation →
         </Link>
       </div>
@@ -211,7 +211,7 @@ function DemoWalkthrough() {
     {
       n: "2",
       title: "Explore your recommendations",
-      body: "The home page shows three personalised carousels: books, readers, and clubs. Each card shows the match score, confidence level, and a plain-language reason.",
+      body: "The home page shows personalised book picks, readers, and clubs. Each card shows the match score, confidence level, and a plain-language reason.",
     },
     {
       n: "3",
@@ -231,21 +231,18 @@ function DemoWalkthrough() {
         <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
           Demo walkthrough
         </h2>
-        <Link
-          href="/sign-in"
-          className="text-xs text-emerald-400 hover:underline"
-        >
+        <Link href="/sign-in" className="text-xs text-primary hover:underline">
           Try it now →
         </Link>
       </div>
       <div className="space-y-5">
         {steps.map((s) => (
           <div key={s.n} className="flex gap-4">
-            <div className="w-7 h-7 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <span className="text-xs font-bold text-emerald-400">{s.n}</span>
+            <div className="w-7 h-7 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span className="text-xs font-bold text-primary">{s.n}</span>
             </div>
             <div>
-              <p className="text-sm font-semibold text-white mb-1">{s.title}</p>
+              <p className="text-sm font-semibold text-foreground mb-1">{s.title}</p>
               <p className="text-sm text-muted-foreground leading-relaxed">{s.body}</p>
             </div>
           </div>
@@ -288,8 +285,8 @@ function Differentiators() {
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {differentiators.map((d) => (
-          <div key={d.label} className="border-l-2 border-emerald-500/40 pl-4">
-            <p className="text-sm font-semibold text-white mb-1">{d.label}</p>
+          <div key={d.label} className="border-l-2 border-primary/40 pl-4">
+            <p className="text-sm font-semibold text-foreground mb-1">{d.label}</p>
             <p className="text-xs text-muted-foreground leading-relaxed">{d.description}</p>
           </div>
         ))}
@@ -305,7 +302,7 @@ const techStack = [
   { icon: Code2, name: "TypeScript", detail: "End-to-end type safety including Prisma client" },
   { icon: Cpu, name: "Custom recommendation engine", detail: "Pure TypeScript, no ML libraries — fully explainable" },
   { icon: Database, name: "PostgreSQL + Prisma", detail: "Relational data model with taste dimensions and feedback" },
-  { icon: Sparkles, name: "Tailwind CSS + shadcn/ui", detail: "Dark design system with Spotify-inspired layout" },
+  { icon: Sparkles, name: "Tailwind CSS + shadcn/ui", detail: "Warm editorial design system with Stacks palette" },
 ];
 
 function TechStack() {
@@ -321,7 +318,7 @@ function TechStack() {
             <div key={t.name} className="flex items-start gap-3 bg-card border border-border rounded-lg px-4 py-3">
               <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-white">{t.name}</p>
+                <p className="text-sm font-medium text-foreground">{t.name}</p>
                 <p className="text-xs text-muted-foreground">{t.detail}</p>
               </div>
             </div>

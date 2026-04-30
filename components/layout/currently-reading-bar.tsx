@@ -26,25 +26,25 @@ export async function CurrentlyReadingBar() {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={currentBook.book.cover} alt="" className="h-8 w-6 object-cover rounded-sm" />
         ) : (
-          <BookOpen className="h-5 w-5 text-emerald-500" />
+          <BookOpen className="h-5 w-5 text-primary" />
         )}
         <div className="min-w-0">
           <p className="text-xs text-muted-foreground">Currently reading</p>
-          <p className="text-sm font-medium text-white truncate">{currentBook.book.title}</p>
+          <p className="text-sm font-medium text-foreground truncate">{currentBook.book.title}</p>
         </div>
       </div>
 
       <div className="flex items-center gap-3">
         <div className="w-32 h-1.5 rounded-full bg-muted overflow-hidden">
           <div
-            className="h-full bg-emerald-500 rounded-full transition-all"
+            className="h-full bg-primary rounded-full transition-all"
             style={{ width: `${percent}%` }}
           />
         </div>
         <span className="text-xs text-muted-foreground w-8">{percent}%</span>
       </div>
 
-      <Link href="/tracker" className="text-xs text-emerald-400 hover:underline flex items-center gap-1">
+      <Link href="/tracker" className="text-xs text-primary hover:underline flex items-center gap-1">
         <ChevronUp className="h-3 w-3" />
         Log session
       </Link>

@@ -41,10 +41,10 @@ export default function HowItWorksPage() {
     <div className="p-6 max-w-2xl">
       <div className="mb-10">
         <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="h-5 w-5 text-emerald-400" />
+          <Sparkles className="h-5 w-5 text-primary" />
           <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">How Folio works</span>
         </div>
-        <h1 className="text-2xl font-bold text-white mb-2">
+        <h1 className="text-2xl font-bold text-foreground mb-2">
           Recommendations that actually get you
         </h1>
         <p className="text-muted-foreground text-sm leading-relaxed">
@@ -58,15 +58,15 @@ export default function HowItWorksPage() {
           return (
             <div key={step.number} className="flex gap-5">
               <div className="flex-shrink-0 flex flex-col items-center">
-                <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                  <Icon className="h-4.5 w-4.5 text-emerald-400" size={18} />
+                <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+                  <Icon className="h-4.5 w-4.5 text-primary" size={18} />
                 </div>
                 <div className="w-px flex-1 bg-border mt-2 mb-0" />
               </div>
               <div className="pb-8">
                 <div className="flex items-baseline gap-2 mb-1">
                   <span className="text-xs font-mono text-muted-foreground">{step.number}</span>
-                  <h2 className="text-base font-semibold text-white">{step.title}</h2>
+                  <h2 className="text-base font-semibold text-foreground">{step.title}</h2>
                 </div>
                 <p className="text-sm text-muted-foreground mb-2 leading-relaxed">{step.description}</p>
                 <p className="text-xs text-muted-foreground/70 leading-relaxed">{step.detail}</p>
@@ -77,39 +77,33 @@ export default function HowItWorksPage() {
       </div>
 
       <div className="mt-6 p-4 rounded-xl bg-card border border-border">
-        <h3 className="text-sm font-semibold text-white mb-1">What makes a strong match?</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-1">What makes a strong match?</h3>
         <ul className="text-xs text-muted-foreground space-y-1.5 mt-2">
           <li className="flex items-start gap-2">
-            <span className="text-emerald-400 mt-0.5">•</span>
-            <span><strong className="text-white/80">Shared highly-rated books</strong> — the strongest signal. If you both loved the same books, your taste is genuinely aligned.</span>
+            <span className="text-primary mt-0.5">•</span>
+            <span><strong className="text-foreground/80">Shared highly-rated books</strong> — the strongest signal. If you both loved the same books, your taste is genuinely aligned.</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-emerald-400 mt-0.5">•</span>
-            <span><strong className="text-white/80">Genre overlap</strong> — but weighted against books you actively dislike, not just genres you haven&apos;t tried.</span>
+            <span className="text-primary mt-0.5">•</span>
+            <span><strong className="text-foreground/80">Genre overlap</strong> — but weighted against books you actively dislike, not just genres you haven&apos;t tried.</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-emerald-400 mt-0.5">•</span>
-            <span><strong className="text-white/80">Reading style dimensions</strong> — pace, tone, complexity, emotional intensity, and more. Two fantasy fans can read very differently.</span>
+            <span className="text-primary mt-0.5">•</span>
+            <span><strong className="text-foreground/80">Reading style dimensions</strong> — pace, tone, complexity, emotional intensity, and more. Two fantasy fans can read very differently.</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-emerald-400 mt-0.5">•</span>
-            <span><strong className="text-white/80">Negative alignment</strong> — if you both avoid certain genres or tropes, that shared taste counts too.</span>
+            <span className="text-primary mt-0.5">•</span>
+            <span><strong className="text-foreground/80">Negative alignment</strong> — if you both avoid certain genres or tropes, that shared taste counts too.</span>
           </li>
         </ul>
       </div>
 
       <div className="mt-6 flex gap-3">
-        <Link
-          href="/home"
-          className="text-sm text-emerald-400 hover:underline"
-        >
+        <Link href="/home" className="text-sm text-primary hover:underline">
           Back to recommendations
         </Link>
         <span className="text-muted-foreground">·</span>
-        <Link
-          href="/library"
-          className="text-sm text-emerald-400 hover:underline"
-        >
+        <Link href="/library" className="text-sm text-primary hover:underline">
           Rate more books
         </Link>
       </div>
