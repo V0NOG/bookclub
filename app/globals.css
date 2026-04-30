@@ -26,6 +26,29 @@
     --ring:               7  49% 37%;
     --radius:             0.75rem;
   }
+
+  .dark {
+    /* Stacks night palette — warm dark parchment, not black */
+    --background:         34 20% 13%;
+    --foreground:         40 33% 88%;
+    --card:               33 18% 18%;
+    --card-foreground:    40 33% 88%;
+    --popover:            33 18% 18%;
+    --popover-foreground: 40 33% 88%;
+    --primary:            8 45% 58%;
+    --primary-foreground: 34 20% 13%;
+    --secondary:          94 13% 62%;
+    --secondary-foreground: 34 20% 13%;
+    --muted:              32 16% 22%;
+    --muted-foreground:   38 18% 68%;
+    --accent:             31 15% 26%;
+    --accent-foreground:  40 33% 88%;
+    --destructive:        0 63% 58%;
+    --destructive-foreground: 40 33% 94%;
+    --border:             31 15% 28%;
+    --input:              31 15% 28%;
+    --ring:               8 45% 58%;
+  }
 }
 
 @layer base {
@@ -35,6 +58,17 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-serif), "Iowan Old Style", Georgia, serif;
+    transition: background-color 180ms ease, color 180ms ease;
+  }
+
+  input,
+  textarea,
+  select,
+  button,
+  a {
+    transition-property: background-color, border-color, color, box-shadow, opacity, transform;
+    transition-duration: 180ms;
+    transition-timing-function: ease;
   }
 }
 
@@ -57,4 +91,201 @@
 ::-webkit-scrollbar-thumb {
   background: hsl(var(--border));
   border-radius: 3px;
+}
+
+@keyframes folio-shimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes folio-rise-in {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes folio-slide-in-right {
+  0% {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes folio-slide-out-right {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+}
+
+@keyframes folio-progress-glow {
+  0% {
+    box-shadow: 0 0 0 hsl(var(--primary) / 0);
+  }
+  50% {
+    box-shadow: 0 0 14px hsl(var(--primary) / 0.28);
+  }
+  100% {
+    box-shadow: 0 0 0 hsl(var(--primary) / 0);
+  }
+}
+
+@keyframes folio-soft-highlight {
+  0% {
+    background-color: hsl(var(--secondary) / 0.16);
+    box-shadow: 0 0 0 1px hsl(var(--secondary) / 0.2);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: 0 0 0 1px hsl(var(--secondary) / 0);
+  }
+}
+
+@keyframes folio-emphasis {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.035);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.folio-cover {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: hsl(var(--muted));
+}
+
+.folio-cover-shimmer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+    100deg,
+    hsl(var(--muted)) 0%,
+    hsl(var(--accent)) 38%,
+    hsl(var(--muted)) 76%
+  );
+  animation: folio-shimmer 1.35s ease-in-out infinite;
+}
+
+.folio-cover > * {
+  position: relative;
+  z-index: 1;
+}
+
+.folio-cover img {
+  display: block;
+  transform: translateZ(0);
+}
+
+.folio-soft-enter {
+  animation: folio-rise-in 220ms ease both;
+}
+
+.folio-slide-in-right {
+  animation: folio-slide-in-right 220ms ease both;
+}
+
+.folio-slide-out-right {
+  animation: folio-slide-out-right 180ms ease both;
+}
+
+.folio-lift {
+  transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.folio-lift:hover {
+  box-shadow: 0 4px 12px rgb(47 42 38 / 0.045);
+}
+
+.dark .folio-lift:hover {
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.14);
+}
+
+.folio-primary-lift {
+  transition: transform 190ms ease, box-shadow 190ms ease, background-color 190ms ease, border-color 190ms ease;
+}
+
+.folio-primary-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 34px rgb(47 42 38 / 0.13);
+}
+
+.dark .folio-primary-lift:hover {
+  box-shadow: 0 16px 38px rgb(0 0 0 / 0.28);
+}
+
+.folio-press {
+  transition: transform 150ms ease, box-shadow 150ms ease, background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.folio-press:hover {
+  transform: translateY(-0.5px);
+}
+
+.folio-press:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.folio-progress-fill {
+  animation: folio-progress-glow 650ms ease;
+  transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.folio-action-confirm {
+  animation: folio-emphasis 260ms ease;
+}
+
+.folio-updated {
+  animation: folio-soft-highlight 1200ms ease both;
+}
+
+.folio-milestone {
+  box-shadow: 0 0 0 1px hsl(var(--secondary) / 0.28), 0 8px 24px hsl(var(--secondary) / 0.12);
+}
+
+.folio-cta {
+  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.folio-cta:hover {
+  box-shadow: 0 8px 20px rgb(139 58 47 / 0.14);
+}
+
+.folio-cta:active {
+  animation: folio-emphasis 220ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

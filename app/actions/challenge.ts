@@ -19,6 +19,7 @@ export async function toggleChallengeParticipation(challengeId: string): Promise
     if (existing) {
       await db.challengeParticipant.delete({ where: { challengeId_userId: { challengeId, userId } } });
       revalidatePath("/challenges");
+      revalidatePath("/home");
       return { success: true, joined: false };
     }
 
@@ -31,6 +32,7 @@ export async function toggleChallengeParticipation(challengeId: string): Promise
 
     await db.challengeParticipant.create({ data: { challengeId, userId } });
     revalidatePath("/challenges");
+    revalidatePath("/home");
     return { success: true, joined: true };
   } catch {
     return { success: false, error: "Failed to update challenge" };

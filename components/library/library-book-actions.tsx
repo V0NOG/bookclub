@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Star } from "lucide-react";
 import { toast } from "sonner";
 import { rateBook, setBookStatus } from "@/app/actions/user-book";
@@ -30,6 +31,7 @@ export function LibraryBookActions({
   initialStatus: Status;
   initialRating?: number | null;
 }) {
+  const router = useRouter();
   const [status, setStatus] = useState<Status>(initialStatus);
   const [rating, setRating] = useState(initialRating ?? 0);
   const [message, setMessage] = useState<string | null>(null);
@@ -49,6 +51,7 @@ export function LibraryBookActions({
         const nextMessage = `Moved to ${STATUS_LABEL[nextStatus]}.`;
         setMessage(nextMessage);
         toast.success(nextMessage);
+        router.refresh();
       }
     });
   }
@@ -68,6 +71,7 @@ export function LibraryBookActions({
         const nextMessage = `Rated ${nextRating} star${nextRating === 1 ? "" : "s"}.`;
         setMessage(nextMessage);
         toast.success(nextMessage);
+        router.refresh();
       }
     });
   }
@@ -78,7 +82,7 @@ export function LibraryBookActions({
         value={status}
         onChange={(event) => changeStatus(event.target.value as Status)}
         disabled={pending}
-        className="h-8 rounded-lg border border-border bg-background px-2 text-xs text-foreground disabled:opacity-60"
+        className="h-8 rounded-lg border border-border bg-background px-2 text-xs text-foreground shadow-sm hover:border-primary/40 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15 disabled:opacity-60"
         aria-label="Reading status"
       >
         {STATUSES.map((item) => (
@@ -92,7 +96,7 @@ export function LibraryBookActions({
             type="button"
             onClick={() => changeRating(value)}
             disabled={pending}
-            className="rounded p-0.5 text-muted-foreground hover:text-primary disabled:opacity-60"
+            className="folio-press rounded p-0.5 text-muted-foreground hover:text-primary disabled:opacity-60"
             aria-label={`Rate ${value} stars`}
           >
             <Star className={`h-4 w-4 ${value <= rating ? "fill-primary text-primary" : ""}`} />

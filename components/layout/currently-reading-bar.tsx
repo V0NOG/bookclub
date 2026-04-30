@@ -1,7 +1,9 @@
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
-import { BookOpen, ChevronUp } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
+import { ReadingMiniPlayerActions } from "@/components/layout/reading-mini-player-actions";
 
 export async function CurrentlyReadingBar() {
   const session = await getSession();
@@ -20,34 +22,43 @@ export async function CurrentlyReadingBar() {
     : 0;
 
   return (
-    <div className="fixed bottom-0 left-60 right-0 z-30 border-t border-border bg-card/95 backdrop-blur h-16 flex items-center px-6 gap-4">
-      <div className="flex items-center gap-3 flex-1">
-        {currentBook.book.cover ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={currentBook.book.cover} alt="" className="h-8 w-6 object-cover rounded-sm" />
-        ) : (
-          <BookOpen className="h-5 w-5 text-primary" />
-        )}
-        <div className="min-w-0">
-          <p className="text-xs text-muted-foreground">Currently reading</p>
-          <p className="text-sm font-medium text-foreground truncate">{currentBook.book.title}</p>
-        </div>
-      </div>
+    <div key={currentBook.bookId} className="folio-soft-enter border-t border-border bg-card/95 px-4 py-3 backdrop-blur md:px-6">
+      <div className="mx-auto flex max-w-7xl items-center gap-4">
+        <Link href="/tracker" className="group/player flex min-w-0 flex-1 items-center gap-3 rounded-lg -m-1 p-1 hover:bg-accent/40">
+          <div className="folio-cover h-12 w-9 flex-shrink-0 overflow-hidden rounded-md bg-muted shadow-sm transition-shadow duration-200 group-hover/player:shadow-md">
+            {currentBook.book.cover ? (
+              <Image src={currentBook.book.cover} alt="" width={72} height={96} unoptimized className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center">
+                <BookOpen className="h-5 w-5 text-primary" />
+              </div>
+            )}
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs text-muted-foreground">Currently reading</p>
+            <p className="truncate text-sm font-semibold italic text-foreground transition-colors group-hover/player:text-primary">{currentBook.book.title}</p>
+            <p className="truncate text-xs text-muted-foreground">{currentBook.book.author}</p>
+          </div>
+        </Link>
 
-      <div className="flex items-center gap-3">
-        <div className="w-32 h-1.5 rounded-full bg-muted overflow-hidden">
-          <div
-            className="h-full bg-primary rounded-full transition-all"
-            style={{ width: `${percent}%` }}
+        <div className="hidden min-w-[220px] flex-col gap-1 md:flex">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>{currentBook.progress} / {currentBook.book.pageCount ?? "?"} pages</span>
+            <span>{percent}%</span>
+          </div>
+          <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+            <div className="folio-progress-fill h-full rounded-full bg-primary" style={{ width: `${percent}%` }} />
+          </div>
+        </div>
+
+        <div className="hidden lg:block">
+          <ReadingMiniPlayerActions
+            bookId={currentBook.bookId}
+            initialProgress={currentBook.progress}
+            pageCount={currentBook.book.pageCount}
           />
         </div>
-        <span className="text-xs text-muted-foreground w-8">{percent}%</span>
       </div>
-
-      <Link href="/tracker" className="text-xs text-primary hover:underline flex items-center gap-1">
-        <ChevronUp className="h-3 w-3" />
-        Log session
-      </Link>
     </div>
   );
 }

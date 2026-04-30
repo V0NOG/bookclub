@@ -4,6 +4,7 @@ import { getMatchesForUser } from "@/lib/matching/cache";
 import { ClubSuggestionCard } from "@/components/clubs/club-suggestion-card";
 import { ClubMembershipButton } from "@/components/clubs/club-membership-button";
 import Link from "next/link";
+import Image from "next/image";
 import { Users, Plus } from "lucide-react";
 
 export default async function ClubsPage() {
@@ -56,7 +57,7 @@ export default async function ClubsPage() {
         </div>
         <Link
           href="/clubs/create"
-          className="flex items-center gap-1.5 text-sm bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg transition-colors"
+          className="folio-press folio-cta flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground shadow-sm hover:bg-primary/90"
         >
           <Plus className="h-4 w-4" />
           Create
@@ -71,10 +72,12 @@ export default async function ClubsPage() {
             {memberships.map(({ club, role }) => (
               <div
                 key={club.id}
-                className="flex items-center gap-3 py-4 border-b border-border/50 group hover:bg-muted/30 -mx-2 px-2 rounded transition-colors"
+                className="folio-lift group -mx-2 flex items-center gap-3 rounded-lg border-b border-border/50 px-2 py-4 hover:bg-card/45"
               >
                 {club.avatar ? (
-                  <img src={club.avatar} alt="" className="h-10 w-10 rounded-lg object-cover flex-shrink-0" />
+                  <div className="folio-cover h-10 w-10 flex-shrink-0 rounded-lg shadow-sm">
+                    <Image src={club.avatar} alt="" width={40} height={40} unoptimized className="h-full w-full object-cover" />
+                  </div>
                 ) : (
                   <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                     <Users className="h-4 w-4 text-primary" />
@@ -141,7 +144,7 @@ export default async function ClubsPage() {
           <p className="text-sm mb-8">Discover clubs matched to your taste, then join the ones that are open.</p>
           <Link
             href="/discover"
-            className="text-sm bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-lg transition-colors"
+            className="folio-press folio-cta rounded-lg bg-primary px-5 py-2.5 text-sm text-primary-foreground shadow-sm hover:bg-primary/90"
           >
             Discover clubs
           </Link>

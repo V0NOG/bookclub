@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth-helpers";
 import { Activity, BookOpen, Clock, Sparkles, Target } from "lucide-react";
 import { ReadingSessionForm } from "@/components/tracker/reading-session-form";
 import Link from "next/link";
+import Image from "next/image";
 
 function dateKey(date: Date) {
   return date.toISOString().slice(0, 10);
@@ -65,7 +66,7 @@ export default async function TrackerPage() {
     }),
   ]);
 
-  const sessionBookIds = Array.from(new Set(sessions.map((s) => s.bookId)));
+  const sessionBookIds = Array.from(new Set([...sessions, ...insightSessions].map((s) => s.bookId)));
   const sessionBooks = sessionBookIds.length
     ? await db.book.findMany({
         where: { id: { in: sessionBookIds } },
@@ -116,10 +117,11 @@ export default async function TrackerPage() {
                 {currentBooks.map(({ id, book, progress }) => {
                   const pct = book.pageCount ? Math.min(100, Math.round((progress / book.pageCount) * 100)) : 0;
                   return (
-                    <div key={id} className="flex items-center gap-4 border-b border-border/50 py-4">
+                    <div key={id} className="folio-lift -mx-2 flex items-center gap-4 rounded-lg border-b border-border/50 px-2 py-4 hover:bg-card/45">
                       {book.cover ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={book.cover} alt="" className="h-16 w-11 rounded object-cover" />
+                        <div className="folio-cover h-16 w-11 flex-shrink-0 rounded shadow-sm">
+                          <Image src={book.cover} alt="" width={44} height={64} unoptimized className="h-full w-full object-cover" />
+                        </div>
                       ) : (
                         <div className="h-16 w-11 rounded bg-muted flex items-center justify-center">
                           <BookOpen className="h-5 w-5 text-muted-foreground/50" />
@@ -129,7 +131,7 @@ export default async function TrackerPage() {
                         <p className="text-sm font-semibold text-foreground truncate">{book.title}</p>
                         <p className="text-xs text-muted-foreground mb-2">{book.author}</p>
                         <div className="h-1.5 max-w-60 rounded-full bg-muted overflow-hidden">
-                          <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+                          <div className="folio-progress-fill h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">{pct}% complete</p>
                       </div>
@@ -138,9 +140,9 @@ export default async function TrackerPage() {
                 })}
               </div>
             ) : (
-              <div className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
+              <div className="folio-lift rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
                 <p>Mark a book as currently reading to see it here.</p>
-                <Link href="/library" className="mt-3 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
+                <Link href="/library" className="folio-press mt-3 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 hover:shadow-md">
                   Choose a book
                 </Link>
               </div>
@@ -157,7 +159,7 @@ export default async function TrackerPage() {
                 {sessions.map((session) => {
                   const book = bookMap.get(session.bookId);
                   return (
-                    <div key={session.id} className="border-b border-border/50 py-4">
+                    <div key={session.id} className="folio-lift -mx-2 rounded-lg border-b border-border/50 px-2 py-4 hover:bg-card/45">
                       <p className="text-sm font-semibold text-foreground">
                         {book?.title ?? "Reading session"}
                       </p>
@@ -174,15 +176,47 @@ export default async function TrackerPage() {
                 })}
               </div>
             ) : (
-              <div className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
+              <div className="folio-lift rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
                 Reading sessions will appear here once logged.
+              </div>
+            )}
+          </section>
+
+          <section>
+            <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+              <Activity className="h-4 w-4 text-primary" />
+              Progress history
+            </h2>
+            {insightSessions.length > 0 ? (
+              <div className="space-y-0">
+                {insightSessions.slice(0, 10).map((session) => {
+                  const book = bookMap.get(session.bookId);
+                  return (
+                    <div key={session.id} className="folio-lift -mx-2 rounded-lg border-b border-border/50 px-2 py-3 hover:bg-card/45">
+                      <div className="flex items-center justify-between gap-4">
+                        <p className="truncate text-sm font-semibold text-foreground">{book?.title ?? "Reading session"}</p>
+                        <p className="flex-shrink-0 text-xs text-muted-foreground">
+                          {new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(session.date)}
+                        </p>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {session.pagesRead ? `+${session.pagesRead} pages` : "Pages not logged"}
+                        {session.minutesRead ? ` · ${session.minutesRead} minutes` : ""}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="folio-lift rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
+                Progress history will build as you log sessions.
               </div>
             )}
           </section>
         </div>
 
         <aside className="space-y-6 xl:sticky xl:top-24 xl:self-start">
-          <div className="rounded-xl border border-border bg-card p-5">
+          <div className="folio-lift rounded-xl border border-border bg-card p-5">
             <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-primary" />
               Reading insights
@@ -202,7 +236,7 @@ export default async function TrackerPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-border bg-card p-5">
+          <div className="folio-lift rounded-xl border border-border bg-card p-5">
             <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
               <Activity className="h-4 w-4 text-primary" />
               Session totals
@@ -219,7 +253,7 @@ export default async function TrackerPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-border bg-card p-5">
+          <div className="folio-lift rounded-xl border border-border bg-card p-5">
             <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
               <Target className="h-4 w-4 text-primary" />
               Annual goal
@@ -231,7 +265,7 @@ export default async function TrackerPage() {
                   <span className="text-muted-foreground">{goalPct}%</span>
                 </div>
                 <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                  <div className="h-full rounded-full bg-primary" style={{ width: `${goalPct}%` }} />
+                  <div className="folio-progress-fill h-full rounded-full bg-primary" style={{ width: `${goalPct}%` }} />
                 </div>
               </>
             ) : (

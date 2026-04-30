@@ -11,7 +11,7 @@ function Slab({
 }) {
   return (
     <div
-      className="animate-pulse"
+      className="folio-cover folio-cover-shimmer animate-pulse"
       style={{
         width,
         height,

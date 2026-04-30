@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { BookOpen, Heart, Star, Users, UserPlus, BookmarkPlus } from "lucide-react";
 import { toast } from "sonner";
+import Image from "next/image";
 import { toggleActivityLike } from "@/app/actions/activity-like";
 import { toggleFollow } from "@/app/actions/follow";
 import { setBookStatus } from "@/app/actions/user-book";
@@ -48,7 +49,16 @@ export function FeedActivityRow({
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [following, setFollowing] = useState(initialFollowing);
   const [saved, setSaved] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [highlighted, setHighlighted] = useState(false);
   const [pending, startTransition] = useTransition();
+
+  function showFeedback(message: string) {
+    setFeedback(message);
+    setHighlighted(true);
+    setTimeout(() => setHighlighted(false), 1000);
+    setTimeout(() => setFeedback(null), 2200);
+  }
 
   function like() {
     const previous = { liked, likeCount };
@@ -59,6 +69,7 @@ export function FeedActivityRow({
       if (result.success) {
         setLiked(result.liked);
         setLikeCount(result.count);
+        showFeedback(result.liked ? "Liked" : "Like removed");
         toast.success(result.liked ? "Activity liked." : "Activity unliked.");
       } else {
         setLiked(previous.liked);
@@ -75,6 +86,7 @@ export function FeedActivityRow({
       const result = await toggleFollow(actorId);
       if (result.success) {
         setFollowing(result.following);
+        showFeedback(result.following ? `Following ${actorName.split(" ")[0]}` : "Unfollowed");
         toast.success(result.following ? `Following ${actorName}.` : `Unfollowed ${actorName}.`);
       } else {
         setFollowing(previous);
@@ -89,6 +101,7 @@ export function FeedActivityRow({
     startTransition(async () => {
       const result = await setBookStatus(bookId, "WANT_TO_READ");
       if (result.success) {
+        showFeedback("Saved to library");
         toast.success("Saved to want-to-read.");
       } else {
         setSaved(false);
@@ -98,11 +111,10 @@ export function FeedActivityRow({
   }
 
   return (
-    <article className="flex gap-3 border-b border-border/50 py-4">
-      <div className="mt-0.5 h-9 w-9 rounded-full bg-accent flex items-center justify-center overflow-hidden flex-shrink-0">
+    <article className={`folio-lift -mx-2 flex gap-3 rounded-lg border-b border-border/50 px-2 py-4 hover:bg-card/45 ${highlighted ? "folio-updated" : ""}`}>
+      <div className="folio-cover mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-accent">
         {actorAvatar ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={actorAvatar} alt="" className="h-full w-full object-cover" />
+          <Image src={actorAvatar} alt="" width={36} height={36} unoptimized className="h-full w-full object-cover" />
         ) : (
           <Icon type={type} />
         )}
@@ -115,27 +127,28 @@ export function FeedActivityRow({
         <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
           <span>{timestamp}</span>
           {bookId && (
-            <button type="button" onClick={wantToRead} disabled={pending || saved} className="inline-flex items-center gap-1 hover:text-primary disabled:text-primary">
+            <button type="button" onClick={wantToRead} disabled={pending || saved} className="folio-press inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 hover:text-primary disabled:text-primary">
               <BookmarkPlus className="h-3.5 w-3.5" />
               {pending && !saved ? "Saving..." : saved ? "Added" : "Want to read"}
             </button>
           )}
           {!isCurrentUser && (
-            <button type="button" onClick={follow} disabled={pending} className="inline-flex items-center gap-1 hover:text-primary">
+            <button type="button" onClick={follow} disabled={pending} className="folio-press inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 hover:text-primary">
               <UserPlus className="h-3.5 w-3.5" />
               {pending ? "Saving..." : following ? "Following" : `Follow ${actorName.split(" ")[0]}`}
             </button>
           )}
+          {feedback && <span className="text-secondary">{feedback}</span>}
         </div>
       </div>
       <button
         type="button"
         onClick={like}
         disabled={pending}
-        className="flex items-center gap-1 self-start text-xs text-muted-foreground hover:text-primary transition-colors"
+        className="folio-press flex items-center gap-1 self-start rounded-full px-1.5 py-0.5 text-xs text-muted-foreground hover:text-primary"
         aria-label={liked ? "Unlike activity" : "Like activity"}
       >
-        <Heart className={`h-3.5 w-3.5 ${liked ? "fill-secondary text-secondary" : ""}`} />
+        <Heart className={`h-3.5 w-3.5 transition-all ${liked ? "folio-action-confirm scale-110 fill-secondary text-secondary" : ""}`} />
         {likeCount > 0 && <span>{likeCount}</span>}
       </button>
     </article>

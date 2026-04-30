@@ -24,6 +24,7 @@ export async function toggleClubMembership(clubId: string): Promise<Result> {
       }
       await db.clubMember.delete({ where: { clubId_userId: { clubId, userId } } });
       revalidatePath("/clubs");
+      revalidatePath(`/clubs/${clubId}`);
       revalidatePath("/discover");
       return { success: true, joined: false };
     }
@@ -43,6 +44,7 @@ export async function toggleClubMembership(clubId: string): Promise<Result> {
     await db.clubMember.create({ data: { clubId, userId } });
     await logActivity({ userId, type: "joined_club", clubId });
     revalidatePath("/clubs");
+    revalidatePath(`/clubs/${clubId}`);
     revalidatePath("/discover");
     revalidatePath("/feed");
     return { success: true, joined: true };

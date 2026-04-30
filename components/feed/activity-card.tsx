@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Star, Heart, BookmarkPlus } from "lucide-react";
 import { toast } from "sonner";
+import Image from "next/image";
 import { toggleActivityLike } from "@/app/actions/activity-like";
 import { setBookStatus } from "@/app/actions/user-book";
 
@@ -65,8 +66,17 @@ export function ActivityCard({
   const [wantToRead, setWantToRead] = useState(false);
   const [likePending, setLikePending] = useState(false);
   const [wtrPending, setWtrPending] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [highlighted, setHighlighted] = useState(false);
 
   const isBookAction = action !== "joined_club";
+
+  function showFeedback(message: string) {
+    setFeedback(message);
+    setHighlighted(true);
+    setTimeout(() => setHighlighted(false), 1000);
+    setTimeout(() => setFeedback(null), 2200);
+  }
 
   async function handleLike() {
     if (likePending) return;
@@ -82,6 +92,7 @@ export function ActivityCard({
     } else {
       setLiked(result.liked);
       setLikeCount(result.count);
+      showFeedback(result.liked ? "Liked" : "Like removed");
       toast.success(result.liked ? "Activity liked." : "Activity unliked.");
     }
     setLikePending(false);
@@ -93,6 +104,7 @@ export function ActivityCard({
     setWantToRead(true);
     const result = await setBookStatus(bookId, "WANT_TO_READ");
     if (result.success) {
+      showFeedback("Saved to library");
       toast.success("Saved to want-to-read.");
     } else {
       setWantToRead(false);
@@ -102,11 +114,10 @@ export function ActivityCard({
   }
 
   return (
-    <div className="flex items-start gap-3 py-5 border-b border-border/50">
-      <div className="w-8 h-8 rounded-full bg-accent flex-shrink-0 flex items-center justify-center overflow-hidden mt-0.5">
+    <div className={`folio-lift -mx-2 flex items-start gap-3 rounded-lg border-b border-border/50 px-2 py-5 hover:bg-card/45 ${highlighted ? "folio-updated" : ""}`}>
+      <div className="folio-cover mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-accent">
         {actorAvatar ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={actorAvatar} alt="" className="w-full h-full object-cover" />
+          <Image src={actorAvatar} alt="" width={32} height={32} unoptimized className="w-full h-full object-cover" />
         ) : (
           <span className="text-xs font-bold text-foreground">{actorName[0]?.toUpperCase()}</span>
         )}
@@ -133,7 +144,7 @@ export function ActivityCard({
             <button
               onClick={handleWantToRead}
               disabled={wantToRead || wtrPending}
-              className={`flex items-center gap-1 text-xs transition-colors ${
+              className={`folio-press flex items-center gap-1 rounded-full px-1.5 py-0.5 text-xs ${
                 wantToRead
                   ? "text-primary cursor-default"
                   : "text-muted-foreground hover:text-foreground"
@@ -147,15 +158,16 @@ export function ActivityCard({
           <button
             onClick={handleLike}
             disabled={likePending}
-            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors ml-auto"
+            className="folio-press ml-auto flex items-center gap-1 rounded-full px-1.5 py-0.5 text-xs text-muted-foreground hover:text-primary"
           >
             <Heart
-              className={`h-3.5 w-3.5 transition-colors ${
-                liked ? "fill-primary text-primary" : ""
+              className={`h-3.5 w-3.5 transition-all ${
+                liked ? "folio-action-confirm scale-110 fill-primary text-primary" : ""
               }`}
             />
             {likeCount > 0 && <span>{likeCount}</span>}
           </button>
+          {feedback && <span className="text-xs text-secondary">{feedback}</span>}
         </div>
       </div>
     </div>

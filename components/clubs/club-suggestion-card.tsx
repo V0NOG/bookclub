@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Users } from "lucide-react";
 
 type Props = {
@@ -19,12 +20,11 @@ export function ClubSuggestionCard({
     .join(" · ");
 
   return (
-    <Link href={`/clubs/${clubId}`} className="block group">
-      <div className="flex items-center gap-3 py-3.5 border-b border-border/40">
-        <div className="w-9 h-9 rounded-lg bg-accent flex-shrink-0 flex items-center justify-center overflow-hidden">
+    <Link href={`/clubs/${clubId}`} className="group block">
+      <div className="folio-lift -mx-2 flex items-center gap-3 rounded-lg border-b border-border/40 px-2 py-3.5 hover:bg-card/45">
+        <div className="folio-cover flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-accent">
           {avatar ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={avatar} alt="" className="w-full h-full object-cover rounded-lg" />
+            <Image src={avatar} alt="" width={36} height={36} unoptimized className="w-full h-full object-cover rounded-lg" />
           ) : (
             <Users className="h-4 w-4 text-muted-foreground" />
           )}

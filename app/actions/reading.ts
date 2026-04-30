@@ -20,6 +20,7 @@ export async function updateBookProgress(bookId: string, progress: number): Prom
     });
     revalidatePath("/tracker");
     revalidatePath("/library");
+    revalidatePath(`/books/${bookId}`);
     return { success: true };
   } catch {
     return { success: false, error: "Failed to update progress" };
@@ -81,6 +82,7 @@ export async function logReadingSession(input: {
 
     revalidatePath("/tracker");
     revalidatePath("/library");
+    revalidatePath(`/books/${input.bookId}`);
     revalidatePath("/home");
     return { success: true };
   } catch {

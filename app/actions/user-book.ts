@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
 import { invalidateUserMatchCache } from "@/lib/matching/cache";
 import { logActivity } from "@/lib/activity";
+import { revalidatePath } from "next/cache";
 
 type Result = { success: true } | { success: false; error: string };
 
@@ -31,6 +32,11 @@ export async function setBookStatus(
     if (status === "READ")              await logActivity({ userId, type: "finished", bookId });
     if (status === "CURRENTLY_READING") await logActivity({ userId, type: "started",  bookId });
 
+    revalidatePath("/library");
+    revalidatePath(`/books/${bookId}`);
+    revalidatePath("/tracker");
+    revalidatePath("/home");
+    revalidatePath("/feed");
     return { success: true };
   } catch {
     return { success: false, error: "Failed to update status" };
@@ -53,6 +59,10 @@ export async function rateBook(bookId: string, rating: number): Promise<Result> 
 
     await logActivity({ userId, type: "rated", bookId });
     invalidateUserMatchCache(userId);
+    revalidatePath("/library");
+    revalidatePath(`/books/${bookId}`);
+    revalidatePath("/home");
+    revalidatePath("/feed");
     return { success: true };
   } catch {
     return { success: false, error: "Failed to rate book" };

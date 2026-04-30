@@ -9,6 +9,8 @@ function ChallengeCard({
   description,
   dates,
   meta,
+  progress,
+  target,
   joined,
   challengeId,
 }: {
@@ -17,10 +19,21 @@ function ChallengeCard({
   description?: string | null;
   dates: string;
   meta: string;
+  progress?: number;
+  target?: number | null;
   joined?: boolean;
 }) {
+  const progressPercent = target && progress !== undefined ? Math.min(100, Math.round((progress / target) * 100)) : null;
+  const milestone =
+    progressPercent === null ? null :
+    progressPercent >= 100 ? "Complete" :
+    progressPercent >= 75 ? "75% milestone" :
+    progressPercent >= 50 ? "Halfway" :
+    progressPercent >= 25 ? "25% milestone" :
+    "In progress";
+
   return (
-    <article className="border-b border-border/50 py-4">
+    <article className={`folio-lift -mx-2 rounded-lg border-b border-border/50 px-2 py-4 hover:bg-card/45 ${joined ? "bg-secondary/5" : ""}`}>
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-sm font-semibold text-foreground">{title}</p>
@@ -35,6 +48,19 @@ function ChallengeCard({
               {meta}
             </span>
           </div>
+          {progress !== undefined && (
+            <div className="mt-3 max-w-sm">
+              <div className="mb-1 flex justify-between text-xs text-secondary">
+                <span>Your progress: {progress}{target ? ` / ${target}` : ""}</span>
+                {milestone && <span>{milestone}</span>}
+              </div>
+              {progressPercent !== null && (
+                <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                  <div className="folio-progress-fill h-full rounded-full bg-primary" style={{ width: `${progressPercent}%` }} />
+                </div>
+              )}
+            </div>
+          )}
         </div>
         <ChallengeToggleButton challengeId={challengeId} initialJoined={Boolean(joined)} />
       </div>
@@ -48,7 +74,7 @@ export default async function ChallengesPage() {
 
   const memberships = await db.challengeParticipant.findMany({
     where: { userId },
-    select: { challengeId: true },
+    select: { challengeId: true, progress: true },
   });
   const joinedIds = new Set(memberships.map((m) => m.challengeId));
   const joinedIdList = Array.from(joinedIds);
@@ -98,14 +124,16 @@ export default async function ChallengesPage() {
                 description={challenge.description}
                 dates={`${formatDate(challenge.startDate)} - ${formatDate(challenge.endDate)}`}
                 meta={`${challenge.participants.length} participant${challenge.participants.length === 1 ? "" : "s"}`}
+                progress={memberships.find((membership) => membership.challengeId === challenge.id)?.progress ?? 0}
+                target={challenge.target}
                 joined
               />
             ))}
           </div>
         ) : (
-          <div className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
+          <div className="folio-lift rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
             <p>You have not joined a challenge yet. Open community challenges are listed below.</p>
-            <a href="#open-challenges" className="mt-3 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
+            <a href="#open-challenges" className="folio-press folio-cta mt-3 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90">
               Browse open challenges
             </a>
           </div>
@@ -135,11 +163,11 @@ export default async function ChallengesPage() {
             })}
           </div>
         ) : (
-          <div className="rounded-xl border border-border bg-card p-8 text-center">
+          <div className="folio-lift rounded-xl border border-border bg-card p-8 text-center">
             <Trophy className="h-10 w-10 text-muted-foreground/40 mx-auto mb-4" />
             <p className="text-base font-semibold text-foreground">No open challenges</p>
             <p className="text-sm text-muted-foreground mt-2">Club and public challenges will appear here when available.</p>
-            <Link href="/clubs" className="mt-5 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
+            <Link href="/clubs" className="folio-press folio-cta mt-5 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90">
               Explore clubs
             </Link>
           </div>

@@ -37,10 +37,10 @@ export function PreferencesForm({
   }
 
   return (
-    <form action={submit} className="rounded-xl border border-border bg-card p-5">
+    <form action={submit} className="folio-lift rounded-xl border border-border bg-card p-5">
       <h2 className="text-base font-semibold text-foreground mb-4">Edit reading preferences</h2>
       <div className="space-y-3">
-        <select name="userType" defaultValue={userType} className="h-9 w-full rounded-lg border border-border bg-background px-3 text-sm">
+        <select name="userType" defaultValue={userType} className="h-9 w-full rounded-lg border border-border bg-background px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15">
           <option value="READER">Reader</option>
           <option value="ORGANISER">Club organiser</option>
           <option value="MEMBER">Club member</option>
@@ -52,9 +52,9 @@ export function PreferencesForm({
           min="1"
           defaultValue={readingGoal ?? ""}
           placeholder="Annual reading goal"
-          className="h-9 w-full rounded-lg border border-border bg-background px-3 text-sm"
+          className="h-9 w-full rounded-lg border border-border bg-background px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
         />
-        <select name="clubPreference" defaultValue={clubPreference ?? "online"} className="h-9 w-full rounded-lg border border-border bg-background px-3 text-sm">
+        <select name="clubPreference" defaultValue={clubPreference ?? "online"} className="h-9 w-full rounded-lg border border-border bg-background px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15">
           <option value="online">Online clubs</option>
           <option value="local">Local clubs</option>
           <option value="both">Both</option>
@@ -70,7 +70,7 @@ export function PreferencesForm({
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+          className="folio-press w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-60"
         >
           {pending ? "Saving..." : "Save preferences"}
         </button>

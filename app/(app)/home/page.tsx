@@ -1,7 +1,8 @@
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
-import { BookOpen, Star } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { getMatchesForUser, ScoredBook, ScoredUser, ScoredClub } from "@/lib/matching/cache";
 import { MatchCard } from "@/components/match/MatchCard";
 import { SearchBar } from "@/components/feed/search-bar";
@@ -166,18 +167,12 @@ export default async function HomePage() {
   const userId = session!.user.id;
   const firstName = session?.user.name?.split(" ")[0] ?? "there";
 
-  const [currentBook, recentBooks, goal, rawMatches, ratedCount, followingData] =
+  const [currentBook, goal, rawMatches, ratedCount, followingData] =
     await Promise.all([
       db.userBook.findFirst({
         where: { userId, status: "CURRENTLY_READING" },
         include: { book: true },
         orderBy: { updatedAt: "desc" },
-      }),
-      db.userBook.findMany({
-        where: { userId, status: "READ" },
-        include: { book: true },
-        orderBy: { updatedAt: "desc" },
-        take: 4,
       }),
       db.readingGoal.findFirst({
         where: { userId, type: "BOOKS_PER_YEAR", year: new Date().getFullYear() },
@@ -303,10 +298,7 @@ export default async function HomePage() {
     | { kind: "people"; items: ScoredUser[] }
     | { kind: "clubs"; items: ScoredClub[] }
     | { kind: "books"; label: string; sublabel?: string; items: ScoredBook[]; isTrigger?: boolean; triggerName?: string; isExploratory?: boolean }
-    | { kind: "popular"; items: Array<{ id: string; title: string; author: string; cover: string | null }> }
-    | { kind: "currently_reading" }
-    | { kind: "reading_goal" }
-    | { kind: "recently_read" };
+    | { kind: "popular"; items: Array<{ id: string; title: string; author: string; cover: string | null }> };
 
   const suggPool: FeedSlot[] = [];
 
@@ -338,13 +330,8 @@ export default async function HomePage() {
   }
   while (sIdx < suggPool.length) contentSlots.push(suggPool[sIdx++]);
 
-  const anchorSlots: FeedSlot[] = [];
-  if (currentBook) anchorSlots.push({ kind: "currently_reading" });
-  if (goal) anchorSlots.push({ kind: "reading_goal" });
-  if (recentBooks.length > 0) anchorSlots.push({ kind: "recently_read" });
-
   const feedSlots: FeedSlot[] = contentSlots;
-  const isEmpty = feedSlots.length === 0 && anchorSlots.length === 0;
+  const isEmpty = feedSlots.length === 0 && !currentBook && !goal;
 
   // ── Render ────────────────────────────────────────────────────────────────────
 
@@ -365,6 +352,55 @@ export default async function HomePage() {
       {/* Search */}
       <SearchBar />
 
+      {(goal || currentBook || ratedCount > 0) && (
+        <section className="mb-10 grid gap-3 md:grid-cols-3">
+          {goal && (
+            <div className="rounded-xl border border-border bg-card p-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{new Date().getFullYear()} goal</p>
+              <div className="mt-3 flex items-baseline justify-between gap-3">
+                <p className="text-2xl font-bold text-foreground">{booksReadThisYear} / {goal.target}</p>
+                <p className="text-sm font-semibold text-primary">
+                  {Math.min(100, Math.round((booksReadThisYear / goal.target) * 100))}%
+                </p>
+              </div>
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="folio-progress-fill h-full rounded-full bg-primary"
+                  style={{ width: `${Math.min(100, Math.round((booksReadThisYear / goal.target) * 100))}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          {currentBook && (
+            <Link href="/tracker" className="rounded-xl border border-border bg-card p-4 hover:bg-accent/35">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Currently reading</p>
+              <div className="mt-3 flex items-center gap-3">
+                <div className="folio-cover h-14 w-10 flex-shrink-0 overflow-hidden rounded-md bg-muted shadow-sm">
+                  {currentBook.book.cover ? (
+                    <Image src={currentBook.book.cover} alt="" width={80} height={112} unoptimized className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center">
+                      <BookOpen className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold italic text-foreground">{currentBook.book.title}</p>
+                  <p className="truncate text-xs text-muted-foreground">{currentPercent}% complete</p>
+                </div>
+              </div>
+            </Link>
+          )}
+
+          <Link href="/library" className="rounded-xl border border-border bg-card p-4 hover:bg-accent/35">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Taste signal</p>
+            <p className="mt-3 text-2xl font-bold text-foreground">{ratedCount}</p>
+            <p className="mt-1 text-xs text-muted-foreground">Rated book{ratedCount === 1 ? "" : "s"} powering recommendations</p>
+          </Link>
+        </section>
+      )}
+
       {/* Today + feed */}
       {isEmpty ? (
         <div className="text-center py-20 text-muted-foreground">
@@ -373,7 +409,7 @@ export default async function HomePage() {
           <p className="text-sm mb-1">Rate a few books you&apos;ve already read.</p>
           <p className="text-sm mb-8 opacity-60">Even 3–5 ratings unlock personalised recommendations.</p>
           <div className="flex gap-3 justify-center">
-            <Link href="/library" className="text-sm bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-lg transition-colors">
+            <Link href="/library" className="folio-press folio-cta rounded-lg bg-primary px-5 py-2.5 text-sm text-primary-foreground shadow-sm hover:bg-primary/90">
               Rate books
             </Link>
             <Link href="/how-it-works" className="text-sm text-primary hover:underline py-2.5">
@@ -387,8 +423,7 @@ export default async function HomePage() {
             <h2 className="text-2xl font-bold text-foreground">Today</h2>
           </div>
 
-          <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_340px]">
-            <div className="min-w-0 space-y-0">
+          <div className="min-w-0 space-y-0">
               {feedSlots.map((slot, i) => {
               switch (slot.kind) {
 
@@ -512,175 +547,10 @@ export default async function HomePage() {
                     </div>
                   );
 
-                case "currently_reading":
-                  if (!currentBook) return null;
-                  return (
-                    <div key="currently-reading" className="pt-8 pb-2">
-                      <h3 className="text-sm font-medium text-muted-foreground mb-4">On your nightstand</h3>
-                      <div className="flex gap-4 items-start max-w-md">
-                        <div className="flex-shrink-0">
-                          {currentBook.book.cover ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={currentBook.book.cover} alt="" className="h-20 w-14 object-cover rounded-md shadow-sm" />
-                          ) : (
-                            <div className="h-20 w-14 bg-muted rounded-md flex items-center justify-center">
-                              <BookOpen className="h-5 w-5 text-muted-foreground" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-foreground italic truncate">{currentBook.book.title}</p>
-                          <p className="text-sm text-muted-foreground mb-4">{currentBook.book.author}</p>
-                          <div className="h-1 bg-muted rounded-full overflow-hidden mb-1.5">
-                            <div className="h-full bg-primary rounded-full" style={{ width: `${currentPercent}%` }} />
-                          </div>
-                          <div className="flex items-center justify-between text-xs text-muted-foreground">
-                            <span>{currentBook.progress} / {currentBook.book.pageCount ?? "?"} pages</span>
-                            <span>{currentPercent}%</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-
-                case "reading_goal":
-                  if (!goal) return null;
-                  return (
-                    <div key="reading-goal" className="pt-8 pb-2">
-                      <h3 className="text-sm font-medium text-muted-foreground mb-4">{new Date().getFullYear()} reading goal</h3>
-                      <div className="max-w-xs">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm text-foreground font-medium">
-                            {booksReadThisYear} of {goal.target} books
-                          </span>
-                          <span className="text-xs text-primary font-semibold">
-                            {Math.round((booksReadThisYear / goal.target) * 100)}%
-                          </span>
-                        </div>
-                        <div className="h-1 bg-muted rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-primary rounded-full transition-all"
-                            style={{ width: `${Math.min(100, Math.round((booksReadThisYear / goal.target) * 100))}%` }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  );
-
-                case "recently_read":
-                  return (
-                    <div key="recently-read" className="pt-8 pb-2">
-                      <h3 className="text-sm font-medium text-muted-foreground mb-4">Recently read</h3>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        {recentBooks.map((ub) => (
-                          <div key={ub.id} className="group">
-                            <div className="aspect-[2/3] bg-muted rounded-lg overflow-hidden mb-2 shadow-sm">
-                              {ub.book.cover ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                  src={ub.book.cover}
-                                  alt=""
-                                  className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                />
-                              ) : (
-                                <div className="h-full w-full flex items-center justify-center">
-                                  <BookOpen className="h-6 w-6 text-muted-foreground" />
-                                </div>
-                              )}
-                            </div>
-                            <p className="text-sm font-medium text-foreground italic truncate">{ub.book.title}</p>
-                            <p className="text-xs text-muted-foreground truncate">{ub.book.author}</p>
-                            {ub.rating && (
-                              <div className="flex items-center gap-0.5 mt-1">
-                                {Array.from({ length: ub.rating }).map((_, idx) => (
-                                  <Star key={idx} className="h-3 w-3 fill-primary text-primary" />
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
+                default:
+                  return null;
               }
               })}
-            </div>
-
-            {anchorSlots.length > 0 && (
-              <aside className="space-y-8 xl:sticky xl:top-24 xl:self-start">
-                {currentBook && (
-                  <section className="rounded-xl border border-border bg-card p-5">
-                    <h3 className="text-sm font-medium text-muted-foreground mb-4">On your nightstand</h3>
-                    <div className="flex gap-4 items-start">
-                      <div className="flex-shrink-0">
-                        {currentBook.book.cover ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={currentBook.book.cover} alt="" className="h-24 w-16 object-cover rounded-md shadow-sm" />
-                        ) : (
-                          <div className="h-24 w-16 bg-muted rounded-md flex items-center justify-center">
-                            <BookOpen className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-foreground italic line-clamp-2">{currentBook.book.title}</p>
-                        <p className="text-sm text-muted-foreground mb-4">{currentBook.book.author}</p>
-                        <div className="h-1 bg-muted rounded-full overflow-hidden mb-1.5">
-                          <div className="h-full bg-primary rounded-full" style={{ width: `${currentPercent}%` }} />
-                        </div>
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span>{currentBook.progress} / {currentBook.book.pageCount ?? "?"} pages</span>
-                          <span>{currentPercent}%</span>
-                        </div>
-                      </div>
-                    </div>
-                  </section>
-                )}
-
-                {goal && (
-                  <section className="rounded-xl border border-border bg-card p-5">
-                    <h3 className="text-sm font-medium text-muted-foreground mb-4">{new Date().getFullYear()} reading goal</h3>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-foreground font-medium">
-                        {booksReadThisYear} of {goal.target} books
-                      </span>
-                      <span className="text-xs text-primary font-semibold">
-                        {Math.round((booksReadThisYear / goal.target) * 100)}%
-                      </span>
-                    </div>
-                    <div className="h-1 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary rounded-full transition-all"
-                        style={{ width: `${Math.min(100, Math.round((booksReadThisYear / goal.target) * 100))}%` }}
-                      />
-                    </div>
-                  </section>
-                )}
-
-                {recentBooks.length > 0 && (
-                  <section className="rounded-xl border border-border bg-card p-5">
-                    <h3 className="text-sm font-medium text-muted-foreground mb-4">Recently read</h3>
-                    <div className="grid grid-cols-3 gap-3">
-                      {recentBooks.slice(0, 6).map((ub) => (
-                        <div key={ub.id} className="group min-w-0">
-                          <div className="aspect-[2/3] bg-muted rounded-md overflow-hidden mb-2 shadow-sm">
-                            {ub.book.cover ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img src={ub.book.cover} alt="" className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                            ) : (
-                              <div className="h-full w-full flex items-center justify-center">
-                                <BookOpen className="h-5 w-5 text-muted-foreground" />
-                              </div>
-                            )}
-                          </div>
-                          <p className="text-xs font-medium text-foreground italic truncate">{ub.book.title}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-              </aside>
-            )}
           </div>
         </>
       )}

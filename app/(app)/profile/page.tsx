@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
 import { BookOpen, Library, MapPin, Sparkles, Star, Users } from "lucide-react";
 import { ProfileEditForm } from "@/components/profile/profile-edit-form";
+import Image from "next/image";
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
@@ -139,10 +140,9 @@ export default async function ProfilePage() {
     <div className="w-full max-w-7xl px-6 py-8">
       <section className="mb-10 border-b border-border/60 pb-8">
         <div className="flex items-start gap-5">
-          <div className="h-20 w-20 rounded-xl bg-secondary/20 flex items-center justify-center overflow-hidden flex-shrink-0">
+          <div className="folio-cover flex h-20 w-20 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-secondary/20 shadow-sm">
             {user?.avatar ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={user.avatar} alt="" className="h-full w-full object-cover" />
+              <Image src={user.avatar} alt="" width={80} height={80} unoptimized className="h-full w-full object-cover" />
             ) : (
               <span className="text-2xl font-bold text-secondary">{initials}</span>
             )}
@@ -174,7 +174,7 @@ export default async function ProfilePage() {
               <Sparkles className="h-4 w-4 text-primary" />
               Taste profile
             </h2>
-            <div className="rounded-xl border border-border bg-card p-5">
+            <div className="folio-lift rounded-xl border border-border bg-card p-5">
               <div className="flex items-center justify-between gap-4 mb-4">
                 <div>
                   <p className="text-sm font-semibold text-foreground">
@@ -241,10 +241,11 @@ export default async function ProfilePage() {
             {recentReads.length > 0 ? (
               <div className="space-y-0">
                 {recentReads.map(({ id, book, rating }) => (
-                  <div key={id} className="flex items-center gap-3 border-b border-border/50 py-3">
+                  <div key={id} className="folio-lift -mx-2 flex items-center gap-3 rounded-lg border-b border-border/50 px-2 py-3 hover:bg-card/45">
                     {book.cover ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={book.cover} alt="" className="h-12 w-8 rounded object-cover" />
+                      <div className="folio-cover h-12 w-8 flex-shrink-0 rounded shadow-sm">
+                        <Image src={book.cover} alt="" width={32} height={48} unoptimized className="h-full w-full object-cover" />
+                      </div>
                     ) : (
                       <div className="h-12 w-8 rounded bg-muted flex items-center justify-center">
                         <BookOpen className="h-4 w-4 text-muted-foreground/50" />
@@ -259,7 +260,7 @@ export default async function ProfilePage() {
                 ))}
               </div>
             ) : (
-              <div className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
+              <div className="folio-lift rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
                 Mark books as read to build a visible reading history.
               </div>
             )}

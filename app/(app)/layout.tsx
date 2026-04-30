@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth-helpers";
-import { Sidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/top-bar";
 import { CurrentlyReadingBar } from "@/components/layout/currently-reading-bar";
+import { AppShell } from "@/components/layout/app-shell";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
@@ -11,15 +11,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!session.user.onboarded) redirect("/onboarding");
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      <div className="flex flex-col flex-1 ml-60 min-h-screen">
-        <TopBar />
-        <main className="flex-1 overflow-y-auto pb-16">
-          {children}
-        </main>
-        <CurrentlyReadingBar />
-      </div>
-    </div>
+    <AppShell topBar={<TopBar />} bottomBar={<CurrentlyReadingBar />}>
+      {children}
+    </AppShell>
   );
 }

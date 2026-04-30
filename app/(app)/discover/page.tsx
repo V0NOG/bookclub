@@ -4,7 +4,7 @@ import { Compass } from "lucide-react";
 import Link from "next/link";
 import { getMatchesForUser } from "@/lib/matching/cache";
 import { MatchCard } from "@/components/match/MatchCard";
-import { SearchBar } from "@/components/feed/search-bar";
+import { DiscoverSearch } from "@/components/discover/discover-search";
 import { PeopleSuggestion } from "@/components/feed/people-suggestion";
 import { ClubSuggestionCard } from "@/components/clubs/club-suggestion-card";
 import { HorizontalScrollRow } from "@/components/ui/horizontal-scroll-row";
@@ -89,7 +89,7 @@ export default async function DiscoverPage() {
         </p>
       </div>
 
-      <SearchBar />
+      <DiscoverSearch />
 
       {!hasMatches && (
         <div className="text-center py-20 text-muted-foreground">
@@ -98,7 +98,7 @@ export default async function DiscoverPage() {
           <p className="text-sm mb-8">Your recommendations unlock after 3–5 ratings.</p>
           <Link
             href="/library"
-            className="text-sm bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-lg transition-colors"
+            className="folio-press folio-cta rounded-lg bg-primary px-5 py-2.5 text-sm text-primary-foreground shadow-sm hover:bg-primary/90"
           >
             Go to library
           </Link>

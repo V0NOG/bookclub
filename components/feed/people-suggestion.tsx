@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import Image from "next/image";
 import { toggleFollow } from "@/app/actions/follow";
 
 type Props = {
@@ -45,11 +46,10 @@ export function PeopleSuggestion({
   const genreLabel = sharedGenres.slice(0, 2).join(" · ");
 
   return (
-    <div className="flex items-center gap-3 py-3.5 border-b border-border/40">
-      <div className="w-9 h-9 rounded-full bg-accent flex-shrink-0 flex items-center justify-center overflow-hidden">
+    <div className="folio-lift -mx-2 flex items-center gap-3 rounded-lg border-b border-border/40 px-2 py-3.5 hover:bg-card/45">
+      <div className="folio-cover flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-accent">
         {avatar ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={avatar} alt="" className="w-full h-full object-cover" />
+          <Image src={avatar} alt="" width={36} height={36} unoptimized className="w-full h-full object-cover" />
         ) : (
           <span className="text-sm font-bold text-foreground">{name[0]?.toUpperCase()}</span>
         )}
@@ -69,7 +69,7 @@ export function PeopleSuggestion({
         onClick={handleToggle}
         disabled={pending}
         aria-label={following ? `Unfollow ${name}` : `Follow ${name}`}
-        className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors flex-shrink-0 disabled:opacity-50 ${
+        className={`folio-press flex-shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-sm disabled:opacity-50 ${
           following
             ? "border-border text-muted-foreground hover:border-destructive/40 hover:text-destructive bg-transparent"
             : "bg-primary hover:bg-primary/90 text-primary-foreground border-transparent"
