@@ -196,6 +196,8 @@ model Book {
   author      String
   authors     String[]
   isbn        String?   @unique
+  externalSource String?
+  externalId     String?
   cover       String?
   description String?   @db.Text
   publishedAt DateTime?
@@ -221,6 +223,7 @@ model Book {
   activityEvents    ActivityEvent[]
 
   @@index([author])
+  @@unique([externalSource, externalId])
 }
 
 model BookTasteDimension {

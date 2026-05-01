@@ -4,6 +4,9 @@ import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from
 import { useRouter } from "next/navigation";
 import { BookOpen, Loader2, Search, Trophy, User, Users, X } from "lucide-react";
 import { searchShell, ShellSearchResult } from "@/app/actions/shell";
+import { searchExternalBooksAction } from "@/app/actions/external-books";
+import { ExternalBookResult } from "@/lib/books/types";
+import { ExternalBookResults } from "@/components/books/external-book-results";
 
 const iconMap = {
   book: BookOpen,
@@ -23,6 +26,8 @@ export function SiteSearchOverlay({
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ShellSearchResult[]>([]);
+  const [externalResults, setExternalResults] = useState<ExternalBookResult[]>([]);
+  const [externalError, setExternalError] = useState<string | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPending, startTransition] = useTransition();
 
@@ -45,17 +50,24 @@ export function SiteSearchOverlay({
     if (!open) return;
     if (trimmedQuery.length < 2) {
       setResults([]);
+      setExternalResults([]);
+      setExternalError(null);
       setActiveIndex(0);
       return;
     }
 
     const timer = setTimeout(() => {
       startTransition(async () => {
-        const nextResults = await searchShell(trimmedQuery);
+        const [nextResults, external] = await Promise.all([
+          searchShell(trimmedQuery),
+          searchExternalBooksAction(trimmedQuery),
+        ]);
         setResults(nextResults);
+        setExternalResults(external.results);
+        setExternalError(external.success ? null : external.error);
         setActiveIndex(0);
       });
-    }, 180);
+    }, 250);
 
     return () => clearTimeout(timer);
   }, [open, startTransition, trimmedQuery]);
@@ -124,8 +136,8 @@ export function SiteSearchOverlay({
 
           {trimmedQuery.length >= 2 && !isPending && results.length === 0 && (
             <div className="px-4 py-10 text-center">
-              <p className="text-sm font-semibold text-foreground">No results found</p>
-              <p className="mt-1 text-xs text-muted-foreground">Try a book title, author, club name, or reader username.</p>
+              <p className="text-sm font-semibold text-foreground">No Folio results found</p>
+              <p className="mt-1 text-xs text-muted-foreground">External book results can still be added below.</p>
             </div>
           )}
 
@@ -155,6 +167,22 @@ export function SiteSearchOverlay({
               </button>
             );
           })}
+
+          {trimmedQuery.length >= 2 && (
+            <div className="mt-2 border-t border-border px-2 pb-2 pt-4">
+              <div className="mb-2 flex items-center justify-between gap-3 px-1">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Real books</p>
+                <p className="text-[11px] text-muted-foreground">External until added</p>
+              </div>
+              <ExternalBookResults
+                query={trimmedQuery}
+                results={externalResults}
+                loading={isPending}
+                error={externalError}
+                compact
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
