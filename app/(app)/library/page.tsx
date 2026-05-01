@@ -5,6 +5,7 @@ import { BookOpen, Star, BookMarked, BookX } from "lucide-react";
 import { LibraryBookActions } from "@/components/library/library-book-actions";
 import { PageContainer } from "@/components/layout/page-container";
 import { BookCover } from "@/components/ui/book-cover";
+import { BookshelfView } from "@/components/library/BookshelfView";
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -85,6 +86,18 @@ export default async function LibraryPage() {
             Discover books
           </Link>
         </div>
+      )}
+
+      {allBooks.length > 0 && (
+        <BookshelfView
+          books={allBooks.map(({ book, status }) => ({
+            id: book.id,
+            title: book.title,
+            author: book.author,
+            cover: book.cover,
+            status,
+          }))}
+        />
       )}
 
       {recentlyAdded.length > 0 && (
