@@ -230,6 +230,10 @@
   background: hsl(var(--muted));
 }
 
+/* Bookshelf Base
+   The shelf establishes the perspective field used by every book. Individual
+   slots keep transform-style: preserve-3d so spine, cover, and page-edge layers
+   can occupy separate Z positions without changing document layout. */
 .folio-bookshelf {
   position: relative;
   display: grid;
@@ -286,6 +290,11 @@
   transform-style: preserve-3d;
 }
 
+/* Spine Button / Hitbox
+   The default DOM hitbox is a narrow spine. When selected/opening, the visible
+   book is much wider than that spine, so the button expands to cover the whole
+   revealed object. This prevents broken click zones on the cover or page edge
+   while preserving one keyboard-accessible control per book. */
 .folio-book-spine-button {
   position: absolute;
   left: 50%;
@@ -338,6 +347,10 @@
   transform: translate3d(3.4rem, -1.2rem, 5.4rem) rotateY(-4deg) rotateZ(-0.3deg) scale(1.1);
 }
 
+/* Press State
+   The second click briefly compresses the selected object before the overlay
+   mounts. This makes the transition feel like opening a physical book rather
+   than instantly replacing one UI layer with another. */
 .folio-book-spine-button[data-pressing="true"] .folio-book-3d {
   filter: drop-shadow(0 16px 20px rgb(47 42 38 / 0.16));
   transform: translate3d(3.34rem, -1.08rem, 5.1rem) rotateY(-5deg) rotateZ(-0.35deg) scale(1.075);
@@ -414,6 +427,7 @@
   opacity: 0;
   pointer-events: none;
   transform: translate3d(-0.25rem, 0, -0.45rem) rotateY(18deg) scale(0.92);
+  /* Left hinge origin keeps the revealed cover attached to its spine. */
   transform-origin: left center;
   transition: opacity 170ms ease, transform 220ms ease;
 }
@@ -486,6 +500,10 @@
   transform: translateZ(0.22rem);
 }
 
+/* Opening Overlay
+   The overlay animation is staged but overlapping: zoom begins first, the cover
+   starts opening before zoom completes, and pages follow as a reaction to the
+   cover motion. Keep these timings causal rather than fully sequential. */
 @keyframes folio-opening-overlay-in {
   0% {
     opacity: 0;
@@ -521,6 +539,8 @@
   }
 }
 
+/* The cover is the heavy hinged object. It rotates less than a loose page so it
+   stays visually attached to the spine instead of drifting away. */
 @keyframes folio-opening-front-cover {
   0%,
   15% {
@@ -538,6 +558,8 @@
   }
 }
 
+/* Cover art fades as the inside cover becomes visible; backface visibility on
+   the cover surface prevents the mirrored cover image from showing through. */
 @keyframes folio-opening-cover-art {
   0%,
   28% {
@@ -560,6 +582,27 @@
   }
 }
 
+/* Page Animations
+   Every page turns from transform-origin: left center, which acts as the hinge.
+   rotateY creates the page-turn; translateZ separates sheets in depth; small
+   skew/scale differences prevent the pages from reading as identical panels.
+
+   folio-opening-page-one:
+   - first page turn
+   - earliest timing
+   - largest rotation, about -65deg
+
+   folio-opening-page-two:
+   - follows page one
+   - medium rotation, about -40deg
+
+   folio-opening-page-three:
+   - subtle depth/back page
+   - stabilises the page stack behind the two turning sheets
+
+   TODO: consider spring-based animation (framer-motion) for more natural page
+   movement.
+   TODO: add dynamic lighting/shadow system for depth realism. */
 @keyframes folio-opening-page-one {
   0%,
   30% {
@@ -672,6 +715,7 @@
   box-shadow:
     inset 0 0 18px rgb(47 42 38 / 0.08),
     0 18px 30px rgb(0 0 0 / 0.1);
+  /* Left center makes each page rotate like paper bound at the spine. */
   transform-origin: left center;
   opacity: 0;
 }
@@ -723,6 +767,7 @@
   z-index: 5;
   border-radius: 0.65rem;
   box-shadow: 0 24px 46px rgb(0 0 0 / 0.24);
+  /* Same hinge as the pages so the cover drives the opening sequence. */
   transform-origin: left center;
   transform-style: preserve-3d;
   animation: folio-opening-front-cover 1450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
@@ -731,6 +776,7 @@
 .folio-book-opening-front-cover > * {
   position: relative;
   z-index: 2;
+  /* Prevents the cover image from appearing mirrored after hinge rotation. */
   backface-visibility: hidden;
   animation: folio-opening-cover-art 1450ms ease both;
 }

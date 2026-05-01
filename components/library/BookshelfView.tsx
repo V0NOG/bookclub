@@ -1,5 +1,26 @@
 "use client";
 
+/**
+ * Bookshelf interaction controller.
+ *
+ * This bookshelf interaction is not a simple UI animation. It is a simulated
+ * physical interaction system based on hinge-based motion, delayed reaction,
+ * depth stacking, and causal animation timing.
+ *
+ * State machine:
+ * - selectedBookId: first click reveals the physical book object on the shelf.
+ * - pressingBookId: second click gives the selected book a brief pressed state.
+ * - openingBookId: after the press delay, the fullscreen opening overlay mounts.
+ *
+ * Flow:
+ * 1. click a spine -> select the book and reveal its cover.
+ * 2. second click -> enter pressing state for tactile feedback.
+ * 3. short delay -> mount the opening overlay.
+ * 4. overlay animation completes -> navigate to /books/[id].
+ *
+ * The small delay is intentional. It makes the second click read as a physical
+ * action before the fullscreen book takes over the page.
+ */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookSpine, BookshelfBook } from "@/components/library/BookSpine";

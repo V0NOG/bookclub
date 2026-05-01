@@ -1,5 +1,24 @@
 "use client";
 
+/**
+ * Physical book object used by the My Library shelf.
+ *
+ * The DOM starts as a narrow spine, then reveals a larger book object when
+ * selected. That object is built from three visual layers:
+ * - spine: the left edge/hinge of the book.
+ * - front cover: the readable cover surface.
+ * - page edge: subtle right/bottom thickness behind the cover.
+ *
+ * Interaction states:
+ * - idle: only the shelf spine is visible.
+ * - selected: cover and page edge slide forward as one attached object.
+ * - pressing: a short scale-down/settle state before opening.
+ * - opening: keeps the selected geometry stable while the overlay mounts.
+ *
+ * The selected visual is wider than the original spine button. CSS expands the
+ * button hitbox in selected/opening states so every visible book surface still
+ * belongs to the same accessible button.
+ */
 import { BookOpen } from "lucide-react";
 import { BookCover } from "@/components/ui/book-cover";
 

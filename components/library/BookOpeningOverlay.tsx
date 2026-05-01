@@ -1,5 +1,16 @@
 "use client";
 
+/**
+ * Fullscreen book-opening animation.
+ *
+ * The overlay is rendered through a portal so the book can animate outside the
+ * shelf row's scroll and stacking constraints. It owns the cinematic sequence:
+ * zoom toward the viewer, front cover opens on a left hinge, three page layers
+ * follow the cover, then BookshelfView navigates to the book detail route.
+ *
+ * The overlay is visual only. Navigation timing and reduced-motion behavior are
+ * controlled by BookshelfView.
+ */
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { BookOpen } from "lucide-react";
