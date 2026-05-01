@@ -66,8 +66,6 @@ export function BookSpine({ book, selected, opening, onActivate }: BookSpineProp
             sizes="112px"
           />
         </span>
-        <span className="folio-book-page folio-book-page-left" aria-hidden="true" />
-        <span className="folio-book-page folio-book-page-right" aria-hidden="true" />
         <span className="folio-book-spine-face" style={coverSpineStyle(book)}>
           <span className="folio-book-spine-title">{book.title}</span>
           <span className="folio-book-spine-foot">

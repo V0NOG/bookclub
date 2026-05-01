@@ -323,17 +323,17 @@
 }
 
 .folio-book-spine-button[data-selected="true"] .folio-book-3d {
-  filter: drop-shadow(0 18px 20px rgb(47 42 38 / 0.16));
-  transform: translate3d(2.2rem, -1rem, 4.8rem) rotateY(-36deg) rotateZ(-1.5deg) scale(1.02);
+  filter: drop-shadow(0 20px 24px rgb(47 42 38 / 0.18));
+  transform: translate3d(3.15rem, -1.15rem, 5.2rem) rotateY(-11deg) rotateZ(-0.8deg) scale(1.08);
 }
 
 .folio-book-spine-button[data-opening="true"] .folio-book-3d {
-  transform: translate3d(2.55rem, -1.15rem, 5.2rem) rotateY(-25deg) rotateZ(-1deg) scale(1.04);
+  filter: drop-shadow(0 20px 24px rgb(47 42 38 / 0.18));
+  transform: translate3d(3.15rem, -1.15rem, 5.2rem) rotateY(-9deg) rotateZ(-0.5deg) scale(1.08);
 }
 
 .folio-book-spine-face,
-.folio-book-cover-reveal,
-.folio-book-page {
+.folio-book-cover-reveal {
   position: absolute;
   bottom: 0;
   display: block;
@@ -405,33 +405,159 @@
   transform: translate3d(-0.2rem, 0, 0.2rem) rotateY(0deg);
 }
 
-.folio-book-page {
-  left: 2.25rem;
+@keyframes folio-opening-overlay-in {
+  0% {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+  18%,
+  100% {
+    opacity: 1;
+    backdrop-filter: blur(3px);
+  }
+}
+
+@keyframes folio-opening-stage {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 26vh, 0) scale(0.32) rotateY(-10deg);
+  }
+  34% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1) rotateY(-4deg);
+  }
+  72% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1.03) rotateY(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -2vh, 0) scale(1.08) rotateY(0deg);
+  }
+}
+
+@keyframes folio-opening-cover {
+  0%,
+  38% {
+    opacity: 1;
+    transform: translateX(0) rotateY(0deg);
+  }
+  70%,
+  100% {
+    opacity: 0.92;
+    transform: translateX(-48%) rotateY(-72deg);
+  }
+}
+
+@keyframes folio-opening-page-left {
+  0%,
+  36% {
+    opacity: 0;
+    transform: translateX(0) rotateY(0deg);
+  }
+  44% {
+    opacity: 1;
+  }
+  76%,
+  100% {
+    opacity: 1;
+    transform: translateX(-52%) rotateY(-66deg);
+  }
+}
+
+@keyframes folio-opening-page-right {
+  0%,
+  36% {
+    opacity: 0;
+    transform: translateX(0) rotateY(0deg);
+  }
+  44% {
+    opacity: 1;
+  }
+  76%,
+  100% {
+    opacity: 1;
+    transform: translateX(52%) rotateY(66deg);
+  }
+}
+
+.folio-book-opening-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 2rem;
+  background: hsl(var(--foreground) / 0.55);
+  animation: folio-opening-overlay-in 1450ms ease both;
+}
+
+.folio-book-opening-stage {
+  display: grid;
+  place-items: center;
+  perspective: 1400px;
+  transform-style: preserve-3d;
+  animation: folio-opening-stage 1450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.folio-book-opening-book {
+  position: relative;
+  width: clamp(14rem, 28vw, 20rem);
+  aspect-ratio: 2 / 3;
+  transform-style: preserve-3d;
+}
+
+.folio-book-opening-cover,
+.folio-book-opening-page,
+.folio-book-opening-gutter {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.folio-book-opening-cover {
   z-index: 4;
-  width: 3.45rem;
-  height: 10.2rem;
-  border: 1px solid hsl(var(--border));
-  border-radius: 0.25rem;
-  background:
-    repeating-linear-gradient(90deg, hsl(var(--background)), hsl(var(--background)) 0.32rem, hsl(var(--accent) / 0.55) 0.36rem),
-    hsl(var(--background));
-  opacity: 0;
   transform-origin: left center;
-  transition: opacity 120ms ease, transform 420ms ease;
+  animation: folio-opening-cover 1450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
-.folio-book-page-right {
+.folio-book-opening-page {
+  top: 2.5%;
+  bottom: 2.5%;
+  width: 52%;
+  border: 1px solid hsl(var(--border));
+  background:
+    repeating-linear-gradient(90deg, hsl(var(--background)), hsl(var(--background)) 0.44rem, hsl(var(--accent) / 0.5) 0.48rem),
+    hsl(var(--background));
+  box-shadow: 0 18px 32px rgb(0 0 0 / 0.16);
+  opacity: 0;
+}
+
+.folio-book-opening-page-left {
+  left: 50%;
+  z-index: 3;
+  border-radius: 0.35rem 0 0 0.35rem;
+  transform-origin: left center;
+  animation: folio-opening-page-left 1450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.folio-book-opening-page-right {
+  right: 50%;
+  z-index: 2;
+  border-radius: 0 0.35rem 0.35rem 0;
   transform-origin: right center;
+  animation: folio-opening-page-right 1450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
-.folio-book-spine-button[data-opening="true"] .folio-book-page-left {
-  opacity: 0.95;
-  transform: translate3d(0.4rem, 0, 0.65rem) rotateY(-68deg);
-}
-
-.folio-book-spine-button[data-opening="true"] .folio-book-page-right {
-  opacity: 0.82;
-  transform: translate3d(3.35rem, 0, 0.55rem) rotateY(62deg);
+.folio-book-opening-gutter {
+  left: 50%;
+  z-index: 5;
+  width: 0.18rem;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: hsl(var(--foreground) / 0.22);
+  opacity: 0.75;
 }
 
 @media (max-width: 640px) {
@@ -458,19 +584,20 @@
 
   .folio-book-spine-button[data-selected="true"] .folio-book-3d,
   .folio-book-spine-button[data-opening="true"] .folio-book-3d {
-    transform: translate3d(1.8rem, -0.8rem, 4rem) rotateY(-34deg) rotateZ(-1deg);
+    transform: translate3d(2.45rem, -0.9rem, 4.4rem) rotateY(-10deg) rotateZ(-0.5deg) scale(1.05);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .folio-book-3d,
   .folio-book-cover-reveal,
-  .folio-book-page {
+  .folio-book-opening-overlay,
+  .folio-book-opening-stage,
+  .folio-book-opening-book,
+  .folio-book-opening-cover,
+  .folio-book-opening-page {
     transition-duration: 1ms;
-  }
-
-  .folio-book-page {
-    display: none;
+    animation-duration: 1ms;
   }
 }
 

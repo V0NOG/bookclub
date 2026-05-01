@@ -3,13 +3,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookSpine, BookshelfBook } from "@/components/library/BookSpine";
+import { BookOpeningOverlay } from "@/components/library/BookOpeningOverlay";
 
 type BookshelfViewProps = {
   books: BookshelfBook[];
 };
 
 const SHELF_SIZE = 14;
-const OPEN_ANIMATION_MS = 620;
+const OPEN_ANIMATION_MS = 1450;
 
 function chunkBooks(books: BookshelfBook[]) {
   const shelves: BookshelfBook[][] = [];
@@ -44,12 +45,22 @@ export function BookshelfView({ books }: BookshelfViewProps) {
   const [openingBookId, setOpeningBookId] = useState<string | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shelves = useMemo(() => chunkBooks(books), [books]);
+  const openingBook = openingBookId ? books.find((book) => book.id === openingBookId) : null;
 
   useEffect(() => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (!openingBookId) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [openingBookId]);
 
   function openBook(bookId: string) {
     router.push(`/books/${bookId}`);
@@ -117,6 +128,7 @@ export function BookshelfView({ books }: BookshelfViewProps) {
           </div>
         ))}
       </div>
+      {openingBook && <BookOpeningOverlay book={openingBook} />}
     </section>
   );
 }
