@@ -23,7 +23,12 @@ export function BookOpeningOverlay({ book }: BookOpeningOverlayProps) {
     <div className="folio-book-opening-overlay" data-bookshelf-opening-overlay aria-hidden="true">
       <div className="folio-book-opening-stage">
         <div className="folio-book-opening-book">
-          <div className="folio-book-opening-cover">
+          <div className="folio-book-opening-back" />
+          <div className="folio-book-opening-pages-spread">
+            <div className="folio-book-opening-inner-page folio-book-opening-inner-left" />
+            <div className="folio-book-opening-inner-page folio-book-opening-inner-right" />
+          </div>
+          <div className="folio-book-opening-front-cover">
             <BookCover
               src={book.cover}
               alt=""
@@ -32,8 +37,7 @@ export function BookOpeningOverlay({ book }: BookOpeningOverlayProps) {
               sizes="(max-width: 640px) 72vw, 320px"
             />
           </div>
-          <div className="folio-book-opening-page folio-book-opening-page-left" />
-          <div className="folio-book-opening-page folio-book-opening-page-right" />
+          <div className="folio-book-opening-spine" />
           <div className="folio-book-opening-gutter" />
         </div>
         <div className="mt-6 flex items-center justify-center gap-2 text-sm text-background">

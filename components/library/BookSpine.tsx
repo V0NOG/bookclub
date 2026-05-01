@@ -58,18 +58,24 @@ export function BookSpine({ book, selected, opening, onActivate }: BookSpineProp
       className="folio-book-spine-button"
     >
       <span className="folio-book-3d">
-        <span className="folio-book-cover-reveal" aria-hidden="true">
-          <BookCover
-            src={book.cover}
-            alt=""
-            className="h-full w-full rounded-r-md rounded-l-sm shadow-md"
-            sizes="112px"
-          />
-        </span>
         <span className="folio-book-spine-face" style={coverSpineStyle(book)}>
           <span className="folio-book-spine-title">{book.title}</span>
           <span className="folio-book-spine-foot">
             <BookOpen className="h-3 w-3" />
+          </span>
+        </span>
+        <span className="folio-book-object" aria-hidden="true">
+          <span className="folio-book-pages-edge" />
+          <span className="folio-book-attached-spine" style={coverSpineStyle(book)}>
+            <span className="folio-book-attached-spine-title">{book.title}</span>
+          </span>
+          <span className="folio-book-front-cover">
+            <BookCover
+              src={book.cover}
+              alt=""
+              className="h-full w-full rounded-r-md rounded-l-sm shadow-md"
+              sizes="128px"
+            />
           </span>
         </span>
       </span>

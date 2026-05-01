@@ -323,17 +323,17 @@
 }
 
 .folio-book-spine-button[data-selected="true"] .folio-book-3d {
-  filter: drop-shadow(0 20px 24px rgb(47 42 38 / 0.18));
-  transform: translate3d(3.15rem, -1.15rem, 5.2rem) rotateY(-11deg) rotateZ(-0.8deg) scale(1.08);
+  filter: drop-shadow(0 22px 26px rgb(47 42 38 / 0.2));
+  transform: translate3d(3.4rem, -1.2rem, 5.4rem) rotateY(-5deg) rotateZ(-0.4deg) scale(1.1);
 }
 
 .folio-book-spine-button[data-opening="true"] .folio-book-3d {
-  filter: drop-shadow(0 20px 24px rgb(47 42 38 / 0.18));
-  transform: translate3d(3.15rem, -1.15rem, 5.2rem) rotateY(-9deg) rotateZ(-0.5deg) scale(1.08);
+  filter: drop-shadow(0 22px 26px rgb(47 42 38 / 0.2));
+  transform: translate3d(3.4rem, -1.2rem, 5.4rem) rotateY(-4deg) rotateZ(-0.3deg) scale(1.1);
 }
 
 .folio-book-spine-face,
-.folio-book-cover-reveal {
+.folio-book-object {
   position: absolute;
   bottom: 0;
   display: block;
@@ -353,6 +353,13 @@
     inset 0 0 0 1px hsl(var(--background) / 0.12),
     inset -8px 0 12px rgb(0 0 0 / 0.14);
   transform: translateZ(0.55rem);
+}
+
+.folio-book-spine-button[data-selected="true"] .folio-book-spine-face,
+.folio-book-spine-button[data-opening="true"] .folio-book-spine-face {
+  opacity: 0;
+  transform: translateZ(0.15rem) scaleX(0.78);
+  transition: opacity 150ms ease, transform 190ms ease;
 }
 
 .folio-book-spine-face::before {
@@ -387,22 +394,84 @@
   color: hsl(var(--primary-foreground) / 0.86);
 }
 
-.folio-book-cover-reveal {
-  left: 1.95rem;
-  z-index: 2;
-  width: 7rem;
-  height: 10.5rem;
+.folio-book-object {
+  left: 0;
+  z-index: 4;
+  width: 8rem;
+  height: 11.45rem;
   opacity: 0;
   pointer-events: none;
-  transform: translate3d(-0.45rem, 0, -0.3rem) rotateY(82deg);
+  transform: translate3d(-0.25rem, 0, -0.45rem) rotateY(18deg) scale(0.92);
   transform-origin: left center;
-  transition: opacity 180ms ease, transform 210ms ease;
+  transition: opacity 170ms ease, transform 220ms ease;
 }
 
-.folio-book-spine-button[data-selected="true"] .folio-book-cover-reveal,
-.folio-book-spine-button[data-opening="true"] .folio-book-cover-reveal {
+.folio-book-spine-button[data-selected="true"] .folio-book-object,
+.folio-book-spine-button[data-opening="true"] .folio-book-object {
   opacity: 1;
-  transform: translate3d(-0.2rem, 0, 0.2rem) rotateY(0deg);
+  transform: translate3d(0, 0, 0.18rem) rotateY(0deg) scale(1);
+}
+
+.folio-book-pages-edge {
+  position: absolute;
+  top: 0.35rem;
+  right: -0.22rem;
+  bottom: -0.22rem;
+  left: 1.18rem;
+  z-index: 1;
+  border-radius: 0.18rem 0.48rem 0.48rem 0.18rem;
+  border: 1px solid hsl(var(--border));
+  background:
+    repeating-linear-gradient(0deg, hsl(var(--background)), hsl(var(--background)) 0.28rem, hsl(var(--accent) / 0.45) 0.32rem),
+    hsl(var(--background));
+  box-shadow:
+    inset -8px 0 12px rgb(47 42 38 / 0.1),
+    0 12px 22px rgb(47 42 38 / 0.12);
+  transform: translateZ(-0.18rem);
+}
+
+.folio-book-attached-spine {
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: 4;
+  width: 1.12rem;
+  overflow: hidden;
+  border-radius: 0.42rem 0 0 0.42rem;
+  border: 1px solid hsl(var(--foreground) / 0.24);
+  box-shadow:
+    inset -6px 0 8px rgb(0 0 0 / 0.2),
+    inset 1px 0 0 hsl(var(--background) / 0.2);
+  transform: translateZ(0.18rem);
+}
+
+.folio-book-attached-spine-title {
+  position: absolute;
+  inset: 0.55rem 0.2rem 0.55rem;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.26);
+  writing-mode: vertical-rl;
+  font-size: 0.52rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.folio-book-front-cover {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 1.02rem;
+  z-index: 3;
+  overflow: hidden;
+  border-radius: 0 0.48rem 0.48rem 0;
+  border: 1px solid hsl(var(--foreground) / 0.16);
+  background: hsl(var(--muted));
+  box-shadow:
+    inset 5px 0 8px rgb(0 0 0 / 0.14),
+    0 18px 26px rgb(47 42 38 / 0.16);
+  transform: translateZ(0.22rem);
 }
 
 @keyframes folio-opening-overlay-in {
@@ -420,13 +489,13 @@
 @keyframes folio-opening-stage {
   0% {
     opacity: 0;
-    transform: translate3d(0, 26vh, 0) scale(0.32) rotateY(-10deg);
+    transform: translate3d(0, 22vh, 0) scale(0.34) rotateY(-7deg);
   }
-  34% {
+  35% {
     opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1) rotateY(-4deg);
+    transform: translate3d(0, 0, 0) scale(1) rotateY(-3deg);
   }
-  72% {
+  70% {
     opacity: 1;
     transform: translate3d(0, 0, 0) scale(1.03) rotateY(0deg);
   }
@@ -436,48 +505,58 @@
   }
 }
 
-@keyframes folio-opening-cover {
+@keyframes folio-opening-front-cover {
   0%,
-  38% {
+  35% {
     opacity: 1;
-    transform: translateX(0) rotateY(0deg);
+    transform: rotateY(0deg) translateZ(0.16rem);
   }
   70%,
   100% {
-    opacity: 0.92;
-    transform: translateX(-48%) rotateY(-72deg);
+    opacity: 1;
+    transform: rotateY(-116deg) translateZ(0.16rem);
   }
 }
 
-@keyframes folio-opening-page-left {
+@keyframes folio-opening-cover-art {
   0%,
-  36% {
-    opacity: 0;
-    transform: translateX(0) rotateY(0deg);
-  }
-  44% {
+  40% {
     opacity: 1;
   }
-  76%,
+  46%,
   100% {
-    opacity: 1;
-    transform: translateX(-52%) rotateY(-66deg);
+    opacity: 0;
   }
 }
 
-@keyframes folio-opening-page-right {
+@keyframes folio-opening-inside-cover {
   0%,
-  36% {
+  42% {
     opacity: 0;
-    transform: translateX(0) rotateY(0deg);
   }
-  44% {
-    opacity: 1;
-  }
-  76%,
+  52%,
   100% {
     opacity: 1;
-    transform: translateX(52%) rotateY(66deg);
+  }
+}
+
+@keyframes folio-opening-pages-spread {
+  0%,
+  54% {
+    opacity: 0;
+    transform: scaleX(0.78) translateZ(-0.1rem);
+  }
+  70% {
+    opacity: 1;
+    transform: scaleX(1) translateZ(0);
+  }
+  90% {
+    opacity: 1;
+    transform: scaleX(1.02) translateZ(0);
+  }
+  100% {
+    opacity: 0.82;
+    transform: scaleX(1.02) translateZ(0);
   }
 }
 
@@ -496,68 +575,125 @@
 .folio-book-opening-stage {
   display: grid;
   place-items: center;
-  perspective: 1400px;
+  perspective: 1500px;
   transform-style: preserve-3d;
   animation: folio-opening-stage 1450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 .folio-book-opening-book {
   position: relative;
-  width: clamp(14rem, 28vw, 20rem);
+  width: clamp(14rem, 30vw, 20rem);
   aspect-ratio: 2 / 3;
   transform-style: preserve-3d;
 }
 
-.folio-book-opening-cover,
-.folio-book-opening-page,
+.folio-book-opening-back,
+.folio-book-opening-pages-spread,
+.folio-book-opening-front-cover,
+.folio-book-opening-spine,
 .folio-book-opening-gutter {
   position: absolute;
-  inset: 0;
   transform-style: preserve-3d;
 }
 
-.folio-book-opening-cover {
-  z-index: 4;
-  transform-origin: left center;
-  animation: folio-opening-cover 1450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
-}
-
-.folio-book-opening-page {
-  top: 2.5%;
-  bottom: 2.5%;
-  width: 52%;
+.folio-book-opening-back {
+  inset: 0;
+  z-index: 1;
+  border-radius: 0.65rem;
   border: 1px solid hsl(var(--border));
   background:
-    repeating-linear-gradient(90deg, hsl(var(--background)), hsl(var(--background)) 0.44rem, hsl(var(--accent) / 0.5) 0.48rem),
+    linear-gradient(90deg, hsl(var(--foreground) / 0.18), transparent 12%),
     hsl(var(--background));
-  box-shadow: 0 18px 32px rgb(0 0 0 / 0.16);
-  opacity: 0;
+  box-shadow: 0 26px 50px rgb(0 0 0 / 0.24);
 }
 
-.folio-book-opening-page-left {
-  left: 50%;
-  z-index: 3;
-  border-radius: 0.35rem 0 0 0.35rem;
-  transform-origin: left center;
-  animation: folio-opening-page-left 1450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
-}
-
-.folio-book-opening-page-right {
-  right: 50%;
+.folio-book-opening-pages-spread {
+  top: 3.5%;
+  right: -48%;
+  bottom: 3.5%;
+  left: 8%;
   z-index: 2;
-  border-radius: 0 0.35rem 0.35rem 0;
-  transform-origin: right center;
-  animation: folio-opening-page-right 1450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  display: flex;
+  gap: 0;
+  transform-origin: left center;
+  animation: folio-opening-pages-spread 1450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.folio-book-opening-inner-page {
+  flex: 1 1 0;
+  border: 1px solid hsl(var(--border));
+  background:
+    linear-gradient(90deg, hsl(var(--foreground) / 0.08), transparent 12%, transparent 88%, hsl(var(--foreground) / 0.05)),
+    repeating-linear-gradient(0deg, transparent, transparent 0.72rem, hsl(var(--accent) / 0.55) 0.78rem),
+    hsl(var(--background));
+  box-shadow: inset 0 0 18px rgb(47 42 38 / 0.08);
+}
+
+.folio-book-opening-inner-left {
+  border-radius: 0.45rem 0 0 0.45rem;
+}
+
+.folio-book-opening-inner-right {
+  border-radius: 0 0.45rem 0.45rem 0;
+}
+
+.folio-book-opening-front-cover {
+  inset: 0;
+  z-index: 5;
+  border-radius: 0.65rem;
+  box-shadow: 0 24px 46px rgb(0 0 0 / 0.24);
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  animation: folio-opening-front-cover 1450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.folio-book-opening-front-cover > * {
+  position: relative;
+  z-index: 2;
+  backface-visibility: hidden;
+  animation: folio-opening-cover-art 1450ms ease both;
+}
+
+.folio-book-opening-front-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: 0.65rem;
+  border: 1px solid hsl(var(--border));
+  background:
+    linear-gradient(90deg, hsl(var(--foreground) / 0.1), transparent 18%),
+    repeating-linear-gradient(0deg, transparent, transparent 0.82rem, hsl(var(--accent) / 0.42) 0.88rem),
+    hsl(var(--background));
+  box-shadow: inset -10px 0 18px rgb(47 42 38 / 0.08);
+  backface-visibility: hidden;
+  transform: rotateY(180deg) translateZ(0.03rem);
+  animation: folio-opening-inside-cover 1450ms ease both;
+}
+
+.folio-book-opening-spine {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 6;
+  width: 0.78rem;
+  border-radius: 0.65rem 0 0 0.65rem;
+  background:
+    linear-gradient(90deg, hsl(var(--foreground) / 0.32), hsl(var(--foreground) / 0.12), transparent),
+    hsl(var(--primary));
+  box-shadow: inset -6px 0 10px rgb(0 0 0 / 0.2);
 }
 
 .folio-book-opening-gutter {
-  left: 50%;
+  top: 3.5%;
+  bottom: 3.5%;
+  left: 8%;
   z-index: 5;
   width: 0.18rem;
-  transform: translateX(-50%);
   border-radius: 999px;
   background: hsl(var(--foreground) / 0.22);
-  opacity: 0.75;
+  opacity: 0;
+  animation: folio-opening-pages-spread 1450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 @media (max-width: 640px) {
@@ -577,25 +713,26 @@
     height: 10.65rem;
   }
 
-  .folio-book-cover-reveal {
-    width: 6.25rem;
-    height: 9.35rem;
+  .folio-book-object {
+    width: 7.2rem;
+    height: 10.35rem;
   }
 
   .folio-book-spine-button[data-selected="true"] .folio-book-3d,
   .folio-book-spine-button[data-opening="true"] .folio-book-3d {
-    transform: translate3d(2.45rem, -0.9rem, 4.4rem) rotateY(-10deg) rotateZ(-0.5deg) scale(1.05);
+    transform: translate3d(2.72rem, -0.95rem, 4.4rem) rotateY(-5deg) rotateZ(-0.3deg) scale(1.06);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .folio-book-3d,
-  .folio-book-cover-reveal,
+  .folio-book-object,
   .folio-book-opening-overlay,
   .folio-book-opening-stage,
   .folio-book-opening-book,
-  .folio-book-opening-cover,
-  .folio-book-opening-page {
+  .folio-book-opening-front-cover,
+  .folio-book-opening-pages-spread,
+  .folio-book-opening-gutter {
     transition-duration: 1ms;
     animation-duration: 1ms;
   }
