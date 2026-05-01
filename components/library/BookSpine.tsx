@@ -37,6 +37,7 @@ function fallbackSpineStyle(book: BookshelfBook) {
 function coverSpineStyle(book: BookshelfBook) {
   if (!book.cover) return fallbackSpineStyle(book);
 
+  // TODO: Consider a generic spine derived from dominant cover colour or fallback palette.
   return {
     backgroundImage: `linear-gradient(180deg, hsl(var(--foreground) / 0.28), hsl(var(--foreground) / 0.52)), url(${book.cover})`,
     backgroundSize: "cover",
