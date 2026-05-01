@@ -15,6 +15,7 @@ type BookSpineProps = {
   book: BookshelfBook;
   selected: boolean;
   opening: boolean;
+  pressing: boolean;
   onActivate: () => void;
 };
 
@@ -37,7 +38,8 @@ function fallbackSpineStyle(book: BookshelfBook) {
 function coverSpineStyle(book: BookshelfBook) {
   if (!book.cover) return fallbackSpineStyle(book);
 
-  // TODO: Consider a generic spine derived from dominant cover colour or fallback palette.
+  // TODO: Replace cover-derived spine with generated spine system
+  // (dominant colour + title layout + contrast rules).
   return {
     backgroundImage: `linear-gradient(180deg, hsl(var(--foreground) / 0.28), hsl(var(--foreground) / 0.52)), url(${book.cover})`,
     backgroundSize: "cover",
@@ -45,13 +47,14 @@ function coverSpineStyle(book: BookshelfBook) {
   };
 }
 
-export function BookSpine({ book, selected, opening, onActivate }: BookSpineProps) {
+export function BookSpine({ book, selected, opening, pressing, onActivate }: BookSpineProps) {
   return (
     <button
       type="button"
       data-bookshelf-spine
       data-selected={selected ? "true" : "false"}
       data-opening={opening ? "true" : "false"}
+      data-pressing={pressing ? "true" : "false"}
       aria-pressed={selected}
       aria-label={`${selected ? "Open" : "Select"} ${book.title} by ${book.author}`}
       title={`${book.title} by ${book.author}`}

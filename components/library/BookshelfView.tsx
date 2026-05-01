@@ -11,6 +11,7 @@ type BookshelfViewProps = {
 
 const SHELF_SIZE = 14;
 const OPEN_ANIMATION_MS = 1450;
+const OPEN_PRESS_DELAY_MS = 100;
 
 function chunkBooks(books: BookshelfBook[]) {
   const shelves: BookshelfBook[][] = [];
@@ -42,14 +43,17 @@ export function BookshelfView({ books }: BookshelfViewProps) {
   const router = useRouter();
   const prefersReducedMotion = useReducedMotion();
   const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
+  const [pressingBookId, setPressingBookId] = useState<string | null>(null);
   const [openingBookId, setOpeningBookId] = useState<string | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shelves = useMemo(() => chunkBooks(books), [books]);
   const openingBook = openingBookId ? books.find((book) => book.id === openingBookId) : null;
 
   useEffect(() => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (pressTimeoutRef.current) clearTimeout(pressTimeoutRef.current);
     };
   }, []);
 
@@ -67,10 +71,11 @@ export function BookshelfView({ books }: BookshelfViewProps) {
   }
 
   function activateBook(bookId: string) {
-    if (openingBookId) return;
+    if (openingBookId || pressingBookId) return;
 
     if (selectedBookId !== bookId) {
       setSelectedBookId(bookId);
+      setPressingBookId(null);
       return;
     }
 
@@ -79,8 +84,12 @@ export function BookshelfView({ books }: BookshelfViewProps) {
       return;
     }
 
-    setOpeningBookId(bookId);
-    timeoutRef.current = setTimeout(() => openBook(bookId), OPEN_ANIMATION_MS);
+    setPressingBookId(bookId);
+    pressTimeoutRef.current = setTimeout(() => {
+      setPressingBookId(null);
+      setOpeningBookId(bookId);
+      timeoutRef.current = setTimeout(() => openBook(bookId), OPEN_ANIMATION_MS);
+    }, OPEN_PRESS_DELAY_MS);
   }
 
   if (books.length === 0) return null;
@@ -108,16 +117,18 @@ export function BookshelfView({ books }: BookshelfViewProps) {
               {shelfBooks.map((book) => {
                 const selected = selectedBookId === book.id;
                 const opening = openingBookId === book.id;
+                const pressing = pressingBookId === book.id;
                 return (
                   <div
                     key={book.id}
                     className="folio-book-slot"
-                    style={{ zIndex: selected || opening ? 40 : 1 }}
+                    style={{ zIndex: selected || opening || pressing ? 40 : 1 }}
                   >
                     <BookSpine
                       book={book}
                       selected={selected}
                       opening={opening}
+                      pressing={pressing}
                       onActivate={() => activateBook(book.id)}
                     />
                   </div>

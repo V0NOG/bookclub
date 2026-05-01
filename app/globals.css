@@ -338,6 +338,12 @@
   transform: translate3d(3.4rem, -1.2rem, 5.4rem) rotateY(-4deg) rotateZ(-0.3deg) scale(1.1);
 }
 
+.folio-book-spine-button[data-pressing="true"] .folio-book-3d {
+  filter: drop-shadow(0 16px 20px rgb(47 42 38 / 0.16));
+  transform: translate3d(3.34rem, -1.08rem, 5.1rem) rotateY(-5deg) rotateZ(-0.35deg) scale(1.075);
+  transition-duration: 90ms;
+}
+
 .folio-book-spine-face,
 .folio-book-object {
   position: absolute;
@@ -503,11 +509,11 @@
   }
   55% {
     opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1) rotateY(-2deg);
+    transform: translate3d(0, 0, 0) scale(0.98) rotateY(-2deg);
   }
   90% {
     opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1.05) rotateY(0deg);
+    transform: translate3d(0, 0, 0) scale(1.04) rotateY(0deg);
   }
   100% {
     opacity: 0;
@@ -521,10 +527,14 @@
     opacity: 1;
     transform: rotateY(0deg) translateZ(0.16rem);
   }
-  55%,
+  45% {
+    opacity: 1;
+    transform: rotateY(-70deg) translateZ(0.16rem);
+  }
+  72%,
   100% {
     opacity: 1;
-    transform: rotateY(-112deg) translateZ(0.16rem);
+    transform: rotateY(-100deg) translateZ(0.16rem);
   }
 }
 
@@ -554,15 +564,16 @@
   0%,
   30% {
     opacity: 0;
-    transform: rotateY(0deg) translateX(0) translateZ(0.12rem);
+    transform: rotateY(0deg) skewY(0deg) scaleX(0.99) translateZ(0.2rem);
   }
-  42% {
+  38% {
     opacity: 1;
+    transform: rotateY(-18deg) skewY(-0.5deg) scaleX(0.995) translateZ(0.2rem);
   }
-  70%,
+  65%,
   100% {
-    opacity: 0.82;
-    transform: rotateY(-78deg) translateX(-0.08rem) translateZ(0.18rem);
+    opacity: 0.88;
+    transform: rotateY(-65deg) skewY(-1.2deg) scaleX(0.985) translateZ(0.2rem);
   }
 }
 
@@ -570,16 +581,16 @@
   0%,
   40% {
     opacity: 0;
-    transform: rotateY(8deg) translateX(-0.18rem) scaleX(0.92) translateZ(0.02rem);
+    transform: rotateY(0deg) skewY(0deg) scaleX(0.985) translateZ(0.1rem);
   }
-  62% {
+  52% {
     opacity: 1;
-    transform: rotateY(-5deg) translateX(-0.04rem) scaleX(0.98) translateZ(0.04rem);
+    transform: rotateY(-12deg) skewY(-0.35deg) scaleX(0.99) translateZ(0.1rem);
   }
-  80%,
+  75%,
   100% {
     opacity: 1;
-    transform: rotateY(0deg) translateX(0) scaleX(1) translateZ(0.04rem);
+    transform: rotateY(-40deg) skewY(-0.7deg) scaleX(0.99) translateZ(0.1rem);
   }
 }
 
@@ -587,16 +598,16 @@
   0%,
   50% {
     opacity: 0;
-    transform: translateX(-0.3rem) scaleX(0.9) translateZ(-0.08rem);
+    transform: rotateY(0deg) skewY(0deg) scaleX(0.98) translateZ(0);
   }
-  72% {
+  66% {
     opacity: 1;
-    transform: translateX(-0.08rem) scaleX(0.98) translateZ(-0.02rem);
+    transform: rotateY(-4deg) skewY(-0.2deg) scaleX(0.99) translateZ(0);
   }
-  90%,
+  85%,
   100% {
     opacity: 1;
-    transform: translateX(0) scaleX(1) translateZ(-0.02rem);
+    transform: rotateY(-9deg) skewY(-0.25deg) scaleX(1) translateZ(0);
   }
 }
 
@@ -660,7 +671,7 @@
     hsl(var(--background));
   box-shadow:
     inset 0 0 18px rgb(47 42 38 / 0.08),
-    0 18px 30px rgb(0 0 0 / 0.12);
+    0 18px 30px rgb(0 0 0 / 0.1);
   transform-origin: left center;
   opacity: 0;
 }
@@ -678,16 +689,32 @@
 
 .folio-book-opening-page-one {
   z-index: 5;
+  box-shadow:
+    inset 6px 0 14px rgb(47 42 38 / 0.08),
+    0 20px 34px rgb(0 0 0 / 0.16);
   animation: folio-opening-page-one 1450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 .folio-book-opening-page-two {
   z-index: 4;
+  top: 4%;
+  bottom: 3%;
+  width: 91%;
+  box-shadow:
+    inset 8px 0 16px rgb(47 42 38 / 0.07),
+    0 15px 26px rgb(0 0 0 / 0.12);
   animation: folio-opening-page-two 1450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 .folio-book-opening-page-three {
   z-index: 3;
+  top: 4.5%;
+  bottom: 2.5%;
+  left: 8.5%;
+  width: 90.5%;
+  box-shadow:
+    inset 10px 0 18px rgb(47 42 38 / 0.08),
+    0 12px 20px rgb(0 0 0 / 0.09);
   animation: folio-opening-page-three 1450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
@@ -716,10 +743,12 @@
   border-radius: 0.65rem;
   border: 1px solid hsl(var(--border));
   background:
-    linear-gradient(90deg, hsl(var(--foreground) / 0.1), transparent 18%),
+    linear-gradient(90deg, hsl(var(--foreground) / 0.16), hsl(var(--foreground) / 0.06) 11%, transparent 28%),
     repeating-linear-gradient(0deg, transparent, transparent 0.82rem, hsl(var(--accent) / 0.42) 0.88rem),
     hsl(var(--background));
-  box-shadow: inset -10px 0 18px rgb(47 42 38 / 0.08);
+  box-shadow:
+    inset 10px 0 18px rgb(47 42 38 / 0.1),
+    inset -10px 0 18px rgb(47 42 38 / 0.07);
   backface-visibility: hidden;
   transform: rotateY(180deg) translateZ(0.03rem);
   animation: folio-opening-inside-cover 1450ms ease both;
