@@ -1,8 +1,10 @@
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
-import { BookOpen, Library, MapPin, Sparkles, Star, Users } from "lucide-react";
+import { Library, MapPin, Sparkles, Star, Users } from "lucide-react";
 import { ProfileEditForm } from "@/components/profile/profile-edit-form";
 import Image from "next/image";
+import { PageContainer } from "@/components/layout/page-container";
+import { BookCover } from "@/components/ui/book-cover";
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
@@ -137,7 +139,7 @@ export default async function ProfilePage() {
   });
 
   return (
-    <div className="w-full max-w-7xl px-6 py-8">
+    <PageContainer>
       <section className="mb-10 border-b border-border/60 pb-8">
         <div className="flex items-start gap-5">
           <div className="folio-cover flex h-20 w-20 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-secondary/20 shadow-sm">
@@ -242,15 +244,7 @@ export default async function ProfilePage() {
               <div className="space-y-0">
                 {recentReads.map(({ id, book, rating }) => (
                   <div key={id} className="folio-lift -mx-2 flex items-center gap-3 rounded-lg border-b border-border/50 px-2 py-3 hover:bg-card/45">
-                    {book.cover ? (
-                      <div className="folio-cover h-12 w-8 flex-shrink-0 rounded shadow-sm">
-                        <Image src={book.cover} alt="" width={32} height={48} unoptimized className="h-full w-full object-cover" />
-                      </div>
-                    ) : (
-                      <div className="h-12 w-8 rounded bg-muted flex items-center justify-center">
-                        <BookOpen className="h-4 w-4 text-muted-foreground/50" />
-                      </div>
-                    )}
+                    <BookCover src={book.cover} alt="" className="h-12 w-8 flex-shrink-0 rounded shadow-sm" sizes="32px" />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-foreground truncate">{book.title}</p>
                       <p className="text-xs text-muted-foreground">{book.author}</p>
@@ -299,6 +293,6 @@ export default async function ProfilePage() {
           </div>
         </aside>
       </div>
-    </div>
+    </PageContainer>
   );
 }

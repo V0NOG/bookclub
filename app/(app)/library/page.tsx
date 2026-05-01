@@ -1,9 +1,10 @@
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
 import Link from "next/link";
-import Image from "next/image";
 import { BookOpen, Star, BookMarked, BookX } from "lucide-react";
 import { LibraryBookActions } from "@/components/library/library-book-actions";
+import { PageContainer } from "@/components/layout/page-container";
+import { BookCover } from "@/components/ui/book-cover";
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -45,7 +46,7 @@ export default async function LibraryPage() {
   const goalPct = goal ? Math.min(100, Math.round(((goal.current ?? 0) / goal.target) * 100)) : null;
 
   return (
-    <div className="w-full max-w-7xl px-6 py-8">
+    <PageContainer>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground mb-2">My library</h1>
         <p className="text-sm text-muted-foreground">
@@ -99,15 +100,7 @@ export default async function LibraryPage() {
                 href={`/books/${book.id}`}
                 className="folio-updated flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:bg-accent/40"
               >
-                {book.cover ? (
-                  <div className="folio-cover h-14 w-10 flex-shrink-0 rounded shadow-sm">
-                    <Image src={book.cover} alt="" width={40} height={56} unoptimized className="h-full w-full object-cover" />
-                  </div>
-                ) : (
-                  <div className="flex h-14 w-10 flex-shrink-0 items-center justify-center rounded bg-muted">
-                    <BookOpen className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                )}
+                <BookCover src={book.cover} alt="" className="h-14 w-10 flex-shrink-0 rounded shadow-sm" sizes="40px" />
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-semibold text-foreground">{book.title}</span>
                   <span className="block truncate text-xs text-muted-foreground">{status.toLowerCase().replace("_", " ")}</span>
@@ -132,15 +125,9 @@ export default async function LibraryPage() {
               const pct = book.pageCount && progress ? Math.min(100, Math.round((progress / book.pageCount) * 100)) : null;
               return (
                 <div key={book.id} className="folio-lift -mx-2 flex items-center gap-4 rounded-lg border-b border-border/50 px-2 py-4 hover:bg-card/45">
-                  {book.cover ? (
-                    <Link href={`/books/${book.id}`} className="folio-cover h-16 w-11 flex-shrink-0 rounded shadow-sm">
-                      <Image src={book.cover} alt="" width={44} height={64} unoptimized className="h-full w-full object-cover" />
-                    </Link>
-                  ) : (
-                    <Link href={`/books/${book.id}`} className="h-16 w-11 bg-muted rounded flex items-center justify-center flex-shrink-0">
-                      <BookOpen className="h-5 w-5 text-muted-foreground/40" />
-                    </Link>
-                  )}
+                  <Link href={`/books/${book.id}`} className="flex-shrink-0">
+                    <BookCover src={book.cover} alt="" className="h-16 w-11 rounded shadow-sm" sizes="44px" />
+                  </Link>
                   <div className="flex-1 min-w-0">
                     <Link href={`/books/${book.id}`} className="block text-sm font-semibold text-foreground truncate hover:text-primary">{book.title}</Link>
                     <p className="text-xs text-muted-foreground mb-2">{book.author}</p>
@@ -176,13 +163,9 @@ export default async function LibraryPage() {
           <div className="grid gap-x-8 md:grid-cols-2 xl:grid-cols-3">
             {wantToRead.map(({ book, status, rating }) => (
               <div key={book.id} className="folio-lift -mx-2 flex items-center gap-3 rounded-lg border-b border-border/40 px-2 py-3 hover:bg-card/45">
-                {book.cover ? (
-                  <Link href={`/books/${book.id}`} className="folio-cover h-12 w-8 flex-shrink-0 rounded shadow-sm">
-                    <Image src={book.cover} alt="" width={32} height={48} unoptimized className="h-full w-full object-cover" />
-                  </Link>
-                ) : (
-                  <Link href={`/books/${book.id}`} className="h-12 w-8 bg-muted rounded flex-shrink-0" />
-                )}
+                <Link href={`/books/${book.id}`} className="flex-shrink-0">
+                  <BookCover src={book.cover} alt="" className="h-12 w-8 rounded shadow-sm" sizes="32px" />
+                </Link>
                 <div className="flex-1 min-w-0">
                   <Link href={`/books/${book.id}`} className="block text-sm font-medium text-foreground truncate hover:text-primary">{book.title}</Link>
                   <p className="text-xs text-muted-foreground">{book.author}</p>
@@ -201,21 +184,22 @@ export default async function LibraryPage() {
             Read
             <span className="text-xs font-normal text-muted-foreground ml-1">({read.length})</span>
           </h2>
-          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7">
             {read.map(({ book, rating, status }) => (
-              <div key={book.id} className="group flex flex-col gap-1.5">
-                {book.cover ? (
-                  <Link href={`/books/${book.id}`} className="folio-cover aspect-[2/3] w-full rounded shadow-sm transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-md">
-                    <Image src={book.cover} alt={book.title} width={160} height={240} unoptimized className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]" />
-                  </Link>
-                ) : (
-                  <Link href={`/books/${book.id}`} className="w-full aspect-[2/3] bg-muted rounded flex items-center justify-center">
-                    <BookOpen className="h-5 w-5 text-muted-foreground/30" />
-                  </Link>
-                )}
+              <div key={book.id} className="group flex min-w-0 flex-col gap-1.5">
+                <Link href={`/books/${book.id}`} className="block w-full">
+                  <BookCover
+                    src={book.cover}
+                    alt={book.title}
+                    className="w-full rounded shadow-sm transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-md"
+                    imageClassName="transition-transform duration-200 group-hover:scale-[1.02]"
+                  />
+                </Link>
                 <Link href={`/books/${book.id}`} className="text-xs text-foreground leading-tight line-clamp-2 hover:text-primary">{book.title}</Link>
                 {rating && <StarRating rating={rating} />}
-                <LibraryBookActions bookId={book.id} initialStatus={status} initialRating={rating} />
+                <div className="min-w-0">
+                  <LibraryBookActions bookId={book.id} initialStatus={status} initialRating={rating} />
+                </div>
               </div>
             ))}
           </div>
@@ -232,13 +216,9 @@ export default async function LibraryPage() {
           <div className="grid gap-x-8 md:grid-cols-2 xl:grid-cols-3">
             {abandoned.map(({ book, status, rating }) => (
               <div key={book.id} className="folio-lift -mx-2 flex items-center gap-3 rounded-lg border-b border-border/40 px-2 py-3 hover:bg-card/45">
-                {book.cover ? (
-                  <Link href={`/books/${book.id}`} className="folio-cover h-10 w-7 flex-shrink-0 rounded opacity-60">
-                    <Image src={book.cover} alt="" width={28} height={40} unoptimized className="h-full w-full object-cover" />
-                  </Link>
-                ) : (
-                  <Link href={`/books/${book.id}`} className="h-10 w-7 bg-muted rounded opacity-50 flex-shrink-0" />
-                )}
+                <Link href={`/books/${book.id}`} className="flex-shrink-0 opacity-60">
+                  <BookCover src={book.cover} alt="" className="h-10 w-7 rounded" sizes="28px" />
+                </Link>
                 <div className="min-w-0">
                   <Link href={`/books/${book.id}`} className="block text-sm text-muted-foreground truncate hover:text-primary">{book.title}</Link>
                   <p className="text-xs text-muted-foreground/60">{book.author}</p>
@@ -249,6 +229,6 @@ export default async function LibraryPage() {
           </div>
         </section>
       )}
-    </div>
+    </PageContainer>
   );
 }

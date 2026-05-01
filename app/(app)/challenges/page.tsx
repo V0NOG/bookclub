@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth-helpers";
 import { CalendarDays, Trophy, Users } from "lucide-react";
 import { ChallengeToggleButton } from "@/components/challenges/challenge-toggle-button";
 import Link from "next/link";
+import { PageContainer } from "@/components/layout/page-container";
 
 function ChallengeCard({
   title,
@@ -99,7 +100,7 @@ export default async function ChallengesPage() {
     new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(date);
 
   return (
-    <div className="w-full max-w-7xl px-6 py-8">
+    <PageContainer>
       <div className="mb-8">
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Reading goals</p>
         <h1 className="text-3xl font-bold text-foreground mb-2">Challenges</h1>
@@ -174,6 +175,6 @@ export default async function ChallengesPage() {
         )}
       </section>
       </div>
-    </div>
+    </PageContainer>
   );
 }

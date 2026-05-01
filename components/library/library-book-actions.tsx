@@ -77,19 +77,19 @@ export function LibraryBookActions({
   }
 
   return (
-    <div className="mt-2 flex flex-wrap items-center gap-2">
+    <div className="mt-2 flex min-w-0 flex-wrap items-center gap-2">
       <select
         value={status}
         onChange={(event) => changeStatus(event.target.value as Status)}
         disabled={pending}
-        className="h-8 rounded-lg border border-border bg-background px-2 text-xs text-foreground shadow-sm hover:border-primary/40 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15 disabled:opacity-60"
+        className="h-8 max-w-full rounded-lg border border-border bg-background px-2 text-xs text-foreground shadow-sm hover:border-primary/40 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15 disabled:opacity-60"
         aria-label="Reading status"
       >
         {STATUSES.map((item) => (
           <option key={item.value} value={item.value}>{item.label}</option>
         ))}
       </select>
-      <div className="flex items-center gap-0.5" aria-label="Rating">
+      <div className="flex min-w-0 items-center gap-0.5" aria-label="Rating">
         {[1, 2, 3, 4, 5].map((value) => (
           <button
             key={value}

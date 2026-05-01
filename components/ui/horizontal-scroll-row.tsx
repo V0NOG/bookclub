@@ -3,10 +3,12 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export function HorizontalScrollRow({ children }: { children: ReactNode }) {
+export function HorizontalScroll({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
+  const drag = useRef({ active: false, startX: 0, scrollLeft: 0, moved: false });
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [dragging, setDragging] = useState(false);
 
   function updateScrollState() {
     const node = ref.current;
@@ -38,8 +40,44 @@ export function HorizontalScrollRow({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="group/row relative -mx-6 px-6">
-      <div ref={ref} className="flex gap-4 overflow-x-auto scroll-smooth pb-4 pt-1 no-scrollbar">
+    <div className="group/row relative -mx-4 min-w-0 max-w-full px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+      <div
+        ref={ref}
+        data-layout-part="horizontal-scroll"
+        className={`flex max-w-full touch-pan-x snap-x snap-mandatory select-none gap-4 overflow-x-auto overscroll-x-contain scroll-smooth pb-4 pt-1 no-scrollbar [&>*]:snap-start ${dragging ? "cursor-grabbing" : "cursor-grab"}`}
+        onPointerDown={(event) => {
+          if (event.pointerType === "touch") return;
+          const node = ref.current;
+          if (!node) return;
+          drag.current = { active: true, startX: event.clientX, scrollLeft: node.scrollLeft, moved: false };
+          setDragging(true);
+          node.setPointerCapture(event.pointerId);
+        }}
+        onPointerMove={(event) => {
+          const node = ref.current;
+          if (!node || !drag.current.active) return;
+          const delta = event.clientX - drag.current.startX;
+          if (Math.abs(delta) > 4) drag.current.moved = true;
+          node.scrollLeft = drag.current.scrollLeft - delta;
+        }}
+        onPointerUp={(event) => {
+          const node = ref.current;
+          if (!node) return;
+          drag.current.active = false;
+          setDragging(false);
+          if (node.hasPointerCapture(event.pointerId)) node.releasePointerCapture(event.pointerId);
+        }}
+        onPointerCancel={() => {
+          drag.current.active = false;
+          setDragging(false);
+        }}
+        onClickCapture={(event) => {
+          if (!drag.current.moved) return;
+          event.preventDefault();
+          event.stopPropagation();
+          drag.current.moved = false;
+        }}
+      >
         {children}
       </div>
       {canScrollLeft && (
@@ -68,4 +106,8 @@ export function HorizontalScrollRow({ children }: { children: ReactNode }) {
       )}
     </div>
   );
+}
+
+export function HorizontalScrollRow({ children }: { children: ReactNode }) {
+  return <HorizontalScroll>{children}</HorizontalScroll>;
 }

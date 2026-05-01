@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth-helpers";
 import { Bell, BookOpen, Lock, Settings, User } from "lucide-react";
 import { PreferencesForm } from "@/components/settings/preferences-form";
 import { UserType } from "@/lib/generated/prisma/enums";
+import { PageContainer } from "@/components/layout/page-container";
 
 function SettingRow({
   title,
@@ -52,7 +53,7 @@ export default async function SettingsPage() {
   });
 
   return (
-    <div className="w-full max-w-7xl px-6 py-8">
+    <PageContainer>
       <div className="mb-8">
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Account</p>
         <h1 className="text-3xl font-bold text-foreground mb-2">Settings</h1>
@@ -146,6 +147,6 @@ export default async function SettingsPage() {
         <Settings className="h-3.5 w-3.5" />
         Settings are currently a read-only view of existing account data.
       </div>
-    </div>
+    </PageContainer>
   );
 }

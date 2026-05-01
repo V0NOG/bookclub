@@ -3,7 +3,8 @@ import { getSession } from "@/lib/auth-helpers";
 import { Activity, BookOpen, Clock, Sparkles, Target } from "lucide-react";
 import { ReadingSessionForm } from "@/components/tracker/reading-session-form";
 import Link from "next/link";
-import Image from "next/image";
+import { PageContainer } from "@/components/layout/page-container";
+import { BookCover } from "@/components/ui/book-cover";
 
 function dateKey(date: Date) {
   return date.toISOString().slice(0, 10);
@@ -86,7 +87,7 @@ export default async function TrackerPage() {
   const weeklyPattern = patternInsight(insightSessions);
 
   return (
-    <div className="w-full max-w-7xl px-6 py-8">
+    <PageContainer>
       <div className="mb-8">
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Reading rhythm</p>
         <h1 className="text-3xl font-bold text-foreground mb-2">Tracker</h1>
@@ -118,15 +119,7 @@ export default async function TrackerPage() {
                   const pct = book.pageCount ? Math.min(100, Math.round((progress / book.pageCount) * 100)) : 0;
                   return (
                     <div key={id} className="folio-lift -mx-2 flex items-center gap-4 rounded-lg border-b border-border/50 px-2 py-4 hover:bg-card/45">
-                      {book.cover ? (
-                        <div className="folio-cover h-16 w-11 flex-shrink-0 rounded shadow-sm">
-                          <Image src={book.cover} alt="" width={44} height={64} unoptimized className="h-full w-full object-cover" />
-                        </div>
-                      ) : (
-                        <div className="h-16 w-11 rounded bg-muted flex items-center justify-center">
-                          <BookOpen className="h-5 w-5 text-muted-foreground/50" />
-                        </div>
-                      )}
+                      <BookCover src={book.cover} alt="" className="h-16 w-11 flex-shrink-0 rounded shadow-sm" sizes="44px" />
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold text-foreground truncate">{book.title}</p>
                         <p className="text-xs text-muted-foreground mb-2">{book.author}</p>
@@ -274,6 +267,6 @@ export default async function TrackerPage() {
           </div>
         </aside>
       </div>
-    </div>
+    </PageContainer>
   );
 }

@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { createClubAction } from "@/app/actions/club";
+import { PageContainer } from "@/components/layout/page-container";
 
 export default function CreateClubPage({ searchParams }: { searchParams?: { error?: string } }) {
   return (
-    <div className="w-full max-w-3xl px-6 py-8">
+    <PageContainer maxWidth="narrow">
       <Link href="/clubs" className="folio-press inline-flex rounded-full px-2 py-1 text-sm text-primary hover:bg-primary/10">
         Back to clubs
       </Link>
@@ -91,6 +92,6 @@ export default function CreateClubPage({ searchParams }: { searchParams?: { erro
           </button>
         </div>
       </form>
-    </div>
+    </PageContainer>
   );
 }

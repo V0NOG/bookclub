@@ -4,6 +4,11 @@
 
 @layer base {
   :root {
+    --sidebar-width: 16.25rem;
+    --sidebar-collapsed-width: 4.75rem;
+    --top-bar-height: 4rem;
+    --mini-player-height: 6rem;
+
     /* Stacks palette — warm parchment light theme */
     --background:         41 39% 94%;   /* #F5F1E8 */
     --foreground:         27 11% 17%;   /* #2F2A26 */
@@ -49,6 +54,12 @@
     --input:              31 15% 28%;
     --ring:               8 45% 58%;
   }
+
+  @media (min-width: 768px) {
+    :root {
+      --mini-player-height: 5.5rem;
+    }
+  }
 }
 
 @layer base {
@@ -59,6 +70,11 @@
     @apply bg-background text-foreground;
     font-family: var(--font-serif), "Iowan Old Style", Georgia, serif;
     transition: background-color 180ms ease, color 180ms ease;
+  }
+
+  html,
+  body {
+    overflow-x: hidden;
   }
 
   input,
@@ -174,7 +190,19 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  background: hsl(var(--muted));
+  background:
+    linear-gradient(145deg, hsl(var(--muted)) 0%, hsl(var(--accent) / 0.72) 100%),
+    hsl(var(--muted));
+  box-shadow: inset 0 0 0 1px hsl(var(--border) / 0.55);
+}
+
+.folio-cover:not(:has(img))::after {
+  content: "";
+  position: absolute;
+  inset: 12%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, hsl(var(--background) / 0.34), hsl(var(--background) / 0));
+  pointer-events: none;
 }
 
 .folio-cover-shimmer::before {
@@ -199,6 +227,7 @@
 .folio-cover img {
   display: block;
   transform: translateZ(0);
+  background: hsl(var(--muted));
 }
 
 .folio-soft-enter {

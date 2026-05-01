@@ -1,4 +1,5 @@
 import { MatchCardSkeleton } from "@/components/match/MatchCardSkeleton";
+import { PageContainer } from "@/components/layout/page-container";
 
 function Pulse({ className }: { className: string }) {
   return <div className={`animate-pulse rounded bg-border ${className}`} />;
@@ -77,7 +78,7 @@ function GridSkeleton({ label }: { label: string }) {
 
 export default function HomeLoading() {
   return (
-    <div className="w-full max-w-7xl p-6">
+    <PageContainer>
       {/* Header */}
       <div className="mb-6">
         <Pulse className="h-7 w-48 mb-2" />
@@ -89,6 +90,6 @@ export default function HomeLoading() {
       <CarouselSkeleton variant="book" />
       <GridSkeleton label="people" />
       <GridSkeleton label="clubs" />
-    </div>
+    </PageContainer>
   );
 }

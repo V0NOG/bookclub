@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BookOpen, Star, Users, Sparkles, ThumbsUp } from "lucide-react";
+import { PageContainer } from "@/components/layout/page-container";
 
 const steps = [
   {
@@ -38,7 +39,7 @@ const steps = [
 
 export default function HowItWorksPage() {
   return (
-    <div className="p-6 max-w-2xl">
+    <PageContainer maxWidth="narrow">
       <div className="mb-10">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles className="h-5 w-5 text-primary" />
@@ -107,6 +108,6 @@ export default function HowItWorksPage() {
           Rate more books
         </Link>
       </div>
-    </div>
+    </PageContainer>
   );
 }

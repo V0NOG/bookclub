@@ -20,23 +20,29 @@ const navItems = [
 
 export function Sidebar({
   collapsed,
+  mobileOpen,
+  onCloseMobile,
   onToggleCollapsed,
 }: {
   collapsed: boolean;
+  mobileOpen: boolean;
+  onCloseMobile: () => void;
   onToggleCollapsed: () => void;
 }) {
   const pathname = usePathname();
+  const showLabels = mobileOpen || !collapsed;
 
   return (
-    <aside className={cn(
-      "fixed left-0 top-0 z-40 flex h-screen w-20 flex-col border-r border-border bg-card transition-[width] duration-200",
-      collapsed ? "md:w-20" : "md:w-60"
+    <aside data-layout-part="sidebar" className={cn(
+      "fixed left-0 top-0 z-50 flex h-screen w-72 flex-col border-r border-border bg-card transition-[transform,width] duration-200 md:z-40 md:translate-x-0",
+      mobileOpen ? "translate-x-0" : "-translate-x-full",
+      collapsed ? "md:w-[var(--sidebar-collapsed-width)]" : "md:w-[var(--sidebar-width)]"
     )}>
       {/* Logo */}
-      <div className={cn("h-16 flex items-center border-b border-border justify-center px-3", !collapsed && "md:justify-start md:px-6")}>
+      <div className={cn("h-16 flex items-center border-b border-border justify-start px-6 md:justify-center md:px-3", !collapsed && "md:justify-start md:px-6")}>
         <Link href="/home" className="flex items-center gap-2 font-bold text-lg text-foreground" title="Folio">
           <BookOpen className="h-5 w-5 text-primary" />
-          {!collapsed && <span className="hidden md:inline">Folio</span>}
+          {showLabels && <span className={cn(collapsed && "md:hidden")}>Folio</span>}
         </Link>
       </div>
 
@@ -47,17 +53,22 @@ export function Sidebar({
             <Link
               key={item.href}
               href={item.href}
+              onClick={onCloseMobile}
               title={collapsed ? item.label : undefined}
               className={cn(
                 "folio-press flex items-center rounded-lg text-sm font-medium",
-                collapsed ? "justify-center px-2 py-2.5" : "justify-center px-2 py-2.5 md:justify-start md:gap-3 md:px-3",
+                mobileOpen
+                  ? "justify-start gap-3 px-3 py-2.5"
+                  : collapsed
+                    ? "justify-center px-2 py-2.5"
+                    : "justify-center px-2 py-2.5 md:justify-start md:gap-3 md:px-3",
                 active
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:text-foreground hover:bg-accent"
               )}
             >
               <item.icon className="h-4 w-4 flex-shrink-0" />
-              {!collapsed && <span className="hidden md:inline">{item.label}</span>}
+              {showLabels && <span className={cn(collapsed && "md:hidden")}>{item.label}</span>}
             </Link>
           );
         })}

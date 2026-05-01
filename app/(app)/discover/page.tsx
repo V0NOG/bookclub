@@ -8,6 +8,7 @@ import { DiscoverSearch } from "@/components/discover/discover-search";
 import { PeopleSuggestion } from "@/components/feed/people-suggestion";
 import { ClubSuggestionCard } from "@/components/clubs/club-suggestion-card";
 import { HorizontalScrollRow } from "@/components/ui/horizontal-scroll-row";
+import { PageContainer } from "@/components/layout/page-container";
 
 type TrendingBook = {
   id: string;
@@ -79,7 +80,7 @@ export default async function DiscoverPage() {
   const hasMatches = topBooks.length > 0 || topPeople.length > 0 || topClubs.length > 0;
 
   return (
-    <div className="w-full max-w-7xl px-6 py-8">
+    <PageContainer>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground mb-2">Discover</h1>
         <p className="text-sm text-muted-foreground">
@@ -227,6 +228,6 @@ export default async function DiscoverPage() {
           </div>
         </section>
       )}
-    </div>
+    </PageContainer>
   );
 }

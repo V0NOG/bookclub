@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth-helpers";
 import { BookOpen, Rss } from "lucide-react";
 import { FeedActivityRow } from "@/components/feed/feed-activity-row";
 import Link from "next/link";
+import { PageContainer } from "@/components/layout/page-container";
 
 function activityText(activity: {
   type: string;
@@ -95,7 +96,7 @@ export default async function FeedPage({ searchParams }: { searchParams?: { view
   const topGenres = new Set(tasteProfile?.topGenres ?? []);
 
   return (
-    <div className="w-full max-w-7xl px-6 py-8">
+    <PageContainer>
       <div className="mb-8">
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Social reading</p>
         <h1 className="text-3xl font-bold text-foreground mb-2">Feed</h1>
@@ -193,6 +194,6 @@ export default async function FeedPage({ searchParams }: { searchParams?: { view
           </div>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

@@ -4,6 +4,7 @@ import {
   Brain, MessageSquare, Compass, GitMerge,
   ArrowRight, Code2, Database, Layers, Cpu,
 } from "lucide-react";
+import { PageContainer } from "@/components/layout/page-container";
 
 // ── Section: Hero ─────────────────────────────────────────────────────────────
 
@@ -333,7 +334,7 @@ function TechStack() {
 
 export default function ShowcasePage() {
   return (
-    <div className="w-full max-w-7xl p-6">
+    <PageContainer>
       <Hero />
       <ProblemSolution />
       <Features />
@@ -341,6 +342,6 @@ export default function ShowcasePage() {
       <DemoWalkthrough />
       <Differentiators />
       <TechStack />
-    </div>
+    </PageContainer>
   );
 }

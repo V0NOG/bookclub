@@ -5,10 +5,11 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { colors, typography, spacing, radius, shadow } from "@/styles/design-tokens";
-import { BookOpen, Users, ThumbsDown, Heart, BookmarkPlus, Check } from "lucide-react";
+import { ThumbsDown, Heart, BookmarkPlus, Check } from "lucide-react";
 import { upsertFeedback } from "@/app/actions/feedback";
 import { setBookStatus } from "@/app/actions/user-book";
 import { FeedbackTargetType, FeedbackAction } from "@/lib/generated/prisma/enums";
+import { BookCover } from "@/components/ui/book-cover";
 
 type Props = {
   variant: "person" | "book" | "club";
@@ -88,24 +89,6 @@ function ScoreBadge({ score, confidence }: { score: number; confidence: "low" | 
           }}
         />
       )}
-    </div>
-  );
-}
-
-function CoverPlaceholder({ variant }: { variant: Props["variant"] }) {
-  return (
-    <div
-      className="folio-cover"
-      style={{
-        width: "100%", height: variant === "book" ? 116 : 56,
-        backgroundColor: colors.accentMuted, borderRadius: radius.md,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        marginBottom: spacing.sm, flexShrink: 0,
-      }}
-    >
-      {variant === "person"
-        ? <Users size={18} color={colors.textSecondary} />
-        : <BookOpen size={18} color={colors.textSecondary} />}
     </div>
   );
 }
@@ -350,34 +333,13 @@ export function MatchCard({
       )}
 
       {variant === "book" ? (
-        coverImage ? (
-          <div
-            className="folio-cover"
-            style={{
-              width: "100%",
-              height: 116,
-              borderRadius: radius.md,
-              marginBottom: spacing.sm,
-              flexShrink: 0,
-            }}
-          >
-            <Image
-              src={coverImage} alt=""
-              width={304}
-              height={464}
-              unoptimized
-              loading="lazy"
-              style={{
-                width: "100%", height: "100%", objectFit: "cover",
-                display: "block",
-                transform: hovered ? "scale(1.02)" : "scale(1)",
-                transition: "transform 200ms ease",
-              }}
-            />
-          </div>
-        ) : (
-          <CoverPlaceholder variant="book" />
-        )
+        <BookCover
+          src={coverImage}
+          alt=""
+          className="mb-2 h-[116px] w-full rounded-md"
+          imageClassName={hovered ? "scale-[1.02] transition-transform duration-200" : "transition-transform duration-200"}
+          sizes="152px"
+        />
       ) : (
         <div style={{ display: "flex", alignItems: "center", gap: spacing.sm, marginBottom: spacing.sm }}>
           {coverImage ? (

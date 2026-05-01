@@ -1,10 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BookOpen, CalendarDays, MessageCircle, Users } from "lucide-react";
+import { CalendarDays, MessageCircle, Users } from "lucide-react";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
 import { ClubMembershipButton } from "@/components/clubs/club-membership-button";
+import { PageContainer } from "@/components/layout/page-container";
+import { BookCover } from "@/components/ui/book-cover";
 
 export default async function ClubDetailPage({ params }: { params: { clubId: string } }) {
   const session = await getSession();
@@ -66,7 +68,7 @@ export default async function ClubDetailPage({ params }: { params: { clubId: str
   ].slice(0, 6);
 
   return (
-    <div className="w-full max-w-7xl px-6 py-8">
+    <PageContainer>
       <Link href="/clubs" className="folio-press inline-flex rounded-full px-2 py-1 text-sm text-primary hover:bg-primary/10">
         Back to clubs
       </Link>
@@ -162,15 +164,7 @@ export default async function ClubDetailPage({ params }: { params: { clubId: str
               <h2 className="mb-4 text-sm font-semibold text-foreground">Reading list</h2>
               {[club.currentBook, club.upcomingBook].filter(Boolean).map((book) => (
                 <Link key={book!.id} href={`/books/${book!.id}`} className="flex gap-3 rounded-lg py-2 hover:text-primary">
-                  {book!.cover ? (
-                    <div className="folio-cover h-14 w-10 flex-shrink-0 overflow-hidden rounded bg-muted">
-                      <Image src={book!.cover} alt="" width={40} height={56} unoptimized className="h-full w-full object-cover" />
-                    </div>
-                  ) : (
-                    <div className="flex h-14 w-10 flex-shrink-0 items-center justify-center rounded bg-muted">
-                      <BookOpen className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  )}
+                  <BookCover src={book!.cover} alt="" className="h-14 w-10 flex-shrink-0 rounded" sizes="40px" />
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-semibold text-foreground">{book!.title}</span>
                     <span className="block truncate text-xs text-muted-foreground">{book!.author}</span>
@@ -216,6 +210,6 @@ export default async function ClubDetailPage({ params }: { params: { clubId: str
           </div>
         </aside>
       </section>
-    </div>
+    </PageContainer>
   );
 }

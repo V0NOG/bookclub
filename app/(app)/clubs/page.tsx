@@ -6,6 +6,7 @@ import { ClubMembershipButton } from "@/components/clubs/club-membership-button"
 import Link from "next/link";
 import Image from "next/image";
 import { Users, Plus } from "lucide-react";
+import { PageContainer } from "@/components/layout/page-container";
 
 export default async function ClubsPage() {
   const session = await getSession();
@@ -45,7 +46,7 @@ export default async function ClubsPage() {
   const cadenceMap = new Map(cadenceRows.map((c) => [c.id, c.meetingCadence]));
 
   return (
-    <div className="w-full max-w-7xl px-6 py-8">
+    <PageContainer>
       <div className="flex items-baseline justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Clubs</h1>
@@ -150,6 +151,6 @@ export default async function ClubsPage() {
           </Link>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

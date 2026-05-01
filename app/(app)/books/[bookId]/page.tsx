@@ -1,11 +1,12 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BookOpen, Clock, Star, Users } from "lucide-react";
+import { Clock, Star, Users } from "lucide-react";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
 import { LibraryBookActions } from "@/components/library/library-book-actions";
 import { ReadingMiniPlayerActions } from "@/components/layout/reading-mini-player-actions";
+import { PageContainer } from "@/components/layout/page-container";
+import { BookCover } from "@/components/ui/book-cover";
 
 export default async function BookDetailPage({ params }: { params: { bookId: string } }) {
   const session = await getSession();
@@ -37,22 +38,21 @@ export default async function BookDetailPage({ params }: { params: { bookId: str
     : 0;
 
   return (
-    <div className="w-full max-w-7xl px-6 py-8">
+    <PageContainer>
       <Link href="/discover" className="folio-press inline-flex rounded-full px-2 py-1 text-sm text-primary hover:bg-primary/10">
         Back to discover
       </Link>
 
       <section className="mt-8 grid gap-10 lg:grid-cols-[280px_minmax(0,1fr)_320px]">
         <div className="lg:sticky lg:top-24 lg:self-start">
-          <div className="folio-cover folio-cover-shimmer aspect-[2/3] overflow-hidden rounded-xl bg-muted shadow-sm">
-            {book.cover ? (
-              <Image src={book.cover} alt="" width={560} height={840} unoptimized priority className="h-full w-full object-cover" />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center">
-                <BookOpen className="h-10 w-10 text-muted-foreground/50" />
-              </div>
-            )}
-          </div>
+          <BookCover
+            src={book.cover}
+            alt={book.title}
+            priority
+            className="w-full rounded-xl shadow-sm"
+            iconClassName="h-10 w-10"
+            sizes="(max-width: 1024px) 60vw, 280px"
+          />
         </div>
 
         <div className="min-w-0">
@@ -151,6 +151,6 @@ export default async function BookDetailPage({ params }: { params: { bookId: str
           </div>
         </aside>
       </section>
-    </div>
+    </PageContainer>
   );
 }

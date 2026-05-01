@@ -2,7 +2,6 @@ import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
 import { BookOpen } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { getMatchesForUser, ScoredBook, ScoredUser, ScoredClub } from "@/lib/matching/cache";
 import { MatchCard } from "@/components/match/MatchCard";
 import { SearchBar } from "@/components/feed/search-bar";
@@ -10,6 +9,8 @@ import { ActivityCard, ActivityItem } from "@/components/feed/activity-card";
 import { PeopleSuggestion } from "@/components/feed/people-suggestion";
 import { ClubSuggestionCard } from "@/components/clubs/club-suggestion-card";
 import { HorizontalScrollRow } from "@/components/ui/horizontal-scroll-row";
+import { PageContainer } from "@/components/layout/page-container";
+import { BookCover } from "@/components/ui/book-cover";
 
 // ── Display pipeline helpers ──────────────────────────────────────────────────
 
@@ -336,7 +337,7 @@ export default async function HomePage() {
   // ── Render ────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="w-full max-w-7xl px-6 py-8">
+    <PageContainer>
 
       {/* Header */}
       <div className="mb-8">
@@ -376,15 +377,7 @@ export default async function HomePage() {
             <Link href="/tracker" className="rounded-xl border border-border bg-card p-4 hover:bg-accent/35">
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Currently reading</p>
               <div className="mt-3 flex items-center gap-3">
-                <div className="folio-cover h-14 w-10 flex-shrink-0 overflow-hidden rounded-md bg-muted shadow-sm">
-                  {currentBook.book.cover ? (
-                    <Image src={currentBook.book.cover} alt="" width={80} height={112} unoptimized className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center">
-                      <BookOpen className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  )}
-                </div>
+                <BookCover src={currentBook.book.cover} alt="" className="h-14 w-10 flex-shrink-0 rounded-md shadow-sm" sizes="40px" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold italic text-foreground">{currentBook.book.title}</p>
                   <p className="truncate text-xs text-muted-foreground">{currentPercent}% complete</p>
@@ -554,6 +547,6 @@ export default async function HomePage() {
           </div>
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }
