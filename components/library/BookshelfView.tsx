@@ -165,6 +165,9 @@ export function BookshelfView({ books }: BookshelfViewProps) {
                   <div
                     key={book.id}
                     className="folio-book-slot"
+                    data-selected={selected ? "true" : "false"}
+                    data-opening={opening ? "true" : "false"}
+                    data-pressing={pressing ? "true" : "false"}
                     style={{ zIndex: selected || opening || pressing ? 40 : 1 }}
                   >
                     <BookSpine

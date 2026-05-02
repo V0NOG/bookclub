@@ -103,7 +103,7 @@ export function BookSpine({ book, selected, opening, pressing, onActivate }: Boo
           </span>
         </span>
         {active && (
-          <span className="folio-book-object" aria-hidden="true">
+          <span key={`${book.id}-${selected}`} className="folio-book-object" aria-hidden="true">
             <span className="folio-book-pages-edge" />
             <span className="folio-book-bottom-edge" />
             <span className="folio-book-attached-spine" style={getSpineTheme(book)}>
