@@ -237,7 +237,7 @@
 .folio-bookshelf {
   position: relative;
   display: grid;
-  gap: 1.75rem;
+  gap: 1.55rem;
   max-width: 100%;
   perspective: 1200px;
   overflow: visible;
@@ -253,13 +253,13 @@
   display: flex;
   min-width: 0;
   max-width: 100%;
-  gap: 0.45rem;
+  gap: 0.42rem;
   overflow-x: auto;
   overflow-y: visible;
   overscroll-behavior-x: contain;
   scroll-behavior: smooth;
   scrollbar-width: none;
-  padding: 1.5rem 1rem 1.25rem;
+  padding: 1.35rem 1rem 1.1rem;
 }
 
 .folio-bookshelf-track::-webkit-scrollbar {
@@ -268,16 +268,18 @@
 
 .folio-bookshelf-board {
   position: absolute;
-  left: 0;
-  right: 0;
+  left: 0.35rem;
+  right: 0.35rem;
   bottom: 0.15rem;
-  height: 0.85rem;
-  border-radius: 0.35rem;
-  border: 1px solid hsl(var(--border));
+  height: 0.72rem;
+  border-radius: 999px;
+  border: 1px solid hsl(var(--border) / 0.72);
   background:
-    linear-gradient(180deg, hsl(var(--accent)), hsl(var(--border))),
+    linear-gradient(180deg, hsl(var(--background) / 0.95), hsl(var(--accent) / 0.9)),
     hsl(var(--accent));
-  box-shadow: 0 8px 16px rgb(47 42 38 / 0.08);
+  box-shadow:
+    0 10px 24px rgb(47 42 38 / 0.08),
+    inset 0 1px 0 hsl(var(--background) / 0.9);
   pointer-events: none;
 }
 
@@ -314,7 +316,7 @@
 
 .folio-book-spine-button[data-selected="true"],
 .folio-book-spine-button[data-opening="true"] {
-  width: 12rem;
+  width: 8.65rem;
   transform: translateX(-1.225rem);
 }
 
@@ -339,12 +341,12 @@
 
 .folio-book-spine-button[data-selected="true"] .folio-book-3d {
   filter: drop-shadow(0 22px 26px rgb(47 42 38 / 0.2));
-  transform: translate3d(3.4rem, -1.2rem, 5.4rem) rotateY(-5deg) rotateZ(-0.4deg) scale(1.1);
+  transform: translate3d(0, -1.18rem, 5.4rem) rotateY(-4deg) rotateZ(-0.25deg) scale(1.08);
 }
 
 .folio-book-spine-button[data-opening="true"] .folio-book-3d {
   filter: drop-shadow(0 22px 26px rgb(47 42 38 / 0.2));
-  transform: translate3d(3.4rem, -1.2rem, 5.4rem) rotateY(-4deg) rotateZ(-0.3deg) scale(1.1);
+  transform: translate3d(0, -1.18rem, 5.4rem) rotateY(-3deg) rotateZ(-0.2deg) scale(1.08);
 }
 
 /* Press State
@@ -353,7 +355,7 @@
    than instantly replacing one UI layer with another. */
 .folio-book-spine-button[data-pressing="true"] .folio-book-3d {
   filter: drop-shadow(0 16px 20px rgb(47 42 38 / 0.16));
-  transform: translate3d(3.34rem, -1.08rem, 5.1rem) rotateY(-5deg) rotateZ(-0.35deg) scale(1.075);
+  transform: translate3d(0, -1.05rem, 5.1rem) rotateY(-4deg) rotateZ(-0.2deg) scale(1.045);
   transition-duration: 90ms;
 }
 
@@ -372,11 +374,12 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border-radius: 0.35rem;
+  border-radius: 0.28rem;
   border: 1px solid hsl(var(--foreground) / 0.22);
   box-shadow:
     inset 0 0 0 1px hsl(var(--background) / 0.12),
-    inset -8px 0 12px rgb(0 0 0 / 0.14);
+    inset -8px 0 12px rgb(0 0 0 / 0.16),
+    0 6px 12px rgb(47 42 38 / 0.08);
   transform: translateZ(0.55rem);
 }
 
@@ -404,6 +407,7 @@
   text-align: center;
   text-overflow: ellipsis;
   text-shadow: 0 1px 2px rgb(0 0 0 / 0.28);
+  color: var(--folio-spine-text);
   writing-mode: vertical-rl;
   font-size: 0.74rem;
   font-weight: 700;
@@ -416,17 +420,26 @@
   bottom: 0.45rem;
   display: inline-flex;
   transform: translateX(-50%);
-  color: hsl(var(--primary-foreground) / 0.86);
+  color: var(--folio-spine-accent);
+}
+
+.folio-book-spine-foot::before {
+  content: "";
+  position: absolute;
+  inset: -0.22rem;
+  z-index: -1;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.08);
 }
 
 .folio-book-object {
   left: 0;
   z-index: 4;
-  width: 8rem;
+  width: 8.2rem;
   height: 11.45rem;
   opacity: 0;
   pointer-events: none;
-  transform: translate3d(-0.25rem, 0, -0.45rem) rotateY(18deg) scale(0.92);
+  transform: translate3d(-0.18rem, 0, -0.45rem) rotateY(14deg) scale(0.94);
   /* Left hinge origin keeps the revealed cover attached to its spine. */
   transform-origin: left center;
   transition: opacity 170ms ease, transform 220ms ease;
@@ -440,34 +453,50 @@
 
 .folio-book-pages-edge {
   position: absolute;
-  top: 0.35rem;
-  right: -0.22rem;
-  bottom: -0.22rem;
-  left: 1.18rem;
+  top: 0.34rem;
+  right: -0.34rem;
+  bottom: 0.18rem;
+  left: 1.14rem;
   z-index: 1;
-  border-radius: 0.18rem 0.48rem 0.48rem 0.18rem;
+  border-radius: 0.12rem 0.34rem 0.34rem 0.12rem;
   border: 1px solid hsl(var(--border));
   background:
-    repeating-linear-gradient(0deg, hsl(var(--background)), hsl(var(--background)) 0.28rem, hsl(var(--accent) / 0.45) 0.32rem),
+    repeating-linear-gradient(0deg, hsl(var(--background)), hsl(var(--background)) 0.22rem, hsl(var(--accent) / 0.5) 0.25rem),
     hsl(var(--background));
   box-shadow:
-    inset -8px 0 12px rgb(47 42 38 / 0.1),
-    0 12px 22px rgb(47 42 38 / 0.12);
-  transform: translateZ(-0.18rem);
+    inset -10px 0 14px rgb(47 42 38 / 0.12),
+    0 13px 22px rgb(47 42 38 / 0.13);
+  transform: translate3d(0.18rem, 0, -0.2rem);
+}
+
+.folio-book-bottom-edge {
+  position: absolute;
+  right: -0.18rem;
+  bottom: -0.24rem;
+  left: 1.22rem;
+  z-index: 2;
+  height: 0.58rem;
+  border-radius: 0 0 0.32rem 0.12rem;
+  border: 1px solid hsl(var(--border) / 0.9);
+  background:
+    repeating-linear-gradient(90deg, hsl(var(--background)), hsl(var(--background)) 0.3rem, hsl(var(--accent) / 0.48) 0.34rem),
+    hsl(var(--background));
+  box-shadow: 0 10px 18px rgb(47 42 38 / 0.14);
+  transform: skewX(18deg) translateZ(0.03rem);
 }
 
 .folio-book-attached-spine {
   position: absolute;
   inset: 0 auto 0 0;
   z-index: 4;
-  width: 1.12rem;
+  width: 1.08rem;
   overflow: hidden;
-  border-radius: 0.42rem 0 0 0.42rem;
+  border-radius: 0.28rem 0 0 0.28rem;
   border: 1px solid hsl(var(--foreground) / 0.24);
   box-shadow:
-    inset -6px 0 8px rgb(0 0 0 / 0.2),
+    inset -7px 0 10px rgb(0 0 0 / 0.24),
     inset 1px 0 0 hsl(var(--background) / 0.2);
-  transform: translateZ(0.18rem);
+  transform: translateZ(0.28rem);
 }
 
 .folio-book-attached-spine-title {
@@ -477,27 +506,45 @@
   text-align: center;
   text-overflow: ellipsis;
   text-shadow: 0 1px 2px rgb(0 0 0 / 0.26);
+  color: var(--folio-spine-text);
   writing-mode: vertical-rl;
   font-size: 0.52rem;
   font-weight: 700;
   line-height: 1;
 }
 
+.folio-book-cover-board {
+  position: absolute;
+  top: -0.08rem;
+  right: -0.05rem;
+  bottom: -0.08rem;
+  left: 0.98rem;
+  z-index: 2;
+  border-radius: 0 0.34rem 0.34rem 0;
+  background:
+    linear-gradient(90deg, hsl(var(--foreground) / 0.16), transparent 11%),
+    hsl(var(--primary));
+  box-shadow:
+    0 22px 30px rgb(47 42 38 / 0.18),
+    inset 3px 0 8px rgb(0 0 0 / 0.18);
+  transform: translateZ(0.12rem);
+}
+
 .folio-book-front-cover {
   position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 1.02rem;
+  top: 0.12rem;
+  right: 0.08rem;
+  bottom: 0.12rem;
+  left: 1.14rem;
   z-index: 3;
   overflow: hidden;
-  border-radius: 0 0.48rem 0.48rem 0;
+  border-radius: 0.04rem 0.3rem 0.3rem 0.04rem;
   border: 1px solid hsl(var(--foreground) / 0.16);
   background: hsl(var(--muted));
   box-shadow:
-    inset 5px 0 8px rgb(0 0 0 / 0.14),
-    0 18px 26px rgb(47 42 38 / 0.16);
-  transform: translateZ(0.22rem);
+    inset 5px 0 9px rgb(0 0 0 / 0.16),
+    inset 0 1px 0 rgb(255 255 255 / 0.18);
+  transform: translateZ(0.34rem);
 }
 
 /* Opening Overlay
@@ -510,9 +557,13 @@
     backdrop-filter: blur(0);
   }
   18%,
-  100% {
+  94% {
     opacity: 1;
     backdrop-filter: blur(3px);
+  }
+  100% {
+    opacity: 0.88;
+    backdrop-filter: blur(4px);
   }
 }
 
@@ -529,13 +580,13 @@
     opacity: 1;
     transform: translate3d(0, 0, 0) scale(0.98) rotateY(-2deg);
   }
-  90% {
+  92% {
     opacity: 1;
     transform: translate3d(0, 0, 0) scale(1.04) rotateY(0deg);
   }
   100% {
-    opacity: 0;
-    transform: translate3d(0, -2vh, 0) scale(1.08) rotateY(0deg);
+    opacity: 0.72;
+    transform: translate3d(0, -1vh, 0) scale(1.06) rotateY(0deg);
   }
 }
 
@@ -661,24 +712,36 @@
   display: grid;
   place-items: center;
   overflow: hidden;
-  padding: 2rem;
+  padding: clamp(1rem, 4vw, 2.5rem);
+  --folio-opening-duration: 1650ms;
   background: hsl(var(--foreground) / 0.55);
-  animation: folio-opening-overlay-in 1450ms ease both;
+  animation: folio-opening-overlay-in var(--folio-opening-duration) ease both;
 }
 
 .folio-book-opening-stage {
+  position: relative;
   display: grid;
   place-items: center;
+  width: 100vw;
+  height: 100dvh;
   perspective: 1500px;
   transform-style: preserve-3d;
-  animation: folio-opening-stage 1450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: folio-opening-stage var(--folio-opening-duration) cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 .folio-book-opening-book {
   position: relative;
-  width: clamp(14rem, 30vw, 20rem);
+  width: min(clamp(15rem, 30vw, 21rem), calc(100vw - 2rem), calc((100dvh - 8rem) * 0.66));
   aspect-ratio: 2 / 3;
   transform-style: preserve-3d;
+}
+
+.folio-book-opening-title {
+  position: absolute;
+  top: calc(50% + min(clamp(15rem, 30vw, 21rem), calc(100vw - 2rem), calc((100dvh - 8rem) * 0.66)) * 0.82);
+  left: 50%;
+  max-width: min(22rem, calc(100vw - 2rem));
+  transform: translateX(-50%);
 }
 
 .folio-book-opening-back,
@@ -736,7 +799,7 @@
   box-shadow:
     inset 6px 0 14px rgb(47 42 38 / 0.08),
     0 20px 34px rgb(0 0 0 / 0.16);
-  animation: folio-opening-page-one 1450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: folio-opening-page-one var(--folio-opening-duration) cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 .folio-book-opening-page-two {
@@ -747,7 +810,7 @@
   box-shadow:
     inset 8px 0 16px rgb(47 42 38 / 0.07),
     0 15px 26px rgb(0 0 0 / 0.12);
-  animation: folio-opening-page-two 1450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: folio-opening-page-two var(--folio-opening-duration) cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 .folio-book-opening-page-three {
@@ -759,18 +822,18 @@
   box-shadow:
     inset 10px 0 18px rgb(47 42 38 / 0.08),
     0 12px 20px rgb(0 0 0 / 0.09);
-  animation: folio-opening-page-three 1450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: folio-opening-page-three var(--folio-opening-duration) cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 .folio-book-opening-front-cover {
   inset: 0;
   z-index: 5;
-  border-radius: 0.65rem;
+  border-radius: 0.35rem;
   box-shadow: 0 24px 46px rgb(0 0 0 / 0.24);
   /* Same hinge as the pages so the cover drives the opening sequence. */
   transform-origin: left center;
   transform-style: preserve-3d;
-  animation: folio-opening-front-cover 1450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: folio-opening-front-cover var(--folio-opening-duration) cubic-bezier(0.16, 0.72, 0.18, 1) both;
 }
 
 .folio-book-opening-front-cover > * {
@@ -778,7 +841,7 @@
   z-index: 2;
   /* Prevents the cover image from appearing mirrored after hinge rotation. */
   backface-visibility: hidden;
-  animation: folio-opening-cover-art 1450ms ease both;
+  animation: folio-opening-cover-art var(--folio-opening-duration) ease both;
 }
 
 .folio-book-opening-front-cover::after {
@@ -786,7 +849,7 @@
   position: absolute;
   inset: 0;
   z-index: 3;
-  border-radius: 0.65rem;
+  border-radius: 0.35rem;
   border: 1px solid hsl(var(--border));
   background:
     linear-gradient(90deg, hsl(var(--foreground) / 0.16), hsl(var(--foreground) / 0.06) 11%, transparent 28%),
@@ -797,7 +860,7 @@
     inset -10px 0 18px rgb(47 42 38 / 0.07);
   backface-visibility: hidden;
   transform: rotateY(180deg) translateZ(0.03rem);
-  animation: folio-opening-inside-cover 1450ms ease both;
+  animation: folio-opening-inside-cover var(--folio-opening-duration) ease both;
 }
 
 .folio-book-opening-spine {
@@ -806,7 +869,7 @@
   left: 0;
   z-index: 6;
   width: 0.78rem;
-  border-radius: 0.65rem 0 0 0.65rem;
+  border-radius: 0.35rem 0 0 0.35rem;
   background:
     linear-gradient(90deg, hsl(var(--foreground) / 0.32), hsl(var(--foreground) / 0.12), transparent),
     hsl(var(--primary));
@@ -822,7 +885,7 @@
   border-radius: 999px;
   background: hsl(var(--foreground) / 0.22);
   opacity: 0;
-  animation: folio-opening-page-three 1450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: folio-opening-page-three var(--folio-opening-duration) cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 @media (max-width: 640px) {
@@ -844,7 +907,7 @@
 
   .folio-book-spine-button[data-selected="true"],
   .folio-book-spine-button[data-opening="true"] {
-    width: 10.5rem;
+    width: 7.75rem;
     transform: translateX(-1.1rem);
   }
 
@@ -855,7 +918,7 @@
 
   .folio-book-spine-button[data-selected="true"] .folio-book-3d,
   .folio-book-spine-button[data-opening="true"] .folio-book-3d {
-    transform: translate3d(2.72rem, -0.95rem, 4.4rem) rotateY(-5deg) rotateZ(-0.3deg) scale(1.06);
+    transform: translate3d(0, -0.95rem, 4.4rem) rotateY(-4deg) rotateZ(-0.2deg) scale(1.05);
   }
 }
 

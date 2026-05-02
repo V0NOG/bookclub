@@ -21,7 +21,7 @@
  * The small delay is intentional. It makes the second click read as a physical
  * action before the fullscreen book takes over the page.
  */
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BookSpine, BookshelfBook } from "@/components/library/BookSpine";
 import { BookOpeningOverlay } from "@/components/library/BookOpeningOverlay";
@@ -31,7 +31,7 @@ type BookshelfViewProps = {
 };
 
 const SHELF_SIZE = 14;
-const OPEN_ANIMATION_MS = 1450;
+const OPEN_ANIMATION_MS = 1650;
 const OPEN_PRESS_DELAY_MS = 100;
 
 function chunkBooks(books: BookshelfBook[]) {
@@ -71,12 +71,22 @@ export function BookshelfView({ books }: BookshelfViewProps) {
   const shelves = useMemo(() => chunkBooks(books), [books]);
   const openingBook = openingBookId ? books.find((book) => book.id === openingBookId) : null;
 
+  const clearOpeningTimers = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    if (pressTimeoutRef.current) {
+      clearTimeout(pressTimeoutRef.current);
+      pressTimeoutRef.current = null;
+    }
+  }, []);
+
   useEffect(() => {
     return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      if (pressTimeoutRef.current) clearTimeout(pressTimeoutRef.current);
+      clearOpeningTimers();
     };
-  }, []);
+  }, [clearOpeningTimers]);
 
   useEffect(() => {
     if (!openingBookId) return;
@@ -87,6 +97,15 @@ export function BookshelfView({ books }: BookshelfViewProps) {
     };
   }, [openingBookId]);
 
+  useEffect(() => {
+    if (!selectedBookId) return;
+    if (books.some((book) => book.id === selectedBookId)) return;
+    clearOpeningTimers();
+    setSelectedBookId(null);
+    setPressingBookId(null);
+    setOpeningBookId(null);
+  }, [books, clearOpeningTimers, selectedBookId]);
+
   function openBook(bookId: string) {
     router.push(`/books/${bookId}`);
   }
@@ -95,8 +114,10 @@ export function BookshelfView({ books }: BookshelfViewProps) {
     if (openingBookId || pressingBookId) return;
 
     if (selectedBookId !== bookId) {
+      clearOpeningTimers();
       setSelectedBookId(bookId);
       setPressingBookId(null);
+      setOpeningBookId(null);
       return;
     }
 
