@@ -80,6 +80,8 @@ function getSpineTheme(book: BookshelfBook): SpineTheme {
 }
 
 export function BookSpine({ book, selected, opening, pressing, onActivate }: BookSpineProps) {
+  const active = selected || pressing || opening;
+
   return (
     <button
       type="button"
@@ -100,22 +102,24 @@ export function BookSpine({ book, selected, opening, pressing, onActivate }: Boo
             <BookOpen className="h-3 w-3" />
           </span>
         </span>
-        <span className="folio-book-object" aria-hidden="true">
-          <span className="folio-book-pages-edge" />
-          <span className="folio-book-bottom-edge" />
-          <span className="folio-book-attached-spine" style={getSpineTheme(book)}>
-            <span className="folio-book-attached-spine-title">{book.title}</span>
+        {active && (
+          <span className="folio-book-object" aria-hidden="true">
+            <span className="folio-book-pages-edge" />
+            <span className="folio-book-bottom-edge" />
+            <span className="folio-book-attached-spine" style={getSpineTheme(book)}>
+              <span className="folio-book-attached-spine-title">{book.title}</span>
+            </span>
+            <span className="folio-book-cover-board" />
+            <span className="folio-book-front-cover">
+              <BookCover
+                src={book.cover}
+                alt=""
+                className="h-full w-full rounded-[0.28rem] shadow-md"
+                sizes="128px"
+              />
+            </span>
           </span>
-          <span className="folio-book-cover-board" />
-          <span className="folio-book-front-cover">
-            <BookCover
-              src={book.cover}
-              alt=""
-              className="h-full w-full rounded-[0.28rem] shadow-md"
-              sizes="128px"
-            />
-          </span>
-        </span>
+        )}
       </span>
     </button>
   );

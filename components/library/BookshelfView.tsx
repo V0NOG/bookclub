@@ -31,7 +31,7 @@ type BookshelfViewProps = {
 };
 
 const SHELF_SIZE = 14;
-const OPEN_ANIMATION_MS = 1650;
+const OPEN_ANIMATION_MS = 1800;
 const OPEN_PRESS_DELAY_MS = 100;
 
 function chunkBooks(books: BookshelfBook[]) {
@@ -126,6 +126,7 @@ export function BookshelfView({ books }: BookshelfViewProps) {
       return;
     }
 
+    router.prefetch(`/books/${bookId}`);
     setPressingBookId(bookId);
     pressTimeoutRef.current = setTimeout(() => {
       setPressingBookId(null);

@@ -557,36 +557,36 @@
     backdrop-filter: blur(0);
   }
   18%,
-  94% {
+  95% {
     opacity: 1;
-    backdrop-filter: blur(3px);
+    backdrop-filter: blur(7px) saturate(0.78);
   }
   100% {
-    opacity: 0.88;
-    backdrop-filter: blur(4px);
+    opacity: 0.94;
+    backdrop-filter: blur(8px) saturate(0.72);
   }
 }
 
 @keyframes folio-opening-stage {
   0% {
     opacity: 0;
-    transform: translate3d(0, 22vh, 0) scale(0.34) rotateY(-7deg);
+    transform: translate3d(0, 18vh, 0) scale(0.34) rotateX(4deg);
   }
-  20% {
+  25% {
     opacity: 1;
-    transform: translate3d(0, 9vh, 0) scale(0.68) rotateY(-5deg);
+    transform: translate3d(0, 0, 0) scale(0.82) rotateX(2deg);
   }
-  55% {
+  72% {
     opacity: 1;
-    transform: translate3d(0, 0, 0) scale(0.98) rotateY(-2deg);
+    transform: translate3d(0, 0, 0) scale(1) rotateX(0deg);
   }
-  92% {
+  95% {
     opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1.04) rotateY(0deg);
+    transform: translate3d(0, 0, 0) scale(1.015) rotateX(0deg);
   }
   100% {
-    opacity: 0.72;
-    transform: translate3d(0, -1vh, 0) scale(1.06) rotateY(0deg);
+    opacity: 0.78;
+    transform: translate3d(0, -0.6vh, 0) scale(1.03) rotateX(0deg);
   }
 }
 
@@ -596,16 +596,16 @@
   0%,
   15% {
     opacity: 1;
-    transform: rotateY(0deg) translateZ(0.16rem);
+    transform: rotateY(0deg) translateZ(0.34rem);
   }
-  45% {
+  50% {
     opacity: 1;
-    transform: rotateY(-70deg) translateZ(0.16rem);
+    transform: rotateY(-130deg) translateZ(0.34rem);
   }
-  72%,
+  82%,
   100% {
     opacity: 1;
-    transform: rotateY(-100deg) translateZ(0.16rem);
+    transform: rotateY(-178deg) translateZ(0.34rem);
   }
 }
 
@@ -613,10 +613,10 @@
    the cover surface prevents the mirrored cover image from showing through. */
 @keyframes folio-opening-cover-art {
   0%,
-  28% {
+  25% {
     opacity: 1;
   }
-  44%,
+  42%,
   100% {
     opacity: 0;
   }
@@ -624,10 +624,10 @@
 
 @keyframes folio-opening-inside-cover {
   0%,
-  30% {
+  28% {
     opacity: 0;
   }
-  48%,
+  46%,
   100% {
     opacity: 1;
   }
@@ -656,52 +656,52 @@
    TODO: add dynamic lighting/shadow system for depth realism. */
 @keyframes folio-opening-page-one {
   0%,
-  30% {
+  45% {
     opacity: 0;
-    transform: rotateY(0deg) skewY(0deg) scaleX(0.99) translateZ(0.2rem);
+    transform: rotateY(0deg) skewY(0deg) scaleX(0.995) translateZ(0.36rem);
   }
-  38% {
+  54% {
     opacity: 1;
-    transform: rotateY(-18deg) skewY(-0.5deg) scaleX(0.995) translateZ(0.2rem);
+    transform: rotateY(-48deg) skewY(-0.4deg) scaleX(0.995) translateZ(0.36rem);
   }
-  65%,
+  80%,
   100% {
-    opacity: 0.88;
-    transform: rotateY(-65deg) skewY(-1.2deg) scaleX(0.985) translateZ(0.2rem);
+    opacity: 1;
+    transform: rotateY(-132deg) skewY(-0.8deg) scaleX(0.985) translateZ(0.36rem);
   }
 }
 
 @keyframes folio-opening-page-two {
   0%,
-  40% {
+  50% {
     opacity: 0;
-    transform: rotateY(0deg) skewY(0deg) scaleX(0.985) translateZ(0.1rem);
+    transform: rotateY(0deg) skewY(0deg) scaleX(0.99) translateZ(0.24rem);
   }
-  52% {
+  62% {
     opacity: 1;
-    transform: rotateY(-12deg) skewY(-0.35deg) scaleX(0.99) translateZ(0.1rem);
+    transform: rotateY(-34deg) skewY(-0.25deg) scaleX(0.99) translateZ(0.24rem);
   }
-  75%,
+  86%,
   100% {
     opacity: 1;
-    transform: rotateY(-40deg) skewY(-0.7deg) scaleX(0.99) translateZ(0.1rem);
+    transform: rotateY(-84deg) skewY(-0.5deg) scaleX(0.985) translateZ(0.24rem);
   }
 }
 
 @keyframes folio-opening-page-three {
   0%,
-  50% {
+  55% {
     opacity: 0;
-    transform: rotateY(0deg) skewY(0deg) scaleX(0.98) translateZ(0);
+    transform: rotateY(0deg) skewY(0deg) scaleX(0.99) translateZ(0.12rem);
   }
-  66% {
+  68% {
     opacity: 1;
-    transform: rotateY(-4deg) skewY(-0.2deg) scaleX(0.99) translateZ(0);
+    transform: rotateY(-15deg) skewY(-0.15deg) scaleX(0.995) translateZ(0.12rem);
   }
-  85%,
+  90%,
   100% {
     opacity: 1;
-    transform: rotateY(-9deg) skewY(-0.25deg) scaleX(1) translateZ(0);
+    transform: rotateY(-28deg) skewY(-0.25deg) scaleX(1) translateZ(0.12rem);
   }
 }
 
@@ -713,8 +713,11 @@
   place-items: center;
   overflow: hidden;
   padding: clamp(1rem, 4vw, 2.5rem);
-  --folio-opening-duration: 1650ms;
-  background: hsl(var(--foreground) / 0.55);
+  --folio-opening-duration: 1800ms;
+  --folio-opening-width: min(82vw, 900px);
+  background:
+    radial-gradient(circle at 50% 48%, hsl(var(--background) / 0.1), transparent 34rem),
+    hsl(var(--foreground) / 0.76);
   animation: folio-opening-overlay-in var(--folio-opening-duration) ease both;
 }
 
@@ -731,53 +734,110 @@
 
 .folio-book-opening-book {
   position: relative;
-  width: min(clamp(15rem, 30vw, 21rem), calc(100vw - 2rem), calc((100dvh - 8rem) * 0.66));
-  aspect-ratio: 2 / 3;
+  width: var(--folio-opening-width);
+  aspect-ratio: 1.48 / 1;
   transform-style: preserve-3d;
 }
 
 .folio-book-opening-title {
   position: absolute;
-  top: calc(50% + min(clamp(15rem, 30vw, 21rem), calc(100vw - 2rem), calc((100dvh - 8rem) * 0.66)) * 0.82);
+  top: calc(50% + var(--folio-opening-width) * 0.37);
   left: 50%;
   max-width: min(22rem, calc(100vw - 2rem));
   transform: translateX(-50%);
 }
 
-.folio-book-opening-back,
+.folio-book-opening-table-shadow,
+.folio-book-opening-left-cover,
+.folio-book-opening-left-page-block,
+.folio-book-opening-right-cover-board,
+.folio-book-opening-right-page-block,
 .folio-book-opening-page,
 .folio-book-opening-front-cover,
-.folio-book-opening-spine,
 .folio-book-opening-gutter {
   position: absolute;
   transform-style: preserve-3d;
 }
 
-.folio-book-opening-back {
-  inset: 0;
+.folio-book-opening-table-shadow {
+  left: 5%;
+  right: 5%;
+  bottom: -5%;
+  z-index: 0;
+  height: 18%;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.22);
+  filter: blur(24px);
+  transform: translateZ(-0.5rem);
+}
+
+.folio-book-opening-left-cover,
+.folio-book-opening-right-cover-board {
+  top: 0;
+  bottom: 0;
+  width: 50%;
   z-index: 1;
-  border-radius: 0.65rem;
+  border: 1px solid hsl(var(--foreground) / 0.22);
+  border-radius: 0.34rem;
+  background:
+    linear-gradient(90deg, hsl(var(--foreground) / 0.22), transparent 10%, hsl(var(--background) / 0.08)),
+    hsl(var(--primary));
+  box-shadow:
+    0 26px 52px rgb(0 0 0 / 0.2),
+    inset 0 0 0 1px rgb(255 255 255 / 0.08);
+}
+
+.folio-book-opening-left-cover {
+  left: 0;
+  transform: translateZ(0.02rem);
+}
+
+.folio-book-opening-right-cover-board {
+  right: 0;
+  transform: translateZ(0);
+}
+
+.folio-book-opening-left-page-block,
+.folio-book-opening-right-page-block {
+  top: 4%;
+  bottom: 4%;
+  width: 46.5%;
+  z-index: 2;
   border: 1px solid hsl(var(--border));
   background:
-    linear-gradient(90deg, hsl(var(--foreground) / 0.18), transparent 12%),
+    repeating-linear-gradient(0deg, hsl(var(--background)), hsl(var(--background)) 0.34rem, hsl(var(--accent) / 0.38) 0.38rem),
     hsl(var(--background));
-  box-shadow: 0 26px 50px rgb(0 0 0 / 0.24);
+  box-shadow:
+    inset 0 0 20px rgb(47 42 38 / 0.08),
+    0 18px 34px rgb(0 0 0 / 0.12);
+}
+
+.folio-book-opening-left-page-block {
+  left: 3.5%;
+  border-radius: 0.26rem 0.08rem 0.08rem 0.26rem;
+  transform: translateZ(0.08rem);
+}
+
+.folio-book-opening-right-page-block {
+  right: 3.5%;
+  border-radius: 0.08rem 0.26rem 0.26rem 0.08rem;
+  transform: translateZ(0.1rem);
 }
 
 .folio-book-opening-page {
-  top: 3.5%;
-  bottom: 3.5%;
-  left: 8%;
-  width: 92%;
+  top: 4.6%;
+  bottom: 4.6%;
+  left: 50%;
+  width: 46.3%;
   border: 1px solid hsl(var(--border));
-  border-radius: 0 0.5rem 0.5rem 0;
+  border-radius: 0.08rem 0.28rem 0.28rem 0.08rem;
   background:
-    linear-gradient(90deg, hsl(var(--foreground) / 0.09), transparent 12%, transparent 88%, hsl(var(--foreground) / 0.04)),
-    repeating-linear-gradient(0deg, transparent, transparent 0.72rem, hsl(var(--accent) / 0.52) 0.78rem),
+    linear-gradient(90deg, hsl(var(--foreground) / 0.12), transparent 10%, transparent 90%, hsl(var(--foreground) / 0.04)),
+    repeating-linear-gradient(0deg, transparent, transparent 0.72rem, hsl(var(--accent) / 0.46) 0.78rem),
     hsl(var(--background));
   box-shadow:
     inset 0 0 18px rgb(47 42 38 / 0.08),
-    0 18px 30px rgb(0 0 0 / 0.1);
+    0 14px 28px rgb(0 0 0 / 0.12);
   /* Left center makes each page rotate like paper bound at the spine. */
   transform-origin: left center;
   opacity: 0;
@@ -795,7 +855,7 @@
 }
 
 .folio-book-opening-page-one {
-  z-index: 5;
+  z-index: 7;
   box-shadow:
     inset 6px 0 14px rgb(47 42 38 / 0.08),
     0 20px 34px rgb(0 0 0 / 0.16);
@@ -803,10 +863,10 @@
 }
 
 .folio-book-opening-page-two {
-  z-index: 4;
-  top: 4%;
-  bottom: 3%;
-  width: 91%;
+  z-index: 6;
+  top: 5%;
+  bottom: 4%;
+  width: 45.8%;
   box-shadow:
     inset 8px 0 16px rgb(47 42 38 / 0.07),
     0 15px 26px rgb(0 0 0 / 0.12);
@@ -814,11 +874,11 @@
 }
 
 .folio-book-opening-page-three {
-  z-index: 3;
-  top: 4.5%;
-  bottom: 2.5%;
-  left: 8.5%;
-  width: 90.5%;
+  z-index: 5;
+  top: 5.5%;
+  bottom: 4.4%;
+  left: 50.4%;
+  width: 45%;
   box-shadow:
     inset 10px 0 18px rgb(47 42 38 / 0.08),
     0 12px 20px rgb(0 0 0 / 0.09);
@@ -826,8 +886,11 @@
 }
 
 .folio-book-opening-front-cover {
-  inset: 0;
-  z-index: 5;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 50%;
+  z-index: 9;
   border-radius: 0.35rem;
   box-shadow: 0 24px 46px rgb(0 0 0 / 0.24);
   /* Same hinge as the pages so the cover drives the opening sequence. */
@@ -863,32 +926,25 @@
   animation: folio-opening-inside-cover var(--folio-opening-duration) ease both;
 }
 
-.folio-book-opening-spine {
-  top: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 6;
-  width: 0.78rem;
-  border-radius: 0.35rem 0 0 0.35rem;
-  background:
-    linear-gradient(90deg, hsl(var(--foreground) / 0.32), hsl(var(--foreground) / 0.12), transparent),
-    hsl(var(--primary));
-  box-shadow: inset -6px 0 10px rgb(0 0 0 / 0.2);
-}
-
 .folio-book-opening-gutter {
-  top: 3.5%;
-  bottom: 3.5%;
-  left: 8%;
-  z-index: 5;
-  width: 0.18rem;
+  top: 3.6%;
+  bottom: 3.6%;
+  left: calc(50% - 0.16rem);
+  z-index: 8;
+  width: 0.32rem;
   border-radius: 999px;
-  background: hsl(var(--foreground) / 0.22);
-  opacity: 0;
-  animation: folio-opening-page-three var(--folio-opening-duration) cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  background:
+    linear-gradient(90deg, hsl(var(--foreground) / 0.2), hsl(var(--foreground) / 0.08), hsl(var(--background) / 0.65));
+  box-shadow:
+    -10px 0 20px rgb(47 42 38 / 0.1),
+    10px 0 20px rgb(47 42 38 / 0.08);
 }
 
 @media (max-width: 640px) {
+  .folio-book-opening-overlay {
+    --folio-opening-width: 92vw;
+  }
+
   .folio-bookshelf-track {
     gap: 0.36rem;
     padding-inline: 0.75rem;
