@@ -3,7 +3,7 @@
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
 import { invalidateUserMatchCache } from "@/lib/matching/cache";
-import { FeedbackTargetType, FeedbackAction } from "@/lib/generated/prisma/enums";
+import { FeedbackTargetType, FeedbackAction } from "@/lib/generated/prisma/client";
 
 export async function upsertFeedback(params: {
   targetType: FeedbackTargetType;

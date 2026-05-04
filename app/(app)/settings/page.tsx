@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
 import { Bell, BookOpen, Lock, Settings, User } from "lucide-react";
 import { PreferencesForm } from "@/components/settings/preferences-form";
-import { UserType } from "@/lib/generated/prisma/enums";
+import { UserType } from "@/lib/generated/prisma/client";
 import { PageContainer } from "@/components/layout/page-container";
 
 function SettingRow({

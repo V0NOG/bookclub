@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth-helpers";
 import { invalidateUserMatchCache } from "@/lib/matching/cache";
-import { UserType } from "@/lib/generated/prisma/enums";
+import { UserType } from "@/lib/generated/prisma/client";
 
 type Result = { success: true } | { success: false; error: string };
 

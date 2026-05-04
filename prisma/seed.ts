@@ -1,5 +1,4 @@
-import { PrismaClient } from "../lib/generated/prisma/client";
-import { ReadingStatus, ClubRole, PollStatus, ChallengeType } from "../lib/generated/prisma/enums";
+import { PrismaClient, ReadingStatus, ClubRole, PollStatus, ChallengeType } from "../lib/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import * as dotenv from "dotenv";

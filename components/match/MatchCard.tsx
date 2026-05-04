@@ -8,7 +8,7 @@ import { colors, typography, spacing, radius, shadow } from "@/styles/design-tok
 import { ThumbsDown, Heart, BookmarkPlus, Check } from "lucide-react";
 import { upsertFeedback } from "@/app/actions/feedback";
 import { setBookStatus } from "@/app/actions/user-book";
-import { FeedbackTargetType, FeedbackAction } from "@/lib/generated/prisma/enums";
+import { FeedbackTargetType, FeedbackAction } from "@/lib/prisma-enums";
 import { BookCover } from "@/components/ui/book-cover";
 
 type Props = {
