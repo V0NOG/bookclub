@@ -15,9 +15,9 @@
  * - pressing: a short scale-down/settle state before opening.
  * - opening: keeps the selected geometry stable while the overlay mounts.
  *
- * The selected visual is wider than the original spine button. CSS expands the
- * button hitbox in selected/opening states so every visible book surface still
- * belongs to the same accessible button.
+ * The selected visual is wider than the original spine. When selected, the
+ * button expands to cover the entire visible physical book so the second click
+ * works anywhere on the cover, page edge, or bottom edge.
  */
 import type { CSSProperties } from "react";
 import { BookOpen } from "lucide-react";
@@ -80,29 +80,29 @@ function getSpineTheme(book: BookshelfBook): SpineTheme {
 }
 
 export function BookSpine({ book, selected, opening, pressing, onActivate }: BookSpineProps) {
-  const active = selected || pressing || opening;
-
   return (
-    <button
-      type="button"
-      data-bookshelf-spine
-      data-selected={selected ? "true" : "false"}
-      data-opening={opening ? "true" : "false"}
-      data-pressing={pressing ? "true" : "false"}
-      aria-pressed={selected}
-      aria-label={`${selected ? "Open" : "Select"} ${book.title} by ${book.author}`}
-      title={`${book.title} by ${book.author}`}
-      onClick={onActivate}
-      className="folio-book-spine-button"
-    >
-      <span className="folio-book-3d">
-        <span className="folio-book-spine-face" style={getSpineTheme(book)}>
-          <span className="folio-book-spine-title">{book.title}</span>
-          <span className="folio-book-spine-foot">
-            <BookOpen className="h-3 w-3" />
+    <span className="folio-book-selection-wrap">
+      <button
+        type="button"
+        data-bookshelf-spine
+        data-selected={selected ? "true" : "false"}
+        data-opening={opening ? "true" : "false"}
+        data-pressing={pressing ? "true" : "false"}
+        aria-pressed={selected}
+        aria-label={`${selected ? "Open" : "Select"} ${book.title} by ${book.author}`}
+        title={`${book.title} by ${book.author}`}
+        onClick={onActivate}
+        className="folio-book-spine-button"
+      >
+        <span className="folio-book-3d">
+          <span className="folio-book-spine-face" style={getSpineTheme(book)}>
+            <span className="folio-book-spine-title">{book.title}</span>
+            <span className="folio-book-spine-foot">
+              <BookOpen className="h-3 w-3" />
+            </span>
           </span>
         </span>
-        {active && (
+        {selected && (
           <span key={`${book.id}-${selected}`} className="folio-book-object" aria-hidden="true">
             <span className="folio-book-pages-edge" />
             <span className="folio-book-bottom-edge" />
@@ -120,7 +120,7 @@ export function BookSpine({ book, selected, opening, pressing, onActivate }: Boo
             </span>
           </span>
         )}
-      </span>
-    </button>
+      </button>
+    </span>
   );
 }

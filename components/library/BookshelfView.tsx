@@ -31,7 +31,7 @@ type BookshelfViewProps = {
 };
 
 const SHELF_SIZE = 14;
-const OPEN_ANIMATION_MS = 1800;
+const OPEN_ANIMATION_MS = 1950;
 const OPEN_PRESS_DELAY_MS = 100;
 
 function chunkBooks(books: BookshelfBook[]) {
@@ -111,15 +111,15 @@ export function BookshelfView({ books }: BookshelfViewProps) {
   }
 
   function activateBook(bookId: string) {
-    if (openingBookId || pressingBookId) return;
-
     if (selectedBookId !== bookId) {
       clearOpeningTimers();
-      setSelectedBookId(bookId);
       setPressingBookId(null);
       setOpeningBookId(null);
+      setSelectedBookId(bookId);
       return;
     }
+
+    if (openingBookId || pressingBookId) return;
 
     if (prefersReducedMotion) {
       openBook(bookId);
@@ -168,7 +168,7 @@ export function BookshelfView({ books }: BookshelfViewProps) {
                     data-selected={selected ? "true" : "false"}
                     data-opening={opening ? "true" : "false"}
                     data-pressing={pressing ? "true" : "false"}
-                    style={{ zIndex: selected || opening || pressing ? 40 : 1 }}
+                    style={{ zIndex: opening || pressing ? 50 : selected ? 20 : 1 }}
                   >
                     <BookSpine
                       book={book}

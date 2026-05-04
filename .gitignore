@@ -8,6 +8,7 @@
 
 # testing
 /coverage
+/test-results/folio-bookshelf-playwright-output/
 
 # next.js
 /.next/

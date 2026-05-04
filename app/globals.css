@@ -300,15 +300,30 @@
   width: 8.85rem;
 }
 
-/* Spine Button / Hitbox
-   The default DOM hitbox is a narrow spine. When selected/opening, the visible
-   book is much wider than that spine, so the button expands to cover the whole
-   revealed object. This prevents broken click zones on the cover or page edge
-   while preserving one keyboard-accessible control per book. */
-.folio-book-spine-button {
+.folio-book-selection-wrap {
   position: absolute;
   left: 50%;
   bottom: 0.75rem;
+  width: 2.45rem;
+  height: 12.1rem;
+  transform: translateX(-50%);
+  transform-style: preserve-3d;
+  transition: width 180ms ease;
+}
+
+.folio-book-slot[data-selected="true"] .folio-book-selection-wrap,
+.folio-book-slot[data-opening="true"] .folio-book-selection-wrap,
+.folio-book-slot[data-pressing="true"] .folio-book-selection-wrap {
+  width: 8.65rem;
+}
+
+/* Spine Button / Hitbox
+   The accessible button is a narrow spine by default. When selected, it expands
+   to cover the full visible book object inside the selected slot. */
+.folio-book-spine-button {
+  position: absolute;
+  left: 0;
+  bottom: 0;
   width: 2.45rem;
   height: 11.75rem;
   margin: 0;
@@ -317,15 +332,23 @@
   background: transparent;
   color: hsl(var(--primary-foreground));
   cursor: pointer;
-  transform: translateX(-50%);
   transform-style: preserve-3d;
   outline: none;
 }
 
 .folio-book-spine-button[data-selected="true"],
-.folio-book-spine-button[data-opening="true"] {
-  width: 8.65rem;
-  transform: translateX(-50%);
+.folio-book-spine-button[data-opening="true"],
+.folio-book-spine-button[data-pressing="true"] {
+  bottom: -0.32rem;
+  width: 8.75rem;
+  height: 12.1rem;
+}
+
+.folio-book-spine-button[data-selected="true"] .folio-book-3d,
+.folio-book-spine-button[data-opening="true"] .folio-book-3d,
+.folio-book-spine-button[data-pressing="true"] .folio-book-3d,
+.folio-book-spine-button[data-selected="true"] .folio-book-object {
+  bottom: 0.32rem;
 }
 
 .folio-book-spine-button:focus-visible {
@@ -335,8 +358,11 @@
 
 .folio-book-3d {
   position: absolute;
-  inset: 0;
+  left: 0;
+  bottom: 0;
   display: block;
+  width: 2.45rem;
+  height: 11.75rem;
   transform-style: preserve-3d;
   transition: transform 190ms ease, filter 190ms ease;
   will-change: transform;
@@ -446,17 +472,24 @@
   width: 8.2rem;
   height: 11.45rem;
   opacity: 0;
-  pointer-events: none;
+  pointer-events: auto;
+  visibility: hidden;
   transform: translate3d(-0.18rem, 0, -0.45rem) rotateY(14deg) scale(0.94);
   /* Left hinge origin keeps the revealed cover attached to its spine. */
   transform-origin: left center;
-  transition: opacity 170ms ease, transform 220ms ease;
+  transition: opacity 170ms ease, transform 220ms ease, visibility 0s linear 220ms;
 }
 
-.folio-book-spine-button[data-selected="true"] .folio-book-object,
-.folio-book-spine-button[data-opening="true"] .folio-book-object {
+.folio-book-slot[data-selected="true"] .folio-book-object {
   opacity: 1;
+  visibility: visible;
   transform: translate3d(0, 0, 0.18rem) rotateY(0deg) scale(1);
+  transition-delay: 0s;
+}
+
+.folio-book-slot[data-pressing="true"] .folio-book-object {
+  transform: translate3d(0, 0.05rem, 0.18rem) rotateY(0deg) scale(0.985);
+  transition-duration: 90ms;
 }
 
 .folio-book-pages-edge {
@@ -567,22 +600,22 @@
   18%,
   95% {
     opacity: 1;
-    backdrop-filter: blur(7px) saturate(0.78);
+    backdrop-filter: blur(12px) saturate(0.72);
   }
   100% {
-    opacity: 0.94;
-    backdrop-filter: blur(8px) saturate(0.72);
+    opacity: 1;
+    backdrop-filter: blur(14px) saturate(0.68);
   }
 }
 
 @keyframes folio-opening-stage {
   0% {
     opacity: 0;
-    transform: translate3d(0, 18vh, 0) scale(0.34) rotateX(4deg);
+    transform: translate3d(0, 16vh, 0) scale(0.3) rotateX(4deg);
   }
   25% {
     opacity: 1;
-    transform: translate3d(0, 0, 0) scale(0.82) rotateX(2deg);
+    transform: translate3d(0, 0, 0) scale(0.78) rotateX(2deg);
   }
   72% {
     opacity: 1;
@@ -593,8 +626,8 @@
     transform: translate3d(0, 0, 0) scale(1.015) rotateX(0deg);
   }
   100% {
-    opacity: 0.78;
-    transform: translate3d(0, -0.6vh, 0) scale(1.03) rotateX(0deg);
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1.02) rotateX(0deg);
   }
 }
 
@@ -602,15 +635,15 @@
    stays visually attached to the spine instead of drifting away. */
 @keyframes folio-opening-front-cover {
   0%,
-  15% {
+  12% {
     opacity: 1;
     transform: rotateY(0deg) translateZ(0.34rem);
   }
-  50% {
+  46% {
     opacity: 1;
-    transform: rotateY(-130deg) translateZ(0.34rem);
+    transform: rotateY(-136deg) translateZ(0.34rem);
   }
-  82%,
+  78%,
   100% {
     opacity: 1;
     transform: rotateY(-178deg) translateZ(0.34rem);
@@ -621,10 +654,10 @@
    the cover surface prevents the mirrored cover image from showing through. */
 @keyframes folio-opening-cover-art {
   0%,
-  25% {
+  22% {
     opacity: 1;
   }
-  42%,
+  50%,
   100% {
     opacity: 0;
   }
@@ -632,10 +665,10 @@
 
 @keyframes folio-opening-inside-cover {
   0%,
-  28% {
+  24% {
     opacity: 0;
   }
-  46%,
+  58%,
   100% {
     opacity: 1;
   }
@@ -649,67 +682,76 @@
    folio-opening-page-one:
    - first page turn
    - earliest timing
-   - largest rotation, about -65deg
+   - largest rotation, held close to the gutter for visible depth
 
    folio-opening-page-two:
    - follows page one
-   - medium rotation, about -40deg
+   - medium rotation, behind page one
 
    folio-opening-page-three:
    - subtle depth/back page
-   - stabilises the page stack behind the two turning sheets
+   - stabilises the page stack near the middle of the spread
 
    TODO: consider spring-based animation (framer-motion) for more natural page
    movement.
    TODO: add dynamic lighting/shadow system for depth realism. */
 @keyframes folio-opening-page-one {
   0%,
-  45% {
+  28% {
     opacity: 0;
-    transform: rotateY(0deg) skewY(0deg) scaleX(0.995) translateZ(0.36rem);
+    transform: rotateY(0deg) rotateZ(0deg) skewY(0deg) scaleX(0.995) translateZ(0.44rem);
   }
-  54% {
-    opacity: 1;
-    transform: rotateY(-48deg) skewY(-0.4deg) scaleX(0.995) translateZ(0.36rem);
+  42% {
+    opacity: 0.72;
+    transform: rotateY(-38deg) rotateZ(-0.18deg) skewY(-0.18deg) scaleX(0.997) translateZ(0.44rem);
   }
-  80%,
+  70% {
+    opacity: 0.98;
+    transform: rotateY(-116deg) rotateZ(-0.42deg) skewY(-0.36deg) scaleX(0.99) translateZ(0.46rem);
+  }
   100% {
     opacity: 1;
-    transform: rotateY(-164deg) skewY(-0.5deg) scaleX(0.99) translateZ(0.36rem);
+    transform: rotateY(-132deg) rotateZ(-0.32deg) skewY(-0.28deg) scaleX(0.992) translateZ(0.44rem);
   }
 }
 
 @keyframes folio-opening-page-two {
   0%,
-  50% {
+  36% {
     opacity: 0;
-    transform: rotateY(0deg) skewY(0deg) scaleX(0.99) translateZ(0.24rem);
+    transform: rotateY(0deg) rotateZ(0deg) skewY(0deg) scaleX(0.992) translateZ(0.3rem);
   }
-  62% {
-    opacity: 1;
-    transform: rotateY(-34deg) skewY(-0.25deg) scaleX(0.99) translateZ(0.24rem);
+  54% {
+    opacity: 0.68;
+    transform: rotateY(-30deg) rotateZ(0.12deg) skewY(-0.12deg) scaleX(0.995) translateZ(0.32rem);
   }
-  86%,
+  82% {
+    opacity: 0.96;
+    transform: rotateY(-74deg) rotateZ(0.24deg) skewY(-0.26deg) scaleX(0.99) translateZ(0.34rem);
+  }
   100% {
     opacity: 1;
-    transform: rotateY(-118deg) skewY(-0.4deg) scaleX(0.99) translateZ(0.24rem);
+    transform: rotateY(-88deg) rotateZ(0.18deg) skewY(-0.18deg) scaleX(0.992) translateZ(0.32rem);
   }
 }
 
 @keyframes folio-opening-page-three {
   0%,
-  55% {
+  45% {
     opacity: 0;
-    transform: rotateY(0deg) skewY(0deg) scaleX(0.99) translateZ(0.12rem);
+    transform: rotateY(0deg) rotateZ(0deg) skewY(0deg) scaleX(0.996) translateZ(0.14rem);
   }
-  68% {
-    opacity: 1;
-    transform: rotateY(-15deg) skewY(-0.15deg) scaleX(0.995) translateZ(0.12rem);
+  64% {
+    opacity: 0.6;
+    transform: rotateY(-16deg) rotateZ(-0.08deg) skewY(-0.08deg) scaleX(0.998) translateZ(0.16rem);
   }
-  90%,
+  88% {
+    opacity: 0.94;
+    transform: rotateY(-34deg) rotateZ(-0.16deg) skewY(-0.12deg) scaleX(0.996) translateZ(0.18rem);
+  }
   100% {
     opacity: 1;
-    transform: rotateY(-58deg) skewY(-0.2deg) scaleX(1) translateZ(0.12rem);
+    transform: rotateY(-42deg) rotateZ(-0.12deg) skewY(-0.1deg) scaleX(0.997) translateZ(0.16rem);
   }
 }
 
@@ -722,10 +764,11 @@
   overflow: hidden;
   padding: clamp(1rem, 4vw, 2.5rem);
   --folio-opening-duration: 1800ms;
-  --folio-opening-width: min(82vw, 900px);
+  --folio-opening-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --folio-opening-width: clamp(520px, 82vw, 920px);
   background:
-    radial-gradient(circle at 50% 48%, hsl(var(--background) / 0.1), transparent 34rem),
-    hsl(var(--foreground) / 0.76);
+    radial-gradient(circle at 50% 48%, hsl(var(--background) / 0.1), transparent 31rem),
+    hsl(var(--foreground) / 0.9);
   animation: folio-opening-overlay-in var(--folio-opening-duration) ease both;
 }
 
@@ -737,23 +780,16 @@
   height: 100dvh;
   perspective: 1500px;
   transform-style: preserve-3d;
-  animation: folio-opening-stage var(--folio-opening-duration) cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  will-change: transform, opacity;
+  animation: folio-opening-stage var(--folio-opening-duration) var(--folio-opening-ease) both;
 }
 
 .folio-book-opening-book {
   position: relative;
   width: var(--folio-opening-width);
-  aspect-ratio: 1.48 / 1;
-  transform: translateX(-4%);
+  aspect-ratio: 1.55 / 1;
   transform-style: preserve-3d;
-}
-
-.folio-book-opening-title {
-  position: absolute;
-  top: calc(50% + var(--folio-opening-width) * 0.37);
-  left: 50%;
-  max-width: min(22rem, calc(100vw - 2rem));
-  transform: translateX(-50%);
+  backface-visibility: hidden;
 }
 
 .folio-book-opening-table-shadow,
@@ -787,7 +823,7 @@
   width: 50%;
   z-index: 1;
   border: 1px solid hsl(var(--foreground) / 0.22);
-  border-radius: 0.34rem;
+  border-radius: 0.25rem;
   background:
     linear-gradient(90deg, hsl(var(--foreground) / 0.22), transparent 10%, hsl(var(--background) / 0.08)),
     hsl(var(--primary));
@@ -823,13 +859,13 @@
 
 .folio-book-opening-left-page-block {
   left: 3.5%;
-  border-radius: 0.26rem 0.08rem 0.08rem 0.26rem;
+  border-radius: 0.22rem 0.08rem 0.08rem 0.22rem;
   transform: translateZ(0.08rem);
 }
 
 .folio-book-opening-right-page-block {
   right: 3.5%;
-  border-radius: 0.08rem 0.26rem 0.26rem 0.08rem;
+  border-radius: 0.08rem 0.22rem 0.22rem 0.08rem;
   transform: translateZ(0.1rem);
 }
 
@@ -839,7 +875,7 @@
   left: 50%;
   width: 46.3%;
   border: 1px solid hsl(var(--border));
-  border-radius: 0.08rem 0.28rem 0.28rem 0.08rem;
+  border-radius: 0.08rem 0.22rem 0.22rem 0.08rem;
   background:
     linear-gradient(90deg, rgb(68 54 43 / 0.12), transparent 10%, transparent 90%, rgb(68 54 43 / 0.05)),
     repeating-linear-gradient(0deg, transparent, transparent 0.72rem, hsl(35 38% 86%) 0.78rem),
@@ -849,6 +885,8 @@
     0 14px 28px rgb(0 0 0 / 0.12);
   /* Left center makes each page rotate like paper bound at the spine. */
   transform-origin: left center;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
   opacity: 0;
 }
 
@@ -868,7 +906,7 @@
   box-shadow:
     inset 6px 0 14px rgb(47 42 38 / 0.08),
     0 20px 34px rgb(0 0 0 / 0.16);
-  animation: folio-opening-page-one var(--folio-opening-duration) cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: folio-opening-page-one var(--folio-opening-duration) var(--folio-opening-ease) both;
 }
 
 .folio-book-opening-page-two {
@@ -879,7 +917,7 @@
   box-shadow:
     inset 8px 0 16px rgb(47 42 38 / 0.07),
     0 15px 26px rgb(0 0 0 / 0.12);
-  animation: folio-opening-page-two var(--folio-opening-duration) cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: folio-opening-page-two var(--folio-opening-duration) var(--folio-opening-ease) both;
 }
 
 .folio-book-opening-page-three {
@@ -891,7 +929,7 @@
   box-shadow:
     inset 10px 0 18px rgb(47 42 38 / 0.08),
     0 12px 20px rgb(0 0 0 / 0.09);
-  animation: folio-opening-page-three var(--folio-opening-duration) cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: folio-opening-page-three var(--folio-opening-duration) var(--folio-opening-ease) both;
 }
 
 .folio-book-opening-front-cover {
@@ -900,12 +938,14 @@
   bottom: 0;
   left: 50%;
   z-index: 9;
-  border-radius: 0.35rem;
+  border-radius: 0.25rem;
   box-shadow: 0 24px 46px rgb(0 0 0 / 0.24);
   /* Same hinge as the pages so the cover drives the opening sequence. */
   transform-origin: left center;
   transform-style: preserve-3d;
-  animation: folio-opening-front-cover var(--folio-opening-duration) cubic-bezier(0.16, 0.72, 0.18, 1) both;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+  animation: folio-opening-front-cover var(--folio-opening-duration) var(--folio-opening-ease) both;
 }
 
 .folio-book-opening-front-cover > * {
@@ -921,7 +961,7 @@
   position: absolute;
   inset: 0;
   z-index: 3;
-  border-radius: 0.35rem;
+  border-radius: 0.25rem;
   border: 1px solid hsl(var(--border));
   background:
     linear-gradient(90deg, hsl(var(--foreground) / 0.16), hsl(var(--foreground) / 0.06) 11%, transparent 28%),
@@ -977,10 +1017,35 @@
     height: 10.65rem;
   }
 
+  .folio-book-3d {
+    width: 2.2rem;
+    height: 10.65rem;
+  }
+
   .folio-book-spine-button[data-selected="true"],
-  .folio-book-spine-button[data-opening="true"] {
+  .folio-book-spine-button[data-opening="true"],
+  .folio-book-spine-button[data-pressing="true"] {
+    bottom: -0.3rem;
+    width: 7.85rem;
+    height: 10.95rem;
+  }
+
+  .folio-book-spine-button[data-selected="true"] .folio-book-3d,
+  .folio-book-spine-button[data-opening="true"] .folio-book-3d,
+  .folio-book-spine-button[data-pressing="true"] .folio-book-3d,
+  .folio-book-spine-button[data-selected="true"] .folio-book-object {
+    bottom: 0.3rem;
+  }
+
+  .folio-book-selection-wrap {
+    width: 2.2rem;
+    height: 10.95rem;
+  }
+
+  .folio-book-slot[data-selected="true"] .folio-book-selection-wrap,
+  .folio-book-slot[data-opening="true"] .folio-book-selection-wrap,
+  .folio-book-slot[data-pressing="true"] .folio-book-selection-wrap {
     width: 7.75rem;
-    transform: translateX(-50%);
   }
 
   .folio-book-object {

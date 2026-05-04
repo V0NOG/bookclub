@@ -13,7 +13,6 @@
  */
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { BookOpen } from "lucide-react";
 import { BookCover } from "@/components/ui/book-cover";
 import { BookshelfBook } from "@/components/library/BookSpine";
 
@@ -46,16 +45,12 @@ export function BookOpeningOverlay({ book }: BookOpeningOverlayProps) {
             <BookCover
               src={book.cover}
               alt=""
-              className="h-full w-full rounded-[0.35rem] shadow-2xl"
+              className="h-full w-full rounded-[0.25rem] shadow-2xl"
               iconClassName="h-12 w-12"
               sizes="(max-width: 640px) 72vw, 320px"
             />
           </div>
           <div className="folio-book-opening-gutter" />
-        </div>
-        <div className="folio-book-opening-title flex items-center justify-center gap-2 text-sm text-background">
-          <BookOpen className="h-4 w-4" />
-          <span className="max-w-[22rem] truncate italic">{book.title}</span>
         </div>
       </div>
     </div>,
