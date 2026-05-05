@@ -1,12 +1,10 @@
-import { PrismaClient, ReadingStatus, ClubRole, PollStatus, ChallengeType } from "../lib/generated/prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import "dotenv/config";
+import { PollStatus, ChallengeType } from "../lib/generated/prisma/client";
+import type { PrismaClient, ReadingStatus, ClubRole } from "../lib/generated/prisma/client";
 import bcrypt from "bcryptjs";
-import * as dotenv from "dotenv";
+import { db } from "@/lib/db";
 
-dotenv.config();
-
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
-const prisma = new PrismaClient({ adapter });
+const prisma = db;
 
 async function main() {
   console.log("Seeding Folio database...");
